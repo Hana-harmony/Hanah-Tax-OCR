@@ -1,0 +1,39 @@
+seed: 20260629
+target_variants_per_image: 6
+preserve_raw_manifest: true
+
+datasets:
+  train:
+    source_root: data/raw/train
+    output_root: data/augmented/train
+    document_types:
+      residency_certificate:
+        enabled: true
+        rotations: [-3.0, -1.5, 1.5, 3.0]
+        brightness: [0.92, 1.08]
+        contrast: [0.95, 1.05]
+        blur_radius: [0.4, 0.9]
+        jpeg_quality: [72, 86]
+        resize_scale: [0.92, 1.0]
+        crop_ratio: [0.0, 0.02]
+        noise_stddev: [2.0, 4.0]
+      apostille:
+        enabled: true
+        rotations: [-2.0, -1.0, 1.0, 2.0]
+        brightness: [0.94, 1.06]
+        contrast: [0.96, 1.04]
+        blur_radius: [0.2, 0.8]
+        jpeg_quality: [74, 88]
+        resize_scale: [0.95, 1.0]
+        crop_ratio: [0.0, 0.015]
+        noise_stddev: [1.5, 3.0]
+      withholding_tax_form:
+        enabled: true
+        rotations: [-1.0, 1.0]
+        brightness: [0.97, 1.03]
+        contrast: [0.98, 1.02]
+        blur_radius: [0.2, 0.5]
+        jpeg_quality: [82, 90]
+        resize_scale: [0.96, 1.0]
+        crop_ratio: [0.0, 0.01]
+        noise_stddev: [1.0, 2.0]

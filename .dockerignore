@@ -1,0 +1,9 @@
+.git
+.idea
+.DS_Store
+.pytest_cache
+.ruff_cache
+__pycache__
+*.pyc
+data/augmented
+data/manifests

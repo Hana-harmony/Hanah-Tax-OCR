@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hanah-tax-ocr"
+version = "0.1.0"
+description = "Tax document OCR and review pipeline for residency certificates, apostilles, and withholding tax forms."
+readme = "READEME.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "numpy>=1.26,<3.0",
+  "opencv-python>=4.10,<5.0",
+  "pillow>=10.4,<11.0",
+  "pydantic>=2.8,<3.0",
+  "pyyaml>=6.0,<7.0",
+]
+
+[project.optional-dependencies]
+ocr = [
+  "paddleocr>=2.9,<3.0",
+]
+dev = [
+  "pytest>=8.2,<9.0",
+  "ruff>=0.5,<0.6",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
