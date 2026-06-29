@@ -1,0 +1,23 @@
+{
+  "case_id": "residency_maria_chen_001",
+  "document_type": "residency_certificate",
+  "source_path": "sample_data/거주자증명서/미국 TREASURY주.png",
+  "dataset_split": "test",
+  "expected_status": "pass",
+  "expected_fields": {
+    "taxpayer_name": "MARIA L. CHEN",
+    "tin": "987-65-4321",
+    "tax_year": "2026",
+    "issue_date": "January 12, 2026",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "notes": [
+    "IRS residency certificate sample with visible certification seal and handwritten signature.",
+    "Used as the main positive regression case for residency extraction."
+  ]
+}

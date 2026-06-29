@@ -6,6 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from hanah_tax_ocr.document_checks import compute_document_checks
 from hanah_tax_ocr.ocr import PaddleOCREngine
 from hanah_tax_ocr.parsers import build_parser_registry
 from hanah_tax_ocr.quality import average_ocr_confidence, compute_quality_metrics
@@ -22,6 +23,7 @@ from hanah_tax_ocr.schemas import (
 class CaseDocument(BaseModel):
     document_type: DocumentType
     source_path: str
+    ocr_lang: str | None = None
     ocr_result: OCRResult | None = None
 
 
@@ -63,6 +65,9 @@ class HarnessRunner:
                 document.source_path,
             )
 
+            extracted.quality_checks.update(
+                compute_document_checks(document.document_type, document.source_path)
+            )
             quality_metrics = compute_quality_metrics(
                 document.source_path,
                 blur_threshold=self._blur_threshold,

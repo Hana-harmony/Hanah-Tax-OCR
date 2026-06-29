@@ -54,6 +54,15 @@ def evaluate_run_result(
                 f"expected field {field_name}={expected_value!r}, got {actual_value!r}"
             )
 
+    for field_name, expected_value in expected.get("expected_quality_checks", {}).items():
+        actual_value = None if target_document is None else target_document.quality_checks.get(
+            field_name
+        )
+        if actual_value != expected_value:
+            mismatches.append(
+                f"expected quality check {field_name}={expected_value!r}, got {actual_value!r}"
+            )
+
     expected_codes = set(expected.get("expected_finding_codes", []))
     if expected_codes:
         actual_codes = {finding.code for finding in run_result.review_result.findings}
@@ -61,6 +70,13 @@ def evaluate_run_result(
         if missing_codes:
             mismatches.append(
                 "missing finding codes: " + ", ".join(sorted(missing_codes))
+            )
+
+    for field_name, expected_value in expected.get("expected_cross_check", {}).items():
+        actual_value = run_result.review_result.cross_check.get(field_name)
+        if actual_value != expected_value:
+            mismatches.append(
+                f"expected cross_check {field_name}={expected_value!r}, got {actual_value!r}"
             )
 
     return EvaluationResult(passed=not mismatches, mismatches=mismatches)
