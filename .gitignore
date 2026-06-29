@@ -47,4 +47,10 @@ data/augmented/**
 !data/augmented/**/
 !data/augmented/**/.gitkeep
 
+data/training/**
+!data/training/
+!data/training/**/
+!data/training/**/.gitkeep
+!data/training/**/README.md
+
 data/manifests/*.jsonl

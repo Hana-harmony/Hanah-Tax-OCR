@@ -72,6 +72,18 @@ Generate deterministic regression labels and eval cases:
 python -m scripts.synthesize.build_regression_suite --per-document 20
 ```
 
+Export reviewed labels into field crop datasets:
+
+```bash
+python -m scripts.training.export_field_crops
+```
+
+Build a field-level CER/WER report from run results:
+
+```bash
+hanah-tax-ocr eval-report --expected-root evals/cases --actual-dir data/review_queue/index
+```
+
 ## Review Workflow
 
 1. Run the harness on staged or sample documents.

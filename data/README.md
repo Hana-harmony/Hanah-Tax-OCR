@@ -11,6 +11,7 @@
 - `data/labeled/`: 정답 JSON 포함 라벨링 데이터셋
 - `data/review_queue/`: 실패, 반려, 저신뢰 문서 보관
 - `data/augmented/train/<document_type>/`: 증강 이미지 산출물
+- `data/training/field_crops/`: 필드 crop 기반 학습 데이터셋 산출물
 - `data/manifests/raw_index.jsonl`: 원본 인덱스
 - `data/manifests/augmented_index.jsonl`: 증강 인덱스
 
