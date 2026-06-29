@@ -25,6 +25,9 @@ dev = [
   "ruff>=0.5,<0.6",
 ]
 
+[project.scripts]
+hanah-tax-ocr = "hanah_tax_ocr.cli:main"
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 
@@ -41,3 +44,6 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_harness.py" = ["I001"]
