@@ -59,6 +59,42 @@ def test_apostille_parser_extracts_standard_items() -> None:
     assert parsed.quality_checks["filled_item_count"] == 8
 
 
+def test_apostille_parser_prefers_full_text_over_noisy_regions() -> None:
+    parser = ApostilleParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "APOSTILLE (Convention de La Haye du 5 octobre 1961)",
+                            "1. Country: UNITED STATES OF AMERICA",
+                            "2. This Public Document has been signed by CHONG U CHOI",
+                            "3. acting in the capacity of "
+                            "NOTARY PUBLIC COMMISSION EXPIRES 10/17/2016",
+                            "4. bears the seal/stamp of COUNTY OF MECKLENBURG, NORTH CAROLINA",
+                            "5. at Raleigh, North Carolina",
+                            "6. the 10TH DAY OF APRIL, 2014",
+                            "7. by Secretary of State or Deputy Secretary of State, "
+                            "State of North Carolina",
+                            "8. No. 5",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "issuing_country": OCRPage(page_number=1, raw_text="ED STATES OF AMERICA"),
+                "signed_by": OCRPage(page_number=1, raw_text="IOHO Y PUBLIC"),
+            },
+        ),
+        "north_carolina_apostille.jpg",
+    )
+
+    assert parsed.fields["issuing_country"] == "UNITED STATES OF AMERICA"
+    assert parsed.fields["signed_by"] == "CHONG U CHOI"
+
+
 def test_withholding_parser_extracts_sample_fields() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(
@@ -80,3 +116,43 @@ def test_withholding_parser_extracts_sample_fields() -> None:
     assert parsed.fields["middle_name"] == "L"
     assert parsed.fields["dividend_tax_rate"] == "15%"
     assert parsed.fields["signature_date"] == "2026-01-12"
+
+
+def test_withholding_parser_recovers_from_region_ocr_noise() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "국내원천소득 제한세율 적용신청서(비거주자용)",
+                            "주소 1234 Sunset Blvd, Apt 5B, Los Angeles, CA 90026, "
+                            "United States of America",
+                            "납세자번호 987-65-4321",
+                            "배당소득 세율 15 %",
+                            "2026년 01월 12일 신청인 MARIA L. CHEN (서명 또는 인)",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "last_name": OCRPage(page_number=1, raw_text="CHEN"),
+                "first_name": OCRPage(page_number=1, raw_text="irst"),
+                "middle_name": OCRPage(page_number=1, raw_text="iddle"),
+                "residency_country": OCRPage(
+                    page_number=1,
+                    raw_text="nited States 이f America 전화",
+                ),
+                "applicant_name": OCRPage(page_number=1, raw_text="MARIA L CHEN"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["first_name"] == "MARIA"
+    assert parsed.fields["middle_name"] == "L"
+    assert parsed.fields["last_name"] == "CHEN"
+    assert parsed.fields["residency_country"] == "United States of America"
+    assert parsed.fields["residency_country_code"] == "US"

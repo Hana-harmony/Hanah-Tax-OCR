@@ -39,15 +39,20 @@
   `python -m scripts.augment.run --config configs/augmentation.yaml`
 - Generate synthetic labels:
   `python -m scripts.synthesize.generate_synthetic_labels`
+- Generate deterministic regression suites:
+  `python -m scripts.synthesize.build_regression_suite --per-document 20`
 - Redact a label file:
   `python -m scripts.redact.mask_labels --input in.json --output out.json`
 - Run harness review:
   `hanah-tax-ocr run-review --case-id sample-001 --document residency_certificate=sample.png`
 - Evaluate harness output:
   `hanah-tax-ocr eval-case --expected evals/cases/residency_smoke_001/expected.json --actual evals/fixtures/last_run_result.json`
+- Promote review queue cases into pending labels:
+  `python -m scripts.review_queue.promote_to_labeled`
 
 ## Data Handling
 
 - Do not commit raw customer documents under `data/raw/`
 - Do not commit generated outputs under `data/augmented/`
 - Commit only safe fixtures, configs, and deterministic test data
+- `data/labeled/` and `evals/cases/` may include sanitized or synthetic regression labels

@@ -1,0 +1,20 @@
+{
+  "case_id": "apostille_regression_005",
+  "document_type": "apostille",
+  "expected_status": "pass",
+  "expected_fields": {
+    "issuing_country": "UNITED STATES OF AMERICA",
+    "signed_by": "NOTARY SAMPLE 5",
+    "signer_capacity": "NOTARY PUBLIC",
+    "seal_owner": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+    "issued_at": "Capital City, Sample State 5",
+    "issued_on": "6TH DAY OF APRIL, 2025",
+    "issuing_authority": "Secretary of State State of Sample",
+    "certificate_number": "5005"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "synthetic": true
+}

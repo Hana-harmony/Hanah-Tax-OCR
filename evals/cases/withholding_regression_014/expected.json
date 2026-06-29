@@ -1,0 +1,22 @@
+{
+  "case_id": "withholding_regression_014",
+  "document_type": "withholding_tax_form",
+  "expected_status": "pass",
+  "expected_fields": {
+    "first_name": "SAMPLE14",
+    "last_name": "USER",
+    "middle_name": "N",
+    "tin": "214-34-2014",
+    "address": "14 Main Street Suite 14 New York NY 10001 United States of America",
+    "residency_country": "United States of America",
+    "residency_country_code": "US",
+    "dividend_tax_rate": "15%",
+    "signature_date": "2026-01-15",
+    "applicant_name": "SAMPLE14 N USER"
+  },
+  "expected_quality_checks": {
+    "all_no_boxes_checked": true,
+    "signature_present": true
+  },
+  "synthetic": true
+}

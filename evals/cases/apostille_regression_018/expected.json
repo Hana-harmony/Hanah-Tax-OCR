@@ -1,0 +1,20 @@
+{
+  "case_id": "apostille_regression_018",
+  "document_type": "apostille",
+  "expected_status": "pass",
+  "expected_fields": {
+    "issuing_country": "UNITED STATES OF AMERICA",
+    "signed_by": "NOTARY SAMPLE 18",
+    "signer_capacity": "NOTARY PUBLIC",
+    "seal_owner": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+    "issued_at": "Capital City, Sample State 18",
+    "issued_on": "19TH DAY OF APRIL, 2028",
+    "issuing_authority": "Secretary of State State of Sample",
+    "certificate_number": "5018"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "synthetic": true
+}
