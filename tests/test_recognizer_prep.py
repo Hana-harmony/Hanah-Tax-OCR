@@ -6,6 +6,7 @@ from pathlib import Path
 from hanah_tax_ocr.training.recognizer import (
     prepare_recognizer_datasets,
     render_training_command,
+    run_training_plans,
 )
 
 
@@ -87,3 +88,48 @@ def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
     assert "python /tmp/PaddleOCR/tools/train.py" in command
     assert "Global.character_dict_path=" in command
     assert "Train.dataset.label_file_list=[" in command
+
+
+def test_run_training_plans_can_execute_against_fake_paddleocr_home(tmp_path: Path) -> None:
+    plan_root = tmp_path / "recognizer" / "numeric_tin_code"
+    plan_root.mkdir(parents=True)
+    for name in ("train.txt", "val.txt", "dict.txt"):
+        (plan_root / name).write_text("sample\n", encoding="utf-8")
+
+    plan_payload = {
+        "field_group": "numeric_tin_code",
+        "settings": {
+            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml",
+            "max_text_length": 24,
+            "image_shape": "3,48,160",
+            "batch_size": 32,
+            "learning_rate": 0.0005,
+            "dictionary_path": str(plan_root / "dict.txt"),
+            "train_label_path": str(plan_root / "train.txt"),
+            "val_label_path": str(plan_root / "val.txt"),
+        },
+    }
+    (plan_root / "plan.json").write_text(
+        json.dumps(plan_payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    paddleocr_home = tmp_path / "PaddleOCR" / "tools"
+    paddleocr_home.mkdir(parents=True)
+    train_py = paddleocr_home / "train.py"
+    marker = tmp_path / "train_ran.txt"
+    train_py.write_text(
+        "from pathlib import Path\n"
+        f"Path({str(marker)!r}).write_text('ran', encoding='utf-8')\n",
+        encoding="utf-8",
+    )
+
+    commands = run_training_plans(
+        tmp_path / "recognizer",
+        tmp_path / "PaddleOCR",
+        field_groups=["numeric_tin_code"],
+        execute=True,
+    )
+
+    assert "numeric_tin_code" in commands
+    assert marker.read_text(encoding="utf-8") == "ran"

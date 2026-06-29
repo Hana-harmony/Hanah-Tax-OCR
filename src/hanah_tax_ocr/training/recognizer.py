@@ -70,6 +70,16 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Generate field crops first when the manifest does not exist.",
     )
+    parser.add_argument(
+        "--hard-cases-root",
+        type=Path,
+        default=Path("data/training/hard_cases"),
+    )
+    parser.add_argument(
+        "--include-hard-cases",
+        action="store_true",
+        help="Merge hard-case augmented crops into the training split.",
+    )
     return parser.parse_args()
 
 
@@ -102,6 +112,17 @@ def parse_run_args() -> argparse.Namespace:
 
 def load_field_crop_manifest(field_crops_root: Path) -> list[dict[str, Any]]:
     manifest_path = field_crops_root / "manifest.jsonl"
+    if not manifest_path.exists():
+        return []
+    entries: list[dict[str, Any]] = []
+    for line in manifest_path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            entries.append(json.loads(line))
+    return entries
+
+
+def load_hard_case_manifest(hard_cases_root: Path) -> list[dict[str, Any]]:
+    manifest_path = hard_cases_root / "manifest.jsonl"
     if not manifest_path.exists():
         return []
     entries: list[dict[str, Any]] = []
@@ -157,6 +178,8 @@ def prepare_recognizer_datasets(
     *,
     labeled_root: Path | None = None,
     ensure_crops: bool = False,
+    hard_cases_root: Path | None = None,
+    include_hard_cases: bool = False,
 ) -> dict[str, Any]:
     if ensure_crops:
         if labeled_root is None:
@@ -164,6 +187,8 @@ def prepare_recognizer_datasets(
         ensure_field_crops(field_crops_root, labeled_root)
 
     entries = load_field_crop_manifest(field_crops_root)
+    if include_hard_cases and hard_cases_root is not None:
+        entries.extend(load_hard_case_manifest(hard_cases_root))
     grouped_entries: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(
         lambda: defaultdict(list)
     )
@@ -228,6 +253,8 @@ def prepare_recognizer_datasets(
     summary = {
         "field_crops_root": str(field_crops_root),
         "output_root": str(output_root),
+        "hard_cases_root": None if hard_cases_root is None else str(hard_cases_root),
+        "include_hard_cases": include_hard_cases,
         "groups": dict(sorted(summary_groups.items())),
     }
     output_root.mkdir(parents=True, exist_ok=True)
@@ -298,6 +325,8 @@ def main() -> None:
         args.output_root,
         labeled_root=args.labeled_root,
         ensure_crops=args.ensure_field_crops,
+        hard_cases_root=args.hard_cases_root,
+        include_hard_cases=args.include_hard_cases,
     )
     print(json.dumps(summary, ensure_ascii=False))
 
