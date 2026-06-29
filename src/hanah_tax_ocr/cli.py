@@ -52,11 +52,13 @@ def parse_document_specs(specs: list[str]) -> list[CaseDocument]:
     for spec in specs:
         if "=" not in spec:
             raise ValueError(f"Invalid --document value: {spec!r}")
-        document_type_raw, source_path = spec.split("=", 1)
+        document_spec, source_path = spec.split("=", 1)
+        document_type_raw, _, ocr_lang = document_spec.partition("@")
         documents.append(
             CaseDocument(
                 document_type=DocumentType(document_type_raw),
                 source_path=source_path,
+                ocr_lang=ocr_lang or None,
             )
         )
     return documents
@@ -64,11 +66,25 @@ def parse_document_specs(specs: list[str]) -> list[CaseDocument]:
 
 def run_review_command(args: argparse.Namespace) -> int:
     documents = parse_document_specs(args.document)
-    runner = HarnessRunner(
-        ocr_engine=PaddleOCREngine(lang=args.lang),
-        review_queue_dir=args.review_queue_dir,
-    )
-    result = runner.run_case(args.case_id, documents)
+    engines: dict[str, PaddleOCREngine] = {}
+    hydrated_documents: list[CaseDocument] = []
+    for document in documents:
+        lang = document.ocr_lang or args.lang
+        engine = engines.get(lang)
+        if engine is None:
+            engine = PaddleOCREngine(lang=lang)
+            engines[lang] = engine
+        hydrated_documents.append(
+            CaseDocument(
+                document_type=document.document_type,
+                source_path=document.source_path,
+                ocr_lang=lang,
+                ocr_result=engine.run(document.source_path),
+            )
+        )
+
+    runner = HarnessRunner(review_queue_dir=args.review_queue_dir)
+    result = runner.run_case(args.case_id, hydrated_documents)
     runner.write_run_result(result, args.output)
     print(
         json.dumps(

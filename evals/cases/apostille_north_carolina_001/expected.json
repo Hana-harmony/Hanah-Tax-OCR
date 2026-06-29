@@ -1,0 +1,19 @@
+{
+  "case_id": "apostille_north_carolina_001",
+  "document_type": "apostille",
+  "expected_status": "pass",
+  "expected_fields": {
+    "issuing_country": "UNITED STATES OF AMERICA",
+    "signed_by": "CHONG U CHOI",
+    "signer_capacity": "NOTARY PUBLIC COMMISSION EXPIRES 10/17/2016",
+    "seal_owner": "COUNTY OF MECKLENBURG,NORTH CAROLINA",
+    "issued_at": "Raleigh, North Carolina",
+    "issued_on": "10TH DAY OF APRIL, 2014",
+    "issuing_authority": "Secretary of State or Deputy Secretary of State State of North Carolina",
+    "certificate_number": "5"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "apostille_michigan_001",
+  "document_type": "apostille",
+  "source_path": "sample_data/아포스티유 샘플/미국 michigan 주.jpg",
+  "dataset_split": "val",
+  "expected_status": "reject",
+  "expected_fields": {
+    "issuing_country": "UNITED STATES OF AMERICA",
+    "signer_capacity": "Michigan Notary Public",
+    "issued_at": "Lansing, Michigan",
+    "issuing_authority": "Secretary of State, State of Michigan"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "expected_finding_codes": [
+    "required_apostille_field_missing"
+  ],
+  "notes": [
+    "Negative regression case: the signer field is blank, so the final review must reject it."
+  ]
+}

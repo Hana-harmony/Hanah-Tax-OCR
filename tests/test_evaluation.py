@@ -15,6 +15,12 @@ def test_evaluate_run_result_matches_expected_fields(tmp_path: Path) -> None:
                     "residency_country": "United States of America",
                     "residency_country_code": "US",
                 },
+                "expected_quality_checks": {
+                    "seal_present": True,
+                },
+                "expected_cross_check": {
+                    "matched": True,
+                },
             }
         ),
         encoding="utf-8",
@@ -33,14 +39,18 @@ def test_evaluate_run_result_matches_expected_fields(tmp_path: Path) -> None:
                             "residency_country": "United States of America",
                             "residency_country_code": "US",
                         },
-                        "quality_checks": {},
+                        "quality_checks": {
+                            "seal_present": True,
+                        },
                         "parser_warnings": [],
                     }
                 ],
                 "review_result": {
                     "status": "needs_review",
                     "findings": [],
-                    "cross_check": {},
+                    "cross_check": {
+                        "matched": True,
+                    },
                 },
                 "queued_review_path": None,
             }

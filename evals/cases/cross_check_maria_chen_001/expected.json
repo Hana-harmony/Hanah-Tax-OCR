@@ -1,0 +1,7 @@
+{
+  "case_id": "cross_check_maria_chen_001",
+  "expected_status": "pass",
+  "expected_cross_check": {
+    "matched": true
+  }
+}

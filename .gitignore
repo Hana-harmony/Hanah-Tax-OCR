@@ -34,6 +34,7 @@ data/labeled/**
 !data/labeled/**/
 !data/labeled/**/.gitkeep
 !data/labeled/**/README.md
+!data/labeled/**/label.json
 
 data/review_queue/**
 !data/review_queue/
