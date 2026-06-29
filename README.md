@@ -78,6 +78,18 @@ Export reviewed labels into field crop datasets:
 python -m scripts.training.export_field_crops
 ```
 
+Prepare PaddleOCR recognizer fine-tuning datasets and plans:
+
+```bash
+python -m scripts.training.prepare_recognizer_finetune --ensure-field-crops
+```
+
+Render per-field-group recognizer training commands:
+
+```bash
+python -m scripts.training.run_recognizer_finetune
+```
+
 Build a field-level CER/WER report from run results:
 
 ```bash
