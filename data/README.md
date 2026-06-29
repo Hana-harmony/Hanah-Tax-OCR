@@ -7,6 +7,9 @@
 - `data/raw/train/<document_type>/`: 수동 적재한 원본 학습 이미지
 - `data/raw/val/<document_type>/`: 검증용 원본 이미지
 - `data/raw/test/<document_type>/`: 운영 전 최종 점검용 원본 이미지
+- `data/staging/`: OCR 전처리 완료 후 다음 단계로 넘길 파일
+- `data/labeled/`: 정답 JSON 포함 라벨링 데이터셋
+- `data/review_queue/`: 실패, 반려, 저신뢰 문서 보관
 - `data/augmented/train/<document_type>/`: 증강 이미지 산출물
 - `data/manifests/raw_index.jsonl`: 원본 인덱스
 - `data/manifests/augmented_index.jsonl`: 증강 인덱스

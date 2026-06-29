@@ -1,0 +1,16 @@
+# Labeled
+
+`data/labeled/` holds reviewed datasets with label JSON files.
+
+Recommended per-case layout:
+
+- `data/labeled/<document_type>/<case_id>/document.png`
+- `data/labeled/<document_type>/<case_id>/label.json`
+
+Each `label.json` should contain:
+
+- extracted field ground truth
+- expected review status
+- expected rejection reasons or review findings
+
+Keep production data out of git unless it is explicitly sanitized.

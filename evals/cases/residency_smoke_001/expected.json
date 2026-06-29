@@ -1,0 +1,13 @@
+{
+  "case_id": "residency_smoke_001",
+  "document_type": "residency_certificate",
+  "expected_status": "needs_review",
+  "expected_fields": {
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "notes": [
+    "Use this as a minimal regression case while real labeled data is being prepared.",
+    "Expected status remains needs_review until image-based signature and seal checks are implemented."
+  ]
+}

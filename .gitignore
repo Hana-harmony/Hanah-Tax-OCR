@@ -23,6 +23,24 @@ data/raw/**
 !data/raw/**/
 !data/raw/**/.gitkeep
 
+data/staging/**
+!data/staging/
+!data/staging/**/
+!data/staging/**/.gitkeep
+!data/staging/**/README.md
+
+data/labeled/**
+!data/labeled/
+!data/labeled/**/
+!data/labeled/**/.gitkeep
+!data/labeled/**/README.md
+
+data/review_queue/**
+!data/review_queue/
+!data/review_queue/**/
+!data/review_queue/**/.gitkeep
+!data/review_queue/**/README.md
+
 data/augmented/**
 !data/augmented/
 !data/augmented/**/
