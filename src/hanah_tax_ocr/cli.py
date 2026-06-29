@@ -4,7 +4,11 @@ import argparse
 import json
 from pathlib import Path
 
-from hanah_tax_ocr.evaluation import evaluate_run_result, load_harness_run_result
+from hanah_tax_ocr.evaluation import (
+    build_field_error_report,
+    evaluate_run_result,
+    load_harness_run_result,
+)
 from hanah_tax_ocr.harness import CaseDocument, HarnessRunner
 from hanah_tax_ocr.ocr import PaddleOCREngine
 from hanah_tax_ocr.schemas import DocumentType
@@ -44,6 +48,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     eval_case.add_argument("--expected", type=Path, required=True)
     eval_case.add_argument("--actual", type=Path, required=True)
+
+    eval_report = subparsers.add_parser(
+        "eval-report",
+        help="Build a field-level OCR error report from expected cases and run results.",
+    )
+    eval_report.add_argument("--expected-root", type=Path, required=True)
+    eval_report.add_argument("--actual-dir", type=Path, required=True)
+    eval_report.add_argument("--case-id", action="append", default=[])
+    eval_report.add_argument(
+        "--only-available",
+        action="store_true",
+        help="Skip missing expected cases and report only cases that exist in the actual dir.",
+    )
 
     return parser
 
@@ -117,6 +134,17 @@ def eval_case_command(args: argparse.Namespace) -> int:
     return 0 if evaluation.passed else 1
 
 
+def eval_report_command(args: argparse.Namespace) -> int:
+    report = build_field_error_report(
+        args.expected_root,
+        args.actual_dir,
+        case_ids=set(args.case_id) or None,
+        include_missing_cases=not args.only_available,
+    )
+    print(json.dumps(report.model_dump(mode="json"), ensure_ascii=False))
+    return 0
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
@@ -125,5 +153,7 @@ def main() -> int:
         return run_review_command(args)
     if args.command == "eval-case":
         return eval_case_command(args)
+    if args.command == "eval-report":
+        return eval_report_command(args)
 
     raise ValueError(f"Unsupported command: {args.command}")
