@@ -1,0 +1,24 @@
+{
+  "case_id": "withholding_regression_002",
+  "document_type": "withholding_tax_form",
+  "source_path": "synthetic://withholding_tax_form/withholding_regression_002",
+  "dataset_split": "synthetic_regression",
+  "expected_status": "pass",
+  "expected_fields": {
+    "first_name": "SAMPLE2",
+    "last_name": "USER",
+    "middle_name": "B",
+    "tin": "202-22-2002",
+    "address": "2 Main Street Suite 2 New York NY 10001 United States of America",
+    "residency_country": "United States of America",
+    "residency_country_code": "US",
+    "dividend_tax_rate": "15%",
+    "signature_date": "2026-01-03",
+    "applicant_name": "SAMPLE2 B USER"
+  },
+  "expected_quality_checks": {
+    "all_no_boxes_checked": true,
+    "signature_present": true
+  },
+  "synthetic": true
+}

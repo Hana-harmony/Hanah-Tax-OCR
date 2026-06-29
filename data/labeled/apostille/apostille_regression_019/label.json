@@ -1,0 +1,22 @@
+{
+  "case_id": "apostille_regression_019",
+  "document_type": "apostille",
+  "source_path": "synthetic://apostille/apostille_regression_019",
+  "dataset_split": "synthetic_regression",
+  "expected_status": "pass",
+  "expected_fields": {
+    "issuing_country": "UNITED STATES OF AMERICA",
+    "signed_by": "NOTARY SAMPLE 19",
+    "signer_capacity": "NOTARY PUBLIC",
+    "seal_owner": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+    "issued_at": "Capital City, Sample State 19",
+    "issued_on": "20TH DAY OF APRIL, 2029",
+    "issuing_authority": "Secretary of State State of Sample",
+    "certificate_number": "5019"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "synthetic": true
+}

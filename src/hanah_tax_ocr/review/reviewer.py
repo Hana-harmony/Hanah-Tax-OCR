@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 
+from hanah_tax_ocr.normalization import canonicalize_name
 from hanah_tax_ocr.schemas import (
     DocumentType,
     ExtractedDocument,
@@ -283,7 +284,7 @@ class TaxDocumentReviewer:
         if (
             residency_name
             and withholding_name
-            and self._canonicalize_name(residency_name) != self._canonicalize_name(withholding_name)
+            and canonicalize_name(residency_name) != canonicalize_name(withholding_name)
         ):
             matched = False
             findings.append(
@@ -324,10 +325,6 @@ class TaxDocumentReviewer:
                 re.IGNORECASE,
             )
         )
-
-    @staticmethod
-    def _canonicalize_name(value: str) -> str:
-        return re.sub(r"[^a-z0-9]", "", value.lower())
 
     @staticmethod
     def _finding(code: str, message: str, field_name: str | None = None) -> ReviewFinding:

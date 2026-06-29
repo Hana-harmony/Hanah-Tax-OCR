@@ -8,6 +8,7 @@ from hanah_tax_ocr.evaluation import evaluate_run_result, load_harness_run_resul
 from hanah_tax_ocr.harness import CaseDocument, HarnessRunner
 from hanah_tax_ocr.ocr import PaddleOCREngine
 from hanah_tax_ocr.schemas import DocumentType
+from hanah_tax_ocr.template_profiles import classify_template
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -74,12 +75,21 @@ def run_review_command(args: argparse.Namespace) -> int:
         if engine is None:
             engine = PaddleOCREngine(lang=lang)
             engines[lang] = engine
+        ocr_result = engine.run(document.source_path)
+        profile = classify_template(
+            document.document_type,
+            document.source_path,
+            ocr_result.combined_text(),
+        )
+        if profile is not None:
+            ocr_result.template_id = profile.template_id
+            ocr_result.regions = engine.run_regions(document.source_path, profile.ocr_regions)
         hydrated_documents.append(
             CaseDocument(
                 document_type=document.document_type,
                 source_path=document.source_path,
                 ocr_lang=lang,
-                ocr_result=engine.run(document.source_path),
+                ocr_result=ocr_result,
             )
         )
 

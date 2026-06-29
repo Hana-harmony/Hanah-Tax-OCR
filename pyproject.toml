@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "hanah-tax-ocr"
 version = "0.1.0"
 description = "Tax document OCR and review pipeline for residency certificates, apostilles, and withholding tax forms."
-readme = "READEME.md"
+readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
   "numpy>=1.26,<3.0",

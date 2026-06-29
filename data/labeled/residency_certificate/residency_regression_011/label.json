@@ -1,0 +1,20 @@
+{
+  "case_id": "residency_regression_011",
+  "document_type": "residency_certificate",
+  "source_path": "synthetic://residency_certificate/residency_regression_011",
+  "dataset_split": "synthetic_regression",
+  "expected_status": "pass",
+  "expected_fields": {
+    "taxpayer_name": "Sample 11 User",
+    "tin": "111-21-1011",
+    "tax_year": "2011",
+    "issue_date": "January 12, 2026",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "synthetic": true
+}

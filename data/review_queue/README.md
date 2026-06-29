@@ -10,3 +10,9 @@ Typical reasons:
 - cross-document mismatch
 
 Each queued case should include the source file path, extracted result, review result, and a timestamp.
+
+Promotion flow:
+
+- queue output is written under `data/review_queue/index/`
+- `python -m scripts.review_queue.promote_to_labeled` copies queue JSON into `data/labeled/pending_review/`
+- promoted labels are marked for human verification before they enter the reviewed dataset

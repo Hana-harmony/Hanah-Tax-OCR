@@ -1,0 +1,18 @@
+{
+  "case_id": "residency_regression_006",
+  "document_type": "residency_certificate",
+  "expected_status": "pass",
+  "expected_fields": {
+    "taxpayer_name": "Sample 6 User",
+    "tin": "106-16-1006",
+    "tax_year": "2016",
+    "issue_date": "January 7, 2026",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "synthetic": true
+}

@@ -32,14 +32,23 @@ class OCRPage(BaseModel):
 
 class OCRResult(BaseModel):
     pages: list[OCRPage] = Field(default_factory=list)
+    regions: dict[str, OCRPage] = Field(default_factory=dict)
+    template_id: str | None = None
 
     def combined_text(self) -> str:
         return "\n".join(page.raw_text for page in self.pages if page.raw_text).strip()
+
+    def region_text(self, region_name: str) -> str | None:
+        page = self.regions.get(region_name)
+        if page is None:
+            return None
+        return page.raw_text.strip() or None
 
 
 class ExtractedDocument(BaseModel):
     document_type: DocumentType
     source_path: str
+    template_id: str | None = None
     fields: dict[str, Any] = Field(default_factory=dict)
     quality_checks: dict[str, Any] = Field(default_factory=dict)
     parser_warnings: list[str] = Field(default_factory=list)

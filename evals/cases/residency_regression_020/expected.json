@@ -1,0 +1,18 @@
+{
+  "case_id": "residency_regression_020",
+  "document_type": "residency_certificate",
+  "expected_status": "pass",
+  "expected_fields": {
+    "taxpayer_name": "Sample 20 User",
+    "tin": "120-30-1020",
+    "tax_year": "2010",
+    "issue_date": "January 21, 2026",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "synthetic": true
+}

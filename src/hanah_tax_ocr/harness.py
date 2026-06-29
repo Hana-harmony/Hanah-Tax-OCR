@@ -18,6 +18,7 @@ from hanah_tax_ocr.schemas import (
     ReviewResult,
     ReviewStatus,
 )
+from hanah_tax_ocr.template_profiles import classify_template
 
 
 class CaseDocument(BaseModel):
@@ -60,14 +61,33 @@ class HarnessRunner:
 
         for document in documents:
             ocr_result = document.ocr_result or self._run_ocr(document.source_path)
+            profile = classify_template(
+                document.document_type,
+                document.source_path,
+                ocr_result.combined_text(),
+            )
+            if profile and not ocr_result.template_id:
+                ocr_result.template_id = profile.template_id
+            if self._ocr_engine is not None and profile and not ocr_result.regions:
+                ocr_result.regions = self._ocr_engine.run_regions(
+                    document.source_path,
+                    profile.ocr_regions,
+                )
             extracted = self._parsers[document.document_type].parse(
                 ocr_result,
                 document.source_path,
             )
+            extracted.template_id = ocr_result.template_id
 
             extracted.quality_checks.update(
-                compute_document_checks(document.document_type, document.source_path)
+                compute_document_checks(
+                    document.document_type,
+                    document.source_path,
+                    template_id=ocr_result.template_id,
+                    ocr_text=ocr_result.combined_text(),
+                )
             )
+            extracted.quality_checks["detected_template_id"] = ocr_result.template_id
             quality_metrics = compute_quality_metrics(
                 document.source_path,
                 blur_threshold=self._blur_threshold,

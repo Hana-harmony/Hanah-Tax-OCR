@@ -4,6 +4,12 @@ import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from hanah_tax_ocr.normalization import (
+    normalize_english_date,
+    normalize_iso_date,
+    normalize_name,
+    normalize_whitespace,
+)
 from hanah_tax_ocr.schemas import DocumentType, ExtractedDocument, OCRPage, OCRResult, OCRWordBox
 
 
@@ -28,16 +34,11 @@ class BaseDocumentParser(ABC):
 
     @staticmethod
     def _normalize_whitespace(text: str) -> str:
-        return re.sub(r"\s+", " ", text).strip()
+        return normalize_whitespace(text)
 
     @staticmethod
     def _normalize_name(value: str | None) -> str | None:
-        if value is None:
-            return None
-        normalized = re.sub(r"\s+", " ", value).strip(" ,;:")
-        normalized = re.sub(r"(?<=\b[A-Z])\.(?=[A-Z])", ". ", normalized)
-        normalized = re.sub(r"\s{2,}", " ", normalized)
-        return normalized or None
+        return normalize_name(value)
 
     @staticmethod
     def _extract_first_pattern(
@@ -57,29 +58,15 @@ class BaseDocumentParser(ABC):
 
     @staticmethod
     def _normalize_english_date(value: str | None) -> str | None:
-        if not value:
-            return None
-        normalized = re.sub(r"\s+", " ", value).strip(" ,.;:")
-        match = re.search(
-            r"([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?[,.]?\s*(\d{4})",
-            normalized,
-            re.IGNORECASE,
-        )
-        if not match:
-            return normalized or None
-        month, day, year = match.groups()
-        return f"{month} {int(day)}, {year}"
+        return normalize_english_date(value)
 
     @staticmethod
     def _normalize_iso_date(value: str | None) -> str | None:
-        if not value:
-            return None
-        normalized = re.sub(r"\s+", "", value)
-        match = re.search(r"(\d{4})[년./-]?(\d{1,2})[월./-]?(\d{1,2})", normalized)
-        if not match:
-            return value.strip()
-        year, month, day = match.groups()
-        return f"{year}-{int(month):02d}-{int(day):02d}"
+        return normalize_iso_date(value)
+
+    @staticmethod
+    def _region_value(ocr_result: OCRResult, region_name: str) -> str | None:
+        return ocr_result.region_text(region_name)
 
     @staticmethod
     def _region_text(

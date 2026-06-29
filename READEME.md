@@ -1,2 +1,0 @@
-# Hanah-Tax-OCR
-

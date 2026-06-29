@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from hanah_tax_ocr.normalization import normalize_country
 from hanah_tax_ocr.parsers.base import BaseDocumentParser
 from hanah_tax_ocr.schemas import DocumentType, ExtractedDocument, OCRResult
 
@@ -17,17 +18,22 @@ class ResidencyCertificateParser(BaseDocumentParser):
             " ".join(
                 part
                 for part in [
-                    self._region_text(ocr_result, (0.10, 0.27, 0.28, 0.33)),
+                    self._region_value(ocr_result, "tin"),
                     single_line,
                 ]
                 if part
             )
         )
+
         taxpayer_name = self._normalize_name(
-            self._clean_taxpayer_value(self._region_text(ocr_result, (0.10, 0.25, 0.34, 0.31)))
-            or self._clean_taxpayer_value(self._region_text(ocr_result, (0.10, 0.24, 0.40, 0.33)))
-            or self._find_first(r"Taxpayer\s*[:;]?\s*([^\n]+)", text)
-            or self._find_first(r"Taxpayer\s*[:;]?\s*(.+?)\s+(?:TIN|Tax Year|Date)\b", single_line)
+            self._clean_taxpayer_value(self._region_value(ocr_result, "taxpayer_name"))
+            or self._clean_taxpayer_value(self._find_first(r"Taxpayer\s*[:;]?\s*([^\n]+)", text))
+            or self._clean_taxpayer_value(
+                self._find_first(
+                    r"Taxpayer\s*[:;]?\s*(.+?)\s+(?:TIN|Tax Year|Date)\b",
+                    single_line,
+                )
+            )
         )
         tin = self._extract_first_pattern(
             [
@@ -39,20 +45,17 @@ class ResidencyCertificateParser(BaseDocumentParser):
             tin_source,
         )
         tax_year = (
-            self._find_first(
-                r"(\d{4})",
-                self._region_text(ocr_result, (0.10, 0.30, 0.23, 0.36)) or "",
-            )
+            self._find_first(r"(\d{4})", self._region_value(ocr_result, "tax_year") or "")
             or self._find_first(r"Tax\s*Year\s*[:;]?\s*(\d{4})", single_line)
         )
         issue_date = self._normalize_english_date(
-            self._region_text(ocr_result, (0.60, 0.22, 0.90, 0.28))
+            self._region_value(ocr_result, "issue_date")
             or self._find_first(
                 r"Date\s*[:;]?\s*([A-Za-z]+\s+\d{1,2}[,.]?\s*\d{4})",
                 single_line,
             )
         )
-        residency_country = (
+        residency_country = normalize_country(
             "United States of America"
             if self._contains_any(
                 single_line,
@@ -92,6 +95,7 @@ class ResidencyCertificateParser(BaseDocumentParser):
         return ExtractedDocument(
             document_type=self.document_type,
             source_path=str(source_path),
+            template_id=ocr_result.template_id,
             fields=fields,
             quality_checks=quality_checks,
             parser_warnings=[],
