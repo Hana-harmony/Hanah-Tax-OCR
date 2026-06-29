@@ -90,6 +90,12 @@ Render per-field-group recognizer training commands:
 python -m scripts.training.run_recognizer_finetune
 ```
 
+Generate hard-case augmented training crops:
+
+```bash
+python -m scripts.training.augment_hard_cases
+```
+
 Build a field-level CER/WER report from run results:
 
 ```bash
