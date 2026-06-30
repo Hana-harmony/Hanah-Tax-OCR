@@ -638,6 +638,36 @@ def test_withholding_parser_prefers_applicant_first_name_when_it_preserves_digit
     assert parsed.fields["applicant_name"] == "SAMPLE11 K USER"
 
 
+def test_withholding_parser_normalizes_ocr_ambiguous_digit_suffix_in_first_name() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "220-40-2020",
+                            "2026-01-21",
+                            "SAMPLE2O T USER",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "first_name": OCRPage(page_number=1, raw_text="SAMPLE2O"),
+                "middle_name": OCRPage(page_number=1, raw_text="T"),
+                "last_name": OCRPage(page_number=1, raw_text="USER"),
+                "applicant_name": OCRPage(page_number=1, raw_text="SAMPLE2O\nT\nUSER"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["first_name"] == "SAMPLE20"
+    assert parsed.fields["applicant_name"] == "SAMPLE20 T USER"
+
+
 def test_withholding_parser_normalizes_zero_middle_initial_and_rebuilds_applicant_name() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

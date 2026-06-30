@@ -17,6 +17,15 @@ from hanah_tax_ocr.schemas import DocumentType, ExtractedDocument, OCRResult
 class WithholdingTaxFormParser(BaseDocumentParser):
     document_type = DocumentType.WITHHOLDING_TAX_FORM
     _LABEL_FRAGMENTS = {"last", "ast", "first", "irst", "middle", "iddle", "name"}
+    _AMBIGUOUS_ALNUM_DIGIT_MAP = {
+        "O": "0",
+        "I": "1",
+        "L": "1",
+        "T": "1",
+        "Z": "2",
+        "S": "5",
+        "B": "8",
+    }
 
     def parse(self, ocr_result: OCRResult, source_path: str | Path) -> ExtractedDocument:
         text = ocr_result.combined_text()
@@ -265,7 +274,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         tokens = [token.strip(".") for token in applicant_name.split() if token.strip(".")]
         if len(tokens) < 2:
             return None, None, None
-        first_name = tokens[0]
+        first_name = self._normalize_alphanumeric_name_token(tokens[0])
         last_name = tokens[-1]
         middle_name = tokens[1][:1].upper() if len(tokens) >= 3 else None
         return first_name, middle_name, last_name
@@ -320,17 +329,19 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         derived_first_name, derived_middle_name, derived_last_name = self._derive_name_parts(
             applicant_name
         )
+        normalized_first_name = self._normalize_alphanumeric_name_token(first_name)
+        normalized_derived_first_name = self._normalize_alphanumeric_name_token(derived_first_name)
         if not derived_first_name or not first_name:
-            return first_name or derived_first_name
+            return normalized_first_name or normalized_derived_first_name
         if not last_name or derived_last_name != last_name:
-            return first_name
+            return normalized_first_name
         if middle_name and derived_middle_name and middle_name != derived_middle_name:
-            return first_name
-        if canonicalize_name(derived_first_name) == canonicalize_name(first_name):
-            return first_name
-        if self._digit_count(derived_first_name) > self._digit_count(first_name):
-            return derived_first_name
-        return first_name
+            return normalized_first_name
+        if canonicalize_name(normalized_derived_first_name) == canonicalize_name(normalized_first_name):
+            return normalized_first_name
+        if self._digit_count(normalized_derived_first_name) > self._digit_count(normalized_first_name):
+            return normalized_derived_first_name
+        return normalized_first_name
 
     def _format_applicant_name(
         self,
@@ -360,6 +371,29 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if normalized == "0":
             return "O"
         return normalized.upper()
+
+    def _normalize_alphanumeric_name_token(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        token = value.strip().strip(".").upper()
+        if not re.fullmatch(r"[A-Z0-9]+", token):
+            return value
+        first_digit_index = next((index for index, char in enumerate(token) if char.isdigit()), -1)
+        if first_digit_index <= 0:
+            return value
+        prefix = token[:first_digit_index]
+        suffix = token[first_digit_index:]
+        normalized_suffix = "".join(
+            self._AMBIGUOUS_ALNUM_DIGIT_MAP.get(char, char) for char in suffix
+        )
+        if normalized_suffix == suffix:
+            return value
+        if not normalized_suffix.isdigit():
+            return value
+        normalized = prefix + normalized_suffix
+        if self._digit_count(normalized) <= self._digit_count(token):
+            return value
+        return normalized
 
     def _digit_count(self, value: str | None) -> int:
         if not value:
