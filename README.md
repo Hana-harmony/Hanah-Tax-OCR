@@ -106,6 +106,12 @@ python -m scripts.training.report_data_gaps \
   --eval-report evals/current_report.json
 ```
 
+Rank queued review cases to decide which ones to label first:
+
+```bash
+python -m scripts.review_queue.report_label_priorities
+```
+
 Build a field-level CER/WER report from run results:
 
 ```bash
