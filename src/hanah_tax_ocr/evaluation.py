@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -66,6 +66,14 @@ class FieldErrorReportComparison(BaseModel):
     added_fields: list[str] = Field(default_factory=list)
     removed_fields: list[str] = Field(default_factory=list)
     field_deltas: dict[str, FieldMetricDelta] = Field(default_factory=dict)
+    improved_documents: list[str] = Field(default_factory=list)
+    regressed_documents: list[str] = Field(default_factory=list)
+    mixed_documents: list[str] = Field(default_factory=list)
+    unchanged_documents: list[str] = Field(default_factory=list)
+    added_documents: list[str] = Field(default_factory=list)
+    removed_documents: list[str] = Field(default_factory=list)
+    document_deltas: dict[str, FieldMetricDelta] = Field(default_factory=dict)
+    overall_delta: FieldMetricDelta | None = None
 
 
 def load_harness_run_result(path: str | Path) -> HarnessRunResult:
@@ -242,38 +250,36 @@ def _classify_metric_delta(
     return "unchanged"
 
 
-def compare_field_error_reports(
-    baseline_report: FieldErrorReport,
-    candidate_report: FieldErrorReport,
-) -> FieldErrorReportComparison:
-    field_deltas: dict[str, FieldMetricDelta] = {}
-    improved_fields: list[str] = []
-    regressed_fields: list[str] = []
-    mixed_fields: list[str] = []
-    unchanged_fields: list[str] = []
-    added_fields: list[str] = []
-    removed_fields: list[str] = []
+def _compare_metric_summary_maps(
+    baseline_metrics: dict[str, FieldMetricSummary],
+    candidate_metrics: dict[str, FieldMetricSummary],
+) -> dict[str, Any]:
+    metric_deltas: dict[str, FieldMetricDelta] = {}
+    improved_keys: list[str] = []
+    regressed_keys: list[str] = []
+    mixed_keys: list[str] = []
+    unchanged_keys: list[str] = []
+    added_keys: list[str] = []
+    removed_keys: list[str] = []
 
-    all_field_keys = sorted(
-        set(baseline_report.field_metrics) | set(candidate_report.field_metrics)
-    )
-    for field_key in all_field_keys:
-        baseline_metric = baseline_report.field_metrics.get(field_key)
-        candidate_metric = candidate_report.field_metrics.get(field_key)
+    all_metric_keys = sorted(set(baseline_metrics) | set(candidate_metrics))
+    for metric_key in all_metric_keys:
+        baseline_metric = baseline_metrics.get(metric_key)
+        candidate_metric = candidate_metrics.get(metric_key)
 
         if baseline_metric is None:
-            added_fields.append(field_key)
-            field_deltas[field_key] = FieldMetricDelta(
-                field_key=field_key,
+            added_keys.append(metric_key)
+            metric_deltas[metric_key] = FieldMetricDelta(
+                field_key=metric_key,
                 status="added",
                 candidate=candidate_metric,
             )
             continue
 
         if candidate_metric is None:
-            removed_fields.append(field_key)
-            field_deltas[field_key] = FieldMetricDelta(
-                field_key=field_key,
+            removed_keys.append(metric_key)
+            metric_deltas[metric_key] = FieldMetricDelta(
+                field_key=metric_key,
                 status="removed",
                 baseline=baseline_metric,
             )
@@ -281,16 +287,16 @@ def compare_field_error_reports(
 
         status = _classify_metric_delta(baseline_metric, candidate_metric)
         if status == "improved":
-            improved_fields.append(field_key)
+            improved_keys.append(metric_key)
         elif status == "regressed":
-            regressed_fields.append(field_key)
+            regressed_keys.append(metric_key)
         elif status == "mixed":
-            mixed_fields.append(field_key)
+            mixed_keys.append(metric_key)
         else:
-            unchanged_fields.append(field_key)
+            unchanged_keys.append(metric_key)
 
-        field_deltas[field_key] = FieldMetricDelta(
-            field_key=field_key,
+        metric_deltas[metric_key] = FieldMetricDelta(
+            field_key=metric_key,
             status=status,
             baseline=baseline_metric,
             candidate=candidate_metric,
@@ -302,6 +308,113 @@ def compare_field_error_reports(
             average_word_error_rate_delta=candidate_metric.average_word_error_rate
             - baseline_metric.average_word_error_rate,
         )
+
+    return {
+        "improved_keys": improved_keys,
+        "regressed_keys": regressed_keys,
+        "mixed_keys": mixed_keys,
+        "unchanged_keys": unchanged_keys,
+        "added_keys": added_keys,
+        "removed_keys": removed_keys,
+        "metric_deltas": metric_deltas,
+    }
+
+
+def _combine_metric_summaries(
+    summaries: list[FieldMetricSummary],
+) -> FieldMetricSummary | None:
+    if not summaries:
+        return None
+
+    comparisons = sum(summary.comparisons for summary in summaries)
+    if comparisons <= 0:
+        return FieldMetricSummary(
+            comparisons=0,
+            exact_matches=0,
+            exact_match_rate=0.0,
+            average_character_error_rate=0.0,
+            average_word_error_rate=0.0,
+        )
+
+    exact_matches = sum(summary.exact_matches for summary in summaries)
+    return FieldMetricSummary(
+        comparisons=comparisons,
+        exact_matches=exact_matches,
+        exact_match_rate=exact_matches / comparisons,
+        average_character_error_rate=sum(
+            summary.average_character_error_rate * summary.comparisons
+            for summary in summaries
+        )
+        / comparisons,
+        average_word_error_rate=sum(
+            summary.average_word_error_rate * summary.comparisons
+            for summary in summaries
+        )
+        / comparisons,
+    )
+
+
+def _aggregate_metric_summaries(
+    metrics: dict[str, FieldMetricSummary],
+    key_builder,
+) -> dict[str, FieldMetricSummary]:
+    grouped: dict[str, list[FieldMetricSummary]] = {}
+    for metric_key, summary in metrics.items():
+        grouped.setdefault(str(key_builder(metric_key)), []).append(summary)
+
+    aggregated: dict[str, FieldMetricSummary] = {}
+    for aggregate_key, summaries in grouped.items():
+        combined = _combine_metric_summaries(summaries)
+        if combined is not None:
+            aggregated[aggregate_key] = combined
+    return dict(sorted(aggregated.items()))
+
+
+def _document_type_for_field_key(field_key: str) -> str:
+    document_type, _, _ = field_key.partition(".")
+    return document_type or field_key
+
+
+def compare_field_error_reports(
+    baseline_report: FieldErrorReport,
+    candidate_report: FieldErrorReport,
+) -> FieldErrorReportComparison:
+    field_comparison = _compare_metric_summary_maps(
+        baseline_report.field_metrics,
+        candidate_report.field_metrics,
+    )
+    document_comparison = _compare_metric_summary_maps(
+        _aggregate_metric_summaries(
+            baseline_report.field_metrics,
+            _document_type_for_field_key,
+        ),
+        _aggregate_metric_summaries(
+            candidate_report.field_metrics,
+            _document_type_for_field_key,
+        ),
+    )
+    overall_comparison = _compare_metric_summary_maps(
+        (
+            {"overall": summary}
+            if (
+                summary := _combine_metric_summaries(
+                    list(baseline_report.field_metrics.values())
+                )
+            )
+            is not None
+            else {}
+        ),
+        (
+            {"overall": summary}
+            if (
+                summary := _combine_metric_summaries(
+                    list(candidate_report.field_metrics.values())
+                )
+            )
+            is not None
+            else {}
+        ),
+    )
 
     baseline_missing_cases = sorted(baseline_report.missing_cases)
     candidate_missing_cases = sorted(candidate_report.missing_cases)
@@ -315,13 +428,21 @@ def compare_field_error_reports(
             set(baseline_missing_cases) - set(candidate_missing_cases)
         ),
         new_missing_cases=sorted(set(candidate_missing_cases) - set(baseline_missing_cases)),
-        improved_fields=improved_fields,
-        regressed_fields=regressed_fields,
-        mixed_fields=mixed_fields,
-        unchanged_fields=unchanged_fields,
-        added_fields=added_fields,
-        removed_fields=removed_fields,
-        field_deltas=field_deltas,
+        improved_fields=field_comparison["improved_keys"],
+        regressed_fields=field_comparison["regressed_keys"],
+        mixed_fields=field_comparison["mixed_keys"],
+        unchanged_fields=field_comparison["unchanged_keys"],
+        added_fields=field_comparison["added_keys"],
+        removed_fields=field_comparison["removed_keys"],
+        field_deltas=field_comparison["metric_deltas"],
+        improved_documents=document_comparison["improved_keys"],
+        regressed_documents=document_comparison["regressed_keys"],
+        mixed_documents=document_comparison["mixed_keys"],
+        unchanged_documents=document_comparison["unchanged_keys"],
+        added_documents=document_comparison["added_keys"],
+        removed_documents=document_comparison["removed_keys"],
+        document_deltas=document_comparison["metric_deltas"],
+        overall_delta=overall_comparison["metric_deltas"].get("overall"),
     )
 
 

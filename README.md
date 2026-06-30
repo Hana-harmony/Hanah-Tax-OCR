@@ -154,6 +154,8 @@ hanah-tax-ocr compare-eval-reports \
   --candidate evals/candidate-report.json
 ```
 
+The comparison output includes field deltas, document-level rollups, and an overall weighted delta so regressions are easier to spot before promoting a candidate recognizer.
+
 ## Review Workflow
 
 1. Run the harness on staged or sample documents.

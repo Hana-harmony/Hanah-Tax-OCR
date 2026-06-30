@@ -137,6 +137,10 @@ def test_compare_field_error_reports_classifies_metric_changes() -> None:
 
     address_delta = comparison.field_deltas["withholding_tax_form.address"]
     assert address_delta.status == "mixed"
+    assert comparison.regressed_documents == ["withholding_tax_form"]
+    assert comparison.document_deltas["withholding_tax_form"].status == "regressed"
+    assert comparison.overall_delta is not None
+    assert comparison.overall_delta.status == "regressed"
 
 
 def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> None:
@@ -187,6 +191,9 @@ def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> Non
 
     comparison = compare_field_error_report_files(baseline_path, candidate_path)
     assert comparison.improved_fields == ["residency_certificate.taxpayer_name"]
+    assert comparison.improved_documents == ["residency_certificate"]
+    assert comparison.overall_delta is not None
+    assert comparison.overall_delta.status == "improved"
 
     original_argv = sys.argv
     sys.argv = [
@@ -205,3 +212,66 @@ def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> Non
     assert exit_code == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["improved_fields"] == ["residency_certificate.taxpayer_name"]
+    assert payload["improved_documents"] == ["residency_certificate"]
+    assert payload["overall_delta"]["status"] == "improved"
+
+
+def test_compare_field_error_reports_rolls_up_document_level_metrics() -> None:
+    baseline_report = FieldErrorReport(
+        compared_cases=2,
+        missing_cases=[],
+        field_metrics={
+            "residency_certificate.taxpayer_name": build_metric(
+                comparisons=2,
+                exact_matches=0,
+                exact_match_rate=0.0,
+                average_character_error_rate=0.4,
+                average_word_error_rate=0.5,
+            ),
+            "apostille.signed_by": build_metric(
+                comparisons=2,
+                exact_matches=2,
+                exact_match_rate=1.0,
+                average_character_error_rate=0.0,
+                average_word_error_rate=0.0,
+            ),
+        },
+    )
+    candidate_report = FieldErrorReport(
+        compared_cases=3,
+        missing_cases=[],
+        field_metrics={
+            "residency_certificate.taxpayer_name": build_metric(
+                comparisons=2,
+                exact_matches=2,
+                exact_match_rate=1.0,
+                average_character_error_rate=0.0,
+                average_word_error_rate=0.0,
+            ),
+            "apostille.signed_by": build_metric(
+                comparisons=2,
+                exact_matches=1,
+                exact_match_rate=0.5,
+                average_character_error_rate=0.2,
+                average_word_error_rate=0.5,
+            ),
+            "withholding_tax_form.tin": build_metric(
+                comparisons=1,
+                exact_matches=1,
+                exact_match_rate=1.0,
+                average_character_error_rate=0.0,
+                average_word_error_rate=0.0,
+            ),
+        },
+    )
+
+    comparison = compare_field_error_reports(baseline_report, candidate_report)
+
+    assert comparison.improved_documents == ["residency_certificate"]
+    assert comparison.regressed_documents == ["apostille"]
+    assert comparison.added_documents == ["withholding_tax_form"]
+    assert comparison.document_deltas["residency_certificate"].status == "improved"
+    assert comparison.document_deltas["apostille"].status == "regressed"
+    assert comparison.document_deltas["withholding_tax_form"].status == "added"
+    assert comparison.overall_delta is not None
+    assert comparison.overall_delta.status == "improved"
