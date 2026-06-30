@@ -143,6 +143,24 @@ def test_compare_field_error_reports_classifies_metric_changes() -> None:
     assert comparison.field_group_deltas["english_name_org"].status == "regressed"
     assert comparison.overall_delta is not None
     assert comparison.overall_delta.status == "regressed"
+    assert comparison.promotion_assessment is not None
+    assert comparison.promotion_assessment.status == "reject"
+    assert comparison.promotion_assessment.blocking_reasons == [
+        "new_missing_cases",
+        "overall_delta_regressed",
+    ]
+    assert comparison.promotion_assessment.warning_reasons == [
+        "severe_field_regressions",
+        "field_regressions",
+        "mixed_field_deltas",
+        "removed_fields",
+    ]
+    assert comparison.promotion_assessment.severe_regressed_fields == [
+        "withholding_tax_form.last_name"
+    ]
+    assert comparison.promotion_assessment.notable_improved_fields == [
+        "withholding_tax_form.first_name"
+    ]
 
 
 def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> None:
@@ -218,6 +236,9 @@ def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> Non
     assert payload["improved_documents"] == ["residency_certificate"]
     assert payload["improved_field_groups"] == ["english_name_org"]
     assert payload["overall_delta"]["status"] == "improved"
+    assert payload["promotion_assessment"]["status"] == "promote"
+    assert payload["promotion_assessment"]["blocking_reasons"] == []
+    assert payload["promotion_assessment"]["warning_reasons"] == []
 
 
 def test_compare_field_error_reports_rolls_up_document_level_metrics() -> None:
@@ -284,3 +305,10 @@ def test_compare_field_error_reports_rolls_up_document_level_metrics() -> None:
     assert comparison.document_deltas["withholding_tax_form"].status == "added"
     assert comparison.overall_delta is not None
     assert comparison.overall_delta.status == "improved"
+    assert comparison.promotion_assessment is not None
+    assert comparison.promotion_assessment.status == "review"
+    assert comparison.promotion_assessment.blocking_reasons == []
+    assert comparison.promotion_assessment.warning_reasons == [
+        "severe_field_regressions",
+        "field_regressions",
+    ]

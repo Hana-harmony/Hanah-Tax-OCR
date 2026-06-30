@@ -53,6 +53,15 @@ class FieldMetricDelta(BaseModel):
     average_word_error_rate_delta: float | None = None
 
 
+class EvalPromotionAssessment(BaseModel):
+    status: Literal["promote", "review", "reject"]
+    blocking_reasons: list[str] = Field(default_factory=list)
+    warning_reasons: list[str] = Field(default_factory=list)
+    severe_regressed_fields: list[str] = Field(default_factory=list)
+    coverage_regressed_fields: list[str] = Field(default_factory=list)
+    notable_improved_fields: list[str] = Field(default_factory=list)
+
+
 class FieldErrorReportComparison(BaseModel):
     baseline_compared_cases: int
     candidate_compared_cases: int
@@ -82,6 +91,7 @@ class FieldErrorReportComparison(BaseModel):
     removed_field_groups: list[str] = Field(default_factory=list)
     field_group_deltas: dict[str, FieldMetricDelta] = Field(default_factory=dict)
     overall_delta: FieldMetricDelta | None = None
+    promotion_assessment: EvalPromotionAssessment | None = None
 
 
 def load_harness_run_result(path: str | Path) -> HarnessRunResult:
@@ -328,6 +338,100 @@ def _compare_metric_summary_maps(
     }
 
 
+def _is_severe_regression(delta: FieldMetricDelta) -> bool:
+    if delta.status != "regressed":
+        return False
+    exact_match_rate_delta = delta.exact_match_rate_delta or 0.0
+    character_error_rate_delta = delta.average_character_error_rate_delta or 0.0
+    word_error_rate_delta = delta.average_word_error_rate_delta or 0.0
+    return (
+        exact_match_rate_delta <= -0.05
+        or character_error_rate_delta >= 0.05
+        or word_error_rate_delta >= 0.1
+    )
+
+
+def _is_notable_improvement(delta: FieldMetricDelta) -> bool:
+    if delta.status != "improved":
+        return False
+    exact_match_rate_delta = delta.exact_match_rate_delta or 0.0
+    character_error_rate_delta = delta.average_character_error_rate_delta or 0.0
+    word_error_rate_delta = delta.average_word_error_rate_delta or 0.0
+    return (
+        exact_match_rate_delta >= 0.05
+        or character_error_rate_delta <= -0.05
+        or word_error_rate_delta <= -0.1
+    )
+
+
+def _build_promotion_assessment(
+    *,
+    baseline_compared_cases: int,
+    candidate_compared_cases: int,
+    new_missing_cases: list[str],
+    regressed_fields: list[str],
+    mixed_fields: list[str],
+    removed_fields: list[str],
+    overall_delta: FieldMetricDelta | None,
+    field_deltas: dict[str, FieldMetricDelta],
+) -> EvalPromotionAssessment:
+    severe_regressed_fields = sorted(
+        field_key
+        for field_key in regressed_fields
+        if _is_severe_regression(field_deltas[field_key])
+    )
+    coverage_regressed_fields = sorted(
+        field_key
+        for field_key, delta in field_deltas.items()
+        if delta.baseline is not None
+        and delta.candidate is not None
+        and (delta.comparison_delta or 0) < 0
+    )
+    notable_improved_fields = sorted(
+        field_key
+        for field_key, delta in field_deltas.items()
+        if _is_notable_improvement(delta)
+    )
+
+    blocking_reasons: list[str] = []
+    if new_missing_cases:
+        blocking_reasons.append("new_missing_cases")
+    if candidate_compared_cases < baseline_compared_cases:
+        blocking_reasons.append("candidate_compared_cases_dropped")
+    if overall_delta is not None and overall_delta.status == "regressed":
+        blocking_reasons.append("overall_delta_regressed")
+
+    warning_reasons: list[str] = []
+    if severe_regressed_fields:
+        warning_reasons.append("severe_field_regressions")
+    if regressed_fields and "severe_field_regressions" not in blocking_reasons:
+        warning_reasons.append("field_regressions")
+    if mixed_fields:
+        warning_reasons.append("mixed_field_deltas")
+    if removed_fields:
+        warning_reasons.append("removed_fields")
+    if coverage_regressed_fields and "candidate_compared_cases_dropped" not in blocking_reasons:
+        warning_reasons.append("reduced_field_coverage")
+    if overall_delta is not None and overall_delta.status == "mixed":
+        warning_reasons.append("overall_delta_mixed")
+
+    if blocking_reasons:
+        status: Literal["promote", "review", "reject"] = "reject"
+    elif warning_reasons:
+        status = "review"
+    else:
+        status = "promote"
+
+    return EvalPromotionAssessment(
+        status=status,
+        blocking_reasons=blocking_reasons,
+        warning_reasons=warning_reasons,
+        severe_regressed_fields=severe_regressed_fields,
+        coverage_regressed_fields=coverage_regressed_fields,
+        notable_improved_fields=notable_improved_fields,
+    )
+
+
 def _combine_metric_summaries(
     summaries: list[FieldMetricSummary],
 ) -> FieldMetricSummary | None:
@@ -446,6 +550,17 @@ def compare_field_error_reports(
     baseline_missing_cases = sorted(baseline_report.missing_cases)
     candidate_missing_cases = sorted(candidate_report.missing_cases)
 
+    promotion_assessment = _build_promotion_assessment(
+        baseline_compared_cases=baseline_report.compared_cases,
+        candidate_compared_cases=candidate_report.compared_cases,
+        new_missing_cases=sorted(set(candidate_missing_cases) - set(baseline_missing_cases)),
+        regressed_fields=field_comparison["regressed_keys"],
+        mixed_fields=field_comparison["mixed_keys"],
+        removed_fields=field_comparison["removed_keys"],
+        overall_delta=overall_comparison["metric_deltas"].get("overall"),
+        field_deltas=field_comparison["metric_deltas"],
+    )
+
     return FieldErrorReportComparison(
         baseline_compared_cases=baseline_report.compared_cases,
         candidate_compared_cases=candidate_report.compared_cases,
@@ -477,6 +592,7 @@ def compare_field_error_reports(
         removed_field_groups=field_group_comparison["removed_keys"],
         field_group_deltas=field_group_comparison["metric_deltas"],
         overall_delta=overall_comparison["metric_deltas"].get("overall"),
+        promotion_assessment=promotion_assessment,
     )
 
 
