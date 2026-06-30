@@ -155,3 +155,54 @@ def test_build_review_queue_priority_report_adds_label_target_paths(tmp_path: Pa
             "label_path": "data/labeled/pending_review/residency_certificate/queue_003/label.json",
         }
     ]
+
+
+def test_build_review_queue_priority_report_skips_already_reviewed_cases(
+    tmp_path: Path,
+) -> None:
+    review_queue_dir = tmp_path / "review_queue"
+    review_queue_dir.mkdir()
+    labeled_root = tmp_path / "labeled"
+    reviewed_label = labeled_root / "apostille" / "queue_004" / "label.json"
+    reviewed_label.parent.mkdir(parents=True)
+    reviewed_label.write_text("{}", encoding="utf-8")
+    data_gap_report_path = tmp_path / "data_gap_report.json"
+    data_gap_report_path.write_text(
+        json.dumps(
+            {
+                "priorities": [
+                    {
+                        "field_group": "english_name_org",
+                        "priority_score": 25.5,
+                        "recommendations": ["expand_train_document_coverage"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    (review_queue_dir / "queue_004.json").write_text(
+        json.dumps(
+            {
+                "case_id": "queue_004",
+                "review_result": {"status": "reject", "findings": []},
+                "documents": [
+                    {
+                        "document_type": "apostille",
+                        "source_path": "apostille.png",
+                        "fields": {"signed_by": "CHOI"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_review_queue_priority_report(
+        review_queue_dir,
+        data_gap_report_path,
+        labeled_root=labeled_root,
+    )
+
+    assert report["prioritized_case_count"] == 0
+    assert report["priority_order"] == []

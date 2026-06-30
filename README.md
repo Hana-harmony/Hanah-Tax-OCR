@@ -112,6 +112,9 @@ Rank queued review cases to decide which ones to label first:
 python -m scripts.review_queue.report_label_priorities
 ```
 
+Cases that already have reviewed labels under `data/labeled/<document_type>/<case_id>/label.json`
+are skipped from this priority list.
+
 Promote only the highest-priority queued cases into `pending_review`:
 
 ```bash

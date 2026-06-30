@@ -1,0 +1,23 @@
+{
+  "case_id": "cross_check_maria_chen_001",
+  "document_type": "residency_certificate",
+  "source_path": "sample_data/거주자증명서/미국 TREASURY주.png",
+  "dataset_split": "test",
+  "expected_status": "pass",
+  "expected_fields": {
+    "taxpayer_name": "MARIA L. CHEN",
+    "tin": "987-65-4321",
+    "tax_year": "2026",
+    "issue_date": "January 12, 2026",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
+  "notes": [
+    "Reviewed residency label used for cross-document validation with withholding_maria_chen_001.",
+    "Human-verified after review_queue triage."
+  ]
+}

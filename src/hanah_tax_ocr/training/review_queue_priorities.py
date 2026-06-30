@@ -10,6 +10,7 @@ from hanah_tax_ocr.training.data_gaps import load_json
 from hanah_tax_ocr.training.field_crops import field_group_for
 
 DEFAULT_REVIEW_QUEUE_DIR = Path("data/review_queue/index")
+DEFAULT_LABELED_ROOT = Path("data/labeled")
 DEFAULT_OUTPUT_PATH = Path("data/training/reports/review_queue_priority.json")
 
 
@@ -28,6 +29,11 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_DATA_GAP_REPORT_PATH,
     )
     parser.add_argument(
+        "--labeled-root",
+        type=Path,
+        default=DEFAULT_LABELED_ROOT,
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=DEFAULT_OUTPUT_PATH,
@@ -43,6 +49,8 @@ def _document_field_groups(document: dict[str, Any]) -> list[str]:
 def build_review_queue_priority_report(
     review_queue_dir: Path,
     data_gap_report_path: Path,
+    *,
+    labeled_root: Path = DEFAULT_LABELED_ROOT,
 ) -> dict[str, Any]:
     data_gap_report = load_json(data_gap_report_path)
     priorities = data_gap_report.get("priorities", [])
@@ -53,6 +61,13 @@ def build_review_queue_priority_report(
         payload = load_json(queue_path)
         documents = payload.get("documents")
         if not documents:
+            continue
+        case_id = str(payload.get("case_id", queue_path.stem))
+        if any(
+            (labeled_root / str(document["document_type"]) / case_id / "label.json").exists()
+            for document in documents
+            if document.get("document_type")
+        ):
             continue
 
         matched_groups = sorted(
@@ -89,7 +104,7 @@ def build_review_queue_priority_report(
 
         cases.append(
             {
-                "case_id": payload.get("case_id", queue_path.stem),
+                "case_id": case_id,
                 "priority_score": priority_score,
                 "status": status,
                 "document_types": sorted(
@@ -118,9 +133,10 @@ def build_review_queue_priority_report(
                     {
                         "document_type": document["document_type"],
                         "label_path": str(
-                            Path("data/labeled/pending_review")
+                            labeled_root
+                            / "pending_review"
                             / str(document["document_type"])
-                            / str(payload.get("case_id", queue_path.stem))
+                            / case_id
                             / "label.json"
                         ),
                     }
@@ -142,7 +158,11 @@ def build_review_queue_priority_report(
 
 def main() -> None:
     args = parse_args()
-    report = build_review_queue_priority_report(args.review_queue_dir, args.data_gap_report)
+    report = build_review_queue_priority_report(
+        args.review_queue_dir,
+        args.data_gap_report,
+        labeled_root=args.labeled_root,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False))
