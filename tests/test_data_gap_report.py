@@ -78,6 +78,16 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
                     "hard_case_train_ratio": 0.5,
                     "filtered_hard_case_train_count": 3,
                     "unique_source_counts": {"train": 1, "val": 1},
+                    "counts_by_source_type": {"train": {"hard_case": 3}, "val": {}},
+                    "hard_case_variant_counts": {
+                        "train": {"left_clip": 3},
+                        "val": {},
+                    },
+                    "hard_case_variant_counts_by_document_type": {
+                        "train": {"apostille": {"left_clip": 3}},
+                        "val": {},
+                    },
+                    "unique_hard_case_variant_counts": {"train": 1, "val": 0},
                     "warnings": ["low_train_sample_count", "hard_case_train_capped"],
                 },
                 "training_readiness": {
@@ -163,6 +173,14 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
     assert english_group["recognizer_profile"]["filtered_hard_case_train_count"] == 3
     assert english_group["recognizer_profile"]["train_source_count"] == 1
     assert english_group["recognizer_profile"]["val_source_count"] == 1
+    assert english_group["recognizer_profile"]["hard_case_variant_counts"] == {
+        "train": {"left_clip": 3},
+        "val": {},
+    }
+    assert english_group["recognizer_profile"]["unique_hard_case_variant_counts"] == {
+        "train": 1,
+        "val": 0,
+    }
     assert english_group["recognizer_profile"]["training_readiness"]["status"] == "review_required"
     assert english_group["score_breakdown"]["train_source_gap"] == 5.0
     assert english_group["score_breakdown"]["val_source_gap"] == 2.0
@@ -170,6 +188,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
     assert "collect_distinct_train_sources" in english_group["recommendations"]
     assert "collect_distinct_val_sources" in english_group["recommendations"]
     assert "add_base_samples_before_more_hard_cases" in english_group["recommendations"]
+    assert "expand_hard_case_variant_coverage" in english_group["recommendations"]
 
     numeric_group = next(
         item for item in report["priorities"] if item["field_group"] == "numeric_tin_code"

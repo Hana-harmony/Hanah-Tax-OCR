@@ -265,6 +265,11 @@ def build_data_gap_report(
             recommendations.append("prioritize_low_accuracy_group")
         if data_profile.get("filtered_hard_case_train_count", 0) > 0:
             recommendations.append("add_base_samples_before_more_hard_cases")
+        if (
+            data_profile.get("counts_by_source_type", {}).get("train", {}).get("hard_case", 0) > 0
+            and data_profile.get("unique_hard_case_variant_counts", {}).get("train", 0) < 2
+        ):
+            recommendations.append("expand_hard_case_variant_coverage")
 
         priorities.append(
             {
@@ -300,6 +305,18 @@ def build_data_gap_report(
                     "filtered_hard_case_train_count": data_profile.get(
                         "filtered_hard_case_train_count",
                         0,
+                    ),
+                    "hard_case_variant_counts": data_profile.get(
+                        "hard_case_variant_counts",
+                        {},
+                    ),
+                    "hard_case_variant_counts_by_document_type": data_profile.get(
+                        "hard_case_variant_counts_by_document_type",
+                        {},
+                    ),
+                    "unique_hard_case_variant_counts": data_profile.get(
+                        "unique_hard_case_variant_counts",
+                        {},
                     ),
                     "warnings": data_profile.get("warnings", []),
                     "training_readiness": recognizer_group.get("training_readiness", {}),

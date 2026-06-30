@@ -72,6 +72,8 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     }
     assert plan["data_profile"]["counts_by_document_type"]["val"] == {"apostille": 1}
     assert plan["data_profile"]["unique_source_counts"] == {"train": 1, "val": 1}
+    assert plan["data_profile"]["hard_case_variant_counts"] == {"train": {}, "val": {}}
+    assert plan["data_profile"]["unique_hard_case_variant_counts"] == {"train": 0, "val": 0}
     assert plan["training_readiness"] == {
         "status": "review_required",
         "ready_for_execution": True,
@@ -157,6 +159,10 @@ def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: P
         summary["groups"]["english_name_org"]["data_profile"]["unique_source_counts"]["train"]
         == 1
     )
+    assert summary["groups"]["english_name_org"]["data_profile"]["hard_case_variant_counts"] == {
+        "train": {},
+        "val": {},
+    }
     assert summary["groups"]["english_name_org"]["training_readiness"] == {
         "status": "blocked",
         "ready_for_execution": False,
@@ -287,3 +293,66 @@ def test_select_hard_case_entries_spreads_across_base_crops_and_variants() -> No
     assert len(selected) == 4
     assert len({entry["base_crop_path"] for entry in selected}) >= 3
     assert len({entry["augmentation_type"] for entry in selected}) >= 2
+
+
+def test_prepare_recognizer_datasets_tracks_hard_case_variant_coverage(tmp_path: Path) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    base_path = image_root / "base.png"
+    base_path.write_bytes(b"base")
+    base_entry = {
+        "case_id": "case_001",
+        "document_type": "withholding_tax_form",
+        "field_group": "numeric_tin_code",
+        "field_name": "tin",
+        "text": "987-65-4321",
+        "split": "train",
+        "crop_path": str(base_path),
+        "quality": {"accepted": True},
+    }
+    (field_crops_root / "manifest.jsonl").write_text(
+        json.dumps(base_entry) + "\n",
+        encoding="utf-8",
+    )
+
+    hard_cases_root = tmp_path / "hard_cases"
+    hard_cases_root.mkdir()
+    hard_case_entries = []
+    for variant in ("left_clip", "edge_overlap"):
+        hard_path = image_root / f"base__{variant}.png"
+        hard_path.write_bytes(variant.encode("utf-8"))
+        hard_case_entries.append(
+            {
+                **base_entry,
+                "augmentation_type": variant,
+                "base_crop_path": str(base_path),
+                "crop_path": str(hard_path),
+            }
+        )
+    (hard_cases_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in hard_case_entries) + "\n",
+        encoding="utf-8",
+    )
+
+    summary = prepare_recognizer_datasets(
+        field_crops_root,
+        tmp_path / "recognizer",
+        hard_cases_root=hard_cases_root,
+        include_hard_cases=True,
+        max_hard_case_ratio=1.0,
+    )
+
+    profile = summary["groups"]["numeric_tin_code"]["data_profile"]
+    assert profile["hard_case_variant_counts"] == {
+        "train": {"edge_overlap": 1, "left_clip": 1},
+        "val": {},
+    }
+    assert profile["hard_case_variant_counts_by_document_type"] == {
+        "train": {
+            "withholding_tax_form": {"edge_overlap": 1, "left_clip": 1},
+        },
+        "val": {},
+    }
+    assert profile["unique_hard_case_variant_counts"] == {"train": 2, "val": 0}

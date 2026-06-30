@@ -224,6 +224,32 @@ def _unique_source_counts(entries: list[dict[str, Any]], key: str) -> dict[str, 
     )
 
 
+def _hard_case_variant_counts(entries: list[dict[str, Any]]) -> dict[str, int]:
+    counter = Counter()
+    for entry in entries:
+        if _source_type_for(entry) != "hard_case":
+            continue
+        variant = str(entry.get("augmentation_type") or "unknown")
+        counter[variant] += 1
+    return dict(sorted(counter.items()))
+
+
+def _hard_case_variant_counts_by_document_type(
+    entries: list[dict[str, Any]],
+) -> dict[str, dict[str, int]]:
+    grouped: dict[str, Counter[str]] = defaultdict(Counter)
+    for entry in entries:
+        if _source_type_for(entry) != "hard_case":
+            continue
+        document_type = str(entry.get("document_type") or "unknown")
+        variant = str(entry.get("augmentation_type") or "unknown")
+        grouped[document_type][variant] += 1
+    return {
+        document_type: dict(sorted(counter.items()))
+        for document_type, counter in sorted(grouped.items())
+    }
+
+
 def _build_data_profile(
     train_entries: list[dict[str, Any]],
     val_entries: list[dict[str, Any]],
@@ -276,6 +302,16 @@ def _build_data_profile(
         warnings.append("hard_case_dominant_train_split")
     if filtered_hard_case_train_count:
         warnings.append("hard_case_train_capped")
+    hard_case_variant_counts = {
+        "train": _hard_case_variant_counts(train_entries),
+        "val": _hard_case_variant_counts(val_entries),
+    }
+    unique_hard_case_variant_counts = {
+        split: len(variant_counts)
+        for split, variant_counts in hard_case_variant_counts.items()
+    }
+    if hard_case_train_count and unique_hard_case_variant_counts["train"] < 2:
+        warnings.append("low_hard_case_variant_diversity")
     if len({_source_key_for(entry) for entry in val_entries}) < 2:
         warnings.append("low_val_source_diversity")
 
@@ -303,6 +339,12 @@ def _build_data_profile(
             "val": _unique_source_counts(val_entries, "document_type"),
         },
         "counts_by_source_type": source_counts,
+        "hard_case_variant_counts": hard_case_variant_counts,
+        "hard_case_variant_counts_by_document_type": {
+            "train": _hard_case_variant_counts_by_document_type(train_entries),
+            "val": _hard_case_variant_counts_by_document_type(val_entries),
+        },
+        "unique_hard_case_variant_counts": unique_hard_case_variant_counts,
         "hard_case_train_ratio": hard_case_train_ratio,
         "filtered_hard_case_train_count": filtered_hard_case_train_count,
         "max_hard_case_ratio": max_hard_case_ratio,
