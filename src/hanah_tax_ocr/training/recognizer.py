@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import shlex
 import subprocess
@@ -896,12 +897,46 @@ def render_training_command(plan_path: Path, paddleocr_home: Path) -> str:
     configured_batch_size = max(1, int(settings["batch_size"]))
     train_batch_size = min(configured_batch_size, train_count)
     eval_batch_size = min(configured_batch_size, val_count)
+    train_steps_per_epoch = max(1, math.ceil(train_count / train_batch_size))
+    epoch_num = int(settings.get("epoch_num") or (8 if train_count <= 128 else 20))
+    eval_interval_steps = int(
+        settings.get("eval_interval_steps") or min(2000, train_steps_per_epoch)
+    )
+    save_epoch_step = int(settings.get("save_epoch_step") or (1 if epoch_num <= 8 else 3))
+    pretrained_model = settings.get("pretrained_model")
+    if not pretrained_model:
+        base_config_name = str(settings.get("base_config") or "").lower()
+        pretrained_candidates: list[Path] = []
+        if "en_pp-ocrv3" in base_config_name:
+            pretrained_candidates.append(
+                Path("tmp/pretrained/en_PP-OCRv3_rec_train/best_accuracy")
+            )
+        if "korean_pp-ocrv3" in base_config_name:
+            pretrained_candidates.append(
+                Path("tmp/pretrained/korean_PP-OCRv3_rec_train/best_accuracy")
+            )
+        pretrained_model = next(
+            (
+                str(candidate.resolve())
+                for candidate in pretrained_candidates
+                if candidate.with_suffix(".pdparams").exists()
+            ),
+            None,
+        )
     return (
         f"{shlex.quote(sys.executable)} {shlex.quote(str(train_py))} "
         f"-c {shlex.quote(base_config)} "
         f"-o Global.use_gpu=False "
         f"Global.character_dict_path={shlex.quote(str(dict_txt))} "
         f"Global.save_model_dir={shlex.quote(str(model_dir))} "
+        + (
+            f"Global.pretrained_model={shlex.quote(str(pretrained_model))} "
+            if pretrained_model
+            else ""
+        )
+        + f"Global.epoch_num={epoch_num} "
+        + f"Global.eval_batch_step=[0,{eval_interval_steps}] "
+        + f"Global.save_epoch_step={save_epoch_step} "
         f"Global.max_text_length={settings['max_text_length']} "
         f"Global.infer_img={settings['image_shape']} "
         f"Optimizer.lr.learning_rate={settings['learning_rate']} "

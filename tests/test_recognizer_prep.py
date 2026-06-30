@@ -121,6 +121,50 @@ def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
     assert "Eval.loader.batch_size_per_card=1" in command
     assert "Train.loader.drop_last=False" in command
     assert "Global.use_gpu=False" in command
+    assert "Global.epoch_num=8" in command
+    assert "Global.eval_batch_step=[0,1]" in command
+    assert "Global.save_epoch_step=1" in command
+
+
+def test_render_training_command_auto_uses_local_pretrained_checkpoint(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    pretrained_root = tmp_path / "tmp" / "pretrained" / "en_PP-OCRv3_rec_train"
+    pretrained_root.mkdir(parents=True)
+    (pretrained_root / "best_accuracy.pdparams").write_bytes(b"weights")
+
+    group_root = tmp_path / "recognizer" / "english_name_org"
+    group_root.mkdir(parents=True)
+    for name in ("train.txt", "val.txt", "dict.txt"):
+        (group_root / name).write_text("sample\n", encoding="utf-8")
+
+    plan_payload = {
+        "field_group": "english_name_org",
+        "settings": {
+            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
+            "max_text_length": 64,
+            "image_shape": "3,48,320",
+            "batch_size": 32,
+            "learning_rate": 0.0003,
+            "dictionary_path": str(group_root / "dict.txt"),
+            "train_label_path": str(group_root / "train.txt"),
+            "val_label_path": str(group_root / "val.txt"),
+            "train_count": 48,
+            "val_count": 5,
+        },
+    }
+    plan_path = group_root / "plan.json"
+    plan_path.write_text(json.dumps(plan_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    command = render_training_command(plan_path, Path("/tmp/PaddleOCR"))
+
+    assert (
+        f"Global.pretrained_model={pretrained_root.joinpath('best_accuracy').resolve()}"
+        in command
+    )
+    assert "Global.eval_batch_step=[0,2]" in command
 
 
 def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: Path) -> None:
