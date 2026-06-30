@@ -15,6 +15,7 @@ from hanah_tax_ocr.template_profiles import OCRRegionSpec
 
 REGION_FALLBACK_VERTICAL_OFFSETS: dict[str, tuple[float, ...]] = {
     "issue_date": (-0.08, -0.06, -0.04, -0.02),
+    "signed_by": (-0.14, -0.12, -0.10, -0.08),
 }
 
 MONTH_NAME_PATTERN = (
@@ -315,6 +316,23 @@ class PaddleOCREngine:
                 return (3, len(normalized), -len(normalized))
             if has_year:
                 return (2, len(normalized), -len(normalized))
+
+        if region_name == "signed_by":
+            normalized_lower = normalized.lower()
+            if re.fullmatch(r"\d+\.?", normalized):
+                return (0, 0, 0)
+            alpha_token_count = len(re.findall(r"[A-Za-z]+", normalized))
+            score = 1
+            if alpha_token_count >= 2:
+                score += 2
+            if re.search(r"\b(sample|notary)\b", normalized_lower):
+                score += 1
+            if re.search(
+                r"(acting in the capacity|secretary of state|bears the seal|country:)",
+                normalized_lower,
+            ):
+                score -= 2
+            return (score, alpha_token_count, -len(normalized))
 
         return (1, len(normalized), -len(normalized))
 

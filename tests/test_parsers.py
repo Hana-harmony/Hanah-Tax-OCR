@@ -420,6 +420,41 @@ def test_apostille_california_parser_prefers_full_text_over_misaligned_regions()
     assert parsed.fields["certificate_number"] == "4"
 
 
+def test_apostille_parser_strips_signed_by_prefix_from_region_value() -> None:
+    parser = ApostilleParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "APOSTILLE",
+                            "Convention de La Haye du 5 octobre 1961",
+                            "1. Country: UNITED STATES OF AMERICA",
+                            "3. acting in the capacity of NOTARY PUBLIC",
+                            "4. bears the seal/stamp of COUNTY OF SAMPLE, STATE OF SAMPLE",
+                            "5. at Capital City, Sample State 11",
+                            "6. the 12TH DAY OF APRIL, 2021",
+                            "7. by Secretary of State State of Sample",
+                            "8. No. 5011",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "signed_by": OCRPage(
+                    page_number=1,
+                    raw_text="2. This Public Document has been signed by NOTARY SAMPLE 11",
+                )
+            },
+        ),
+        "north_carolina.png",
+    )
+
+    assert parsed.fields["signed_by"] == "NOTARY SAMPLE 11"
+
+
 def test_withholding_parser_extracts_sample_fields() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(
@@ -455,6 +490,40 @@ def test_withholding_parser_extracts_single_digit_street_number_from_full_text()
                 "1 Main Street Suite 1 New York NY 10001 United States of America",
                 "201-21-2001",
             ]
+        ),
+        "withholding.png",
+    )
+
+    assert (
+        parsed.fields["address"]
+        == "1 Main Street Suite 1 New York NY 10001 United States of America"
+    )
+
+
+def test_withholding_parser_prefers_region_address_when_full_text_contains_name_noise() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "USER",
+                            "1 USER 1 Main Street Suite New York NY 10001 United States of America",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "address": OCRPage(
+                    page_number=1,
+                    raw_text=(
+                        "Main\nStreet\nSuite\n1\nNew\nYork\nNY\n10001\n"
+                        "United\nStates\nof\nAmerica"
+                    ),
+                )
+            },
         ),
         "withholding.png",
     )

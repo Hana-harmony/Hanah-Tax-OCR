@@ -143,7 +143,7 @@ APOSTILLE_NORTH_CAROLINA = DocumentTemplateProfile(
     },
     ocr_regions=(
         OCRRegionSpec("issuing_country", 0.34, 0.31, 0.68, 0.36),
-        OCRRegionSpec("signed_by", 0.44, 0.38, 0.66, 0.43),
+        OCRRegionSpec("signed_by", 0.08, 0.23, 0.70, 0.32),
         OCRRegionSpec("signer_capacity", 0.43, 0.44, 0.72, 0.50),
         OCRRegionSpec("seal_owner", 0.42, 0.49, 0.79, 0.55),
         OCRRegionSpec("issued_at", 0.30, 0.57, 0.56, 0.62),

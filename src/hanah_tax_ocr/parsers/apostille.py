@@ -254,7 +254,15 @@ class ApostilleParser(BaseDocumentParser):
     def _normalize_signed_by(self, value: str | None) -> str | None:
         if not value:
             return None
-        cleaned = value.strip().rstrip(".,;:")
+        cleaned = self._normalize_whitespace(value)
+        cleaned = re.sub(
+            r"^\d+\.\s*(?:This\s+Public\s+Document\s+)?(?:has\s+been\s+)?signed\s+by\s*[:.]?\s*",
+            "",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = value if not cleaned else cleaned
+        cleaned = cleaned.strip().rstrip(".,;:")
         if re.fullmatch(r"\d+\.?", cleaned):
             return None
         return cleaned or None

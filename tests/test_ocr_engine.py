@@ -138,6 +138,55 @@ def test_paddle_ocr_engine_retries_issue_date_region_with_upward_shift(tmp_path:
     assert regions["issue_date"].raw_text == "Date: April 5, 2021"
 
 
+def test_paddle_ocr_engine_retries_signed_by_region_with_upward_shift(tmp_path: Path) -> None:
+    image_path = tmp_path / "sample.png"
+    image = Image.new("RGB", (100, 100), "white")
+    for x in range(44, 66):
+        for y in range(25, 31):
+            image.putpixel((x, y), (0, 0, 0))
+    image.save(image_path)
+
+    class FakePaddleOCR:
+        def __init__(self, **kwargs: str) -> None:
+            self.kwargs = kwargs
+
+        def ocr(self, image_input: object, cls: bool = True) -> list[list[object]]:
+            assert cls is True
+            width = len(image_input[0])  # type: ignore[index]
+            height = len(image_input)  # type: ignore[arg-type]
+            dark_pixels = 0
+            for row in image_input:  # type: ignore[assignment]
+                for pixel in row:
+                    if int(pixel[0]) < 64:
+                        dark_pixels += 1
+            if dark_pixels == 0:
+                return [[]]
+            return [[
+                (
+                    [[0, 0], [width, 0], [width, height], [0, height]],
+                    ("NOTARY SAMPLE 11", 0.99),
+                )
+            ]]
+
+    fake_module = types.ModuleType("paddleocr")
+    fake_module.PaddleOCR = FakePaddleOCR
+    original = sys.modules.get("paddleocr")
+    sys.modules["paddleocr"] = fake_module
+    try:
+        engine = PaddleOCREngine(lang="en")
+        regions = engine.run_regions(
+            image_path,
+            [OCRRegionSpec("signed_by", 0.44, 0.38, 0.66, 0.43)],
+        )
+    finally:
+        if original is None:
+            del sys.modules["paddleocr"]
+        else:
+            sys.modules["paddleocr"] = original
+
+    assert regions["signed_by"].raw_text == "NOTARY SAMPLE 11"
+
+
 def test_paddle_ocr_engine_prefers_preprocessed_certificate_number_crop(tmp_path: Path) -> None:
     image_path = tmp_path / "sample.png"
     image = Image.new("RGB", (100, 100), "white")

@@ -21,6 +21,17 @@ class WithholdingTaxFormParser(BaseDocumentParser):
     def parse(self, ocr_result: OCRResult, source_path: str | Path) -> ExtractedDocument:
         text = ocr_result.combined_text()
         single_line = self._normalize_whitespace(text)
+        region_address = normalize_address(self._region_value(ocr_result, "address"))
+        full_text_address = normalize_address(
+            self._find_first(
+                r"(\d{1,5}\s+[A-Za-z0-9 ,.'#-]+?(?:United States of America|USA))",
+                single_line,
+            )
+            or self._find_first(
+                r"주소(?:\s*\([^)]+\))?\s*([0-9A-Za-z ,.'#-]+?(?:United States of America|USA))",
+                single_line,
+            )
+        )
         tin_source = self._normalize_whitespace(
             " ".join(
                 part
@@ -81,14 +92,9 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             tin_source,
         )
         address = normalize_address(
-            self._find_first(
-                r"(\d{1,5}\s+[A-Za-z0-9 ,.'#-]+?(?:United States of America|USA))",
-                single_line,
-            )
-            or self._region_value(ocr_result, "address")
-            or self._find_first(
-                r"주소(?:\s*\([^)]+\))?\s*([0-9A-Za-z ,.'#-]+?(?:United States of America|USA))",
-                single_line,
+            self._merge_address_candidates(
+                region_address=region_address,
+                full_text_address=full_text_address,
             )
         )
         country = normalize_country(
@@ -168,6 +174,35 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             quality_checks=quality_checks,
             parser_warnings=[],
         )
+
+    def _merge_address_candidates(
+        self,
+        *,
+        region_address: str | None,
+        full_text_address: str | None,
+    ) -> str | None:
+        if region_address and full_text_address:
+            full_text_street_number = self._leading_street_number(full_text_address)
+            repaired_region_address = region_address
+            if full_text_street_number and not self._leading_street_number(region_address):
+                repaired_region_address = f"{full_text_street_number} {region_address}"
+            if self._contains_leading_name_noise(full_text_address):
+                return repaired_region_address
+            return full_text_address
+        return full_text_address or region_address
+
+    def _leading_street_number(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        match = re.match(r"^(\d{1,5})\b", value)
+        if not match:
+            return None
+        return match.group(1)
+
+    def _contains_leading_name_noise(self, value: str | None) -> bool:
+        if not value:
+            return False
+        return re.search(r"^\d{1,5}\s+USER\b", value, re.IGNORECASE) is not None
 
     def _clean_name_value(self, value: str | None) -> str | None:
         if not value:
