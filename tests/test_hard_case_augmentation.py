@@ -18,6 +18,7 @@ def test_augment_hard_cases_writes_variant_manifest(tmp_path: Path) -> None:
     for name, group, split in (
         ("name_001.png", "english_name_org", "train"),
         ("mixed_001.png", "korean_mixed_form", "train"),
+        ("tin_001.png", "numeric_tin_code", "train"),
     ):
         image_path = image_root / name
         Image.new("RGB", (120, 40), "white").save(image_path)
@@ -45,8 +46,60 @@ def test_augment_hard_cases_writes_variant_manifest(tmp_path: Path) -> None:
         (output_root / "manifest.jsonl").read_text(encoding="utf-8").strip().splitlines()
     )
     first_entry = json.loads(manifest_lines[0])
-    assert first_entry["augmentation_type"] in {"left_clip", "rotate", "low_res", "overlay_patch"}
+    assert first_entry["augmentation_type"] in {
+        "left_clip",
+        "rotate",
+        "low_res",
+        "overlay_patch",
+        "edge_overlap",
+    }
     assert Path(first_entry["crop_path"]).exists()
+
+
+def test_augment_hard_cases_adds_edge_overlap_variant_for_numeric_groups(tmp_path: Path) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+
+    entries = []
+    for name, field_group in (
+        ("numeric_001.png", "numeric_tin_code"),
+        ("mixed_001.png", "korean_mixed_form"),
+    ):
+        image_path = image_root / name
+        Image.new("RGB", (120, 40), "white").save(image_path)
+        entries.append(
+            {
+                "case_id": name,
+                "document_type": "withholding_tax_form",
+                "field_group": field_group,
+                "field_name": "tin",
+                "text": "123-45-6789",
+                "split": "train",
+                "crop_path": str(image_path),
+            }
+        )
+    (field_crops_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in entries) + "\n",
+        encoding="utf-8",
+    )
+
+    summary = augment_hard_cases(field_crops_root, tmp_path / "hard_cases", seed=7)
+
+    assert summary["counts_by_variant"]["edge_overlap"] == 1
+    manifest_entries = [
+        json.loads(line)
+        for line in (tmp_path / "hard_cases" / "manifest.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    edge_overlap_entry = next(
+        entry for entry in manifest_entries if entry["augmentation_type"] == "edge_overlap"
+    )
+    assert edge_overlap_entry["field_group"] == "numeric_tin_code"
+    assert Path(edge_overlap_entry["crop_path"]).exists()
 
 
 def test_prepare_recognizer_datasets_can_include_hard_cases(tmp_path: Path) -> None:

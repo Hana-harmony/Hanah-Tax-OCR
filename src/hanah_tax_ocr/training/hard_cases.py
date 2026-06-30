@@ -15,7 +15,7 @@ DEFAULT_OUTPUT_ROOT = Path("data/training/hard_cases")
 
 HARD_CASE_PROFILES: dict[str, tuple[str, ...]] = {
     "english_name_org": ("left_clip", "rotate", "low_res", "overlay_patch"),
-    "numeric_tin_code": ("left_clip", "rotate", "low_res"),
+    "numeric_tin_code": ("left_clip", "rotate", "low_res", "edge_overlap"),
     "date": ("rotate", "low_res"),
     "korean_mixed_form": ("left_clip", "low_res", "overlay_patch"),
 }
@@ -118,6 +118,55 @@ def _apply_overlay_patch(
     return canvas.convert("RGB")
 
 
+def _apply_edge_overlap(
+    image: Image.Image,
+    donors: list[dict[str, Any]],
+    rng: random.Random,
+) -> Image.Image:
+    canvas = image.copy().convert("RGBA")
+    patch_width = max(10, image.width // 4)
+    patch_height = max(10, image.height // 2)
+    if donors:
+        donor_path = Path(rng.choice(donors)["crop_path"])
+        try:
+            donor = _open_image(donor_path)
+            patch = donor.resize(
+                (patch_width, patch_height),
+                resample=Image.Resampling.BILINEAR,
+            ).convert("RGBA")
+        except OSError:
+            patch = Image.new("RGBA", (patch_width, patch_height), (255, 255, 255, 0))
+    else:
+        patch = Image.new("RGBA", (patch_width, patch_height), (255, 255, 255, 0))
+
+    shade = Image.new("RGBA", patch.size, (40, 40, 40, 110))
+    patch = Image.blend(patch, shade, 0.65)
+    draw = ImageDraw.Draw(patch)
+    step = max(4, patch.width // 6)
+    for x in range(0, patch.width, step):
+        draw.line(
+            [(x, 0), (x, patch.height - 1)],
+            fill=(15, 15, 15, 150),
+            width=max(1, step // 4),
+        )
+    for y in range(0, patch.height, step):
+        draw.line(
+            [(0, y), (patch.width - 1, y)],
+            fill=(20, 20, 20, 120),
+            width=1,
+        )
+
+    anchor = rng.choice(("left", "right", "bottom"))
+    if anchor == "left":
+        position = (0, max(0, image.height // 5))
+    elif anchor == "right":
+        position = (image.width - patch.width, max(0, image.height // 5))
+    else:
+        position = (max(0, image.width // 3), image.height - patch.height)
+    canvas.alpha_composite(patch, position)
+    return canvas.convert("RGB")
+
+
 def augment_hard_cases(
     field_crops_root: Path,
     output_root: Path,
@@ -153,6 +202,17 @@ def augment_hard_cases(
                     [],
                 )
                 augmented = _apply_overlay_patch(
+                    source_image,
+                    donor_entries,
+                    rng,
+                )
+            elif variant == "edge_overlap":
+                donor_entries = (
+                    donors_by_group.get("korean_mixed_form", [])
+                    + donors_by_group.get("english_name_org", [])
+                    + donors_by_group.get(field_group, [])
+                )
+                augmented = _apply_edge_overlap(
                     source_image,
                     donor_entries,
                     rng,
