@@ -18,6 +18,10 @@ REGION_FALLBACK_VERTICAL_OFFSETS: dict[str, tuple[float, ...]] = {
     "signed_by": (-0.14, -0.12, -0.10, -0.08),
 }
 
+REGION_FALLBACK_LEFT_OFFSETS: dict[str, tuple[float, ...]] = {
+    "address": (-0.04, -0.06, -0.08),
+}
+
 MONTH_NAME_PATTERN = (
     r"\b(January|February|March|April|May|June|July|August|"
     r"September|October|November|December)\b"
@@ -227,6 +231,19 @@ class PaddleOCREngine:
                     shifted_bottom,
                 )
             )
+        for left_offset in REGION_FALLBACK_LEFT_OFFSETS.get(region_spec.name, ()):
+            shifted_left = max(0.0, region_spec.left + left_offset)
+            if shifted_left >= region_spec.right:
+                continue
+            region_boxes.append(
+                OCRRegionSpec(
+                    region_spec.name,
+                    shifted_left,
+                    region_spec.top,
+                    region_spec.right,
+                    region_spec.bottom,
+                )
+            )
 
         for candidate_region in region_boxes:
             crop = image.crop(
@@ -333,6 +350,28 @@ class PaddleOCREngine:
             ):
                 score -= 2
             return (score, alpha_token_count, -len(normalized))
+
+        if region_name == "address":
+            normalized_lower = normalized.lower()
+            has_leading_number = re.match(r"^\d{1,5}\b", normalized) is not None
+            has_country_tail = (
+                "united states" in normalized_lower
+                or normalized_lower.endswith("usa")
+            )
+            has_street_marker = bool(
+                re.search(
+                    r"\b(street|st|road|rd|avenue|ave|blvd|boulevard|suite|apt)\b",
+                    normalized_lower,
+                )
+            )
+            score = 1
+            if has_country_tail:
+                score += 1
+            if has_street_marker:
+                score += 1
+            if has_leading_number:
+                score += 2
+            return (score, len(normalized), -len(normalized))
 
         return (1, len(normalized), -len(normalized))
 

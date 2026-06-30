@@ -534,6 +534,50 @@ def test_withholding_parser_prefers_region_address_when_full_text_contains_name_
     )
 
 
+def test_withholding_parser_strips_leading_user_noise_from_full_text_address() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "USER",
+                            "SAMPLE3",
+                            "USER",
+                            "3 Main",
+                            "Street",
+                            "Suite 3",
+                            "New",
+                            "York NY",
+                            "10001",
+                            "United",
+                            "States",
+                            "of America",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "address": OCRPage(
+                    page_number=1,
+                    raw_text=(
+                        "5\nMain\nStreet\nSuite\n3\nNew\nYork\nNY\n10001\n"
+                        "United\nStates\nof\nAmerica"
+                    ),
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert (
+        parsed.fields["address"]
+        == "3 Main Street Suite 3 New York NY 10001 United States of America"
+    )
+
+
 def test_withholding_parser_preserves_digits_and_rebuilds_applicant_name() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

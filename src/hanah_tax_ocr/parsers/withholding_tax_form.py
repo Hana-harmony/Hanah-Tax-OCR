@@ -182,14 +182,29 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         full_text_address: str | None,
     ) -> str | None:
         if region_address and full_text_address:
+            sanitized_full_text_address = self._sanitize_full_text_address(full_text_address)
             full_text_street_number = self._leading_street_number(full_text_address)
             repaired_region_address = region_address
             if full_text_street_number and not self._leading_street_number(region_address):
                 repaired_region_address = f"{full_text_street_number} {region_address}"
             if self._contains_leading_name_noise(full_text_address):
+                region_has_suite_number = re.search(
+                    r"\bSuite\s+[0-9][A-Za-z0-9-]*",
+                    region_address,
+                    re.IGNORECASE,
+                )
+                sanitized_has_suite_number = sanitized_full_text_address and re.search(
+                    r"\bSuite\s+[0-9][A-Za-z0-9-]*",
+                    sanitized_full_text_address,
+                    re.IGNORECASE,
+                )
+                if sanitized_full_text_address and (
+                    not region_has_suite_number or sanitized_has_suite_number
+                ):
+                    return sanitized_full_text_address
                 return repaired_region_address
-            return full_text_address
-        return full_text_address or region_address
+            return sanitized_full_text_address or full_text_address
+        return self._sanitize_full_text_address(full_text_address) or region_address
 
     def _leading_street_number(self, value: str | None) -> str | None:
         if not value:
@@ -203,6 +218,13 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if not value:
             return False
         return re.search(r"^\d{1,5}\s+USER\b", value, re.IGNORECASE) is not None
+
+    def _sanitize_full_text_address(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        sanitized = re.sub(r"^\d{1,5}\s+USER\b\s+", "", value, flags=re.IGNORECASE)
+        sanitized = normalize_address(sanitized)
+        return sanitized or None
 
     def _clean_name_value(self, value: str | None) -> str | None:
         if not value:
