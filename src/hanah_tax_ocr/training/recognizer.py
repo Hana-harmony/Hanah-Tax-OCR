@@ -54,7 +54,7 @@ BLOCKING_READINESS_WARNINGS = {
 
 DEFAULT_HARD_CASE_SELECTION_STRATEGY = "base_document_balance"
 SCARCE_BASE_VARIANT_FLOOR_STRATEGY = (
-    "base_document_balance_with_scarce_variant_floor"
+    "base_document_balance_with_scarce_full_variant_floor"
 )
 
 
@@ -575,7 +575,7 @@ def _limit_hard_case_train_entries(
     selection_strategy = DEFAULT_HARD_CASE_SELECTION_STRATEGY
     if len(base_entries) == 1 and allowed_hard_case_count > 0:
         unique_variant_count = len({_entry_variant(entry) for entry in hard_case_entries})
-        minimum_variant_count = min(2, unique_variant_count, len(hard_case_entries))
+        minimum_variant_count = min(3, unique_variant_count, len(hard_case_entries))
         if minimum_variant_count > allowed_hard_case_count:
             allowed_hard_case_count = minimum_variant_count
             variant_floor_applied = True

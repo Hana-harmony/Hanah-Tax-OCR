@@ -210,21 +210,21 @@ def test_prepare_recognizer_datasets_caps_hard_case_share(tmp_path: Path) -> Non
     )
 
     profile = summary["groups"]["numeric_tin_code"]["data_profile"]
-    assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 2}
+    assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 3}
     assert profile["counts_by_document_type_and_source"]["train"]["hard_case"] == {
-        "withholding_tax_form": 2
+        "withholding_tax_form": 3
     }
-    assert profile["filtered_hard_case_train_count"] == 1
-    assert profile["hard_case_train_ratio"] == 0.6667
-    assert "hard_case_train_capped" in profile["warnings"]
+    assert profile["filtered_hard_case_train_count"] == 0
+    assert profile["hard_case_train_ratio"] == 0.75
     assert "hard_case_variant_floor_applied" in profile["warnings"]
     assert "hard_case_dominant_train_split" in profile["warnings"]
+    assert "hard_case_train_capped" not in profile["warnings"]
     train_lines = (
         (output_root / "numeric_tin_code" / "train.txt")
         .read_text(encoding="utf-8")
         .splitlines()
     )
-    assert len(train_lines) == 3
+    assert len(train_lines) == 4
 
 
 def test_prepare_recognizer_datasets_balances_capped_hard_cases_by_document_type(
