@@ -650,3 +650,82 @@ def test_prepare_recognizer_datasets_can_refresh_stale_hard_cases_when_requested
         if line.strip()
     ]
     assert {entry["base_crop_path"] for entry in refreshed_entries} == {str(train_base)}
+
+
+def test_prepare_recognizer_datasets_can_split_date_group_by_field_name(tmp_path: Path) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    for image_name in ("issue.png", "signature.png", "issued_on.png", "issue_val.png"):
+        (image_root / image_name).write_bytes(b"fake-image")
+
+    entries = [
+        {
+            "case_id": "case_issue_train",
+            "document_type": "residency_certificate",
+            "field_group": "date",
+            "field_name": "issue_date",
+            "text": "January 12, 2026",
+            "split": "train",
+            "crop_path": str(image_root / "issue.png"),
+            "quality": {"accepted": True},
+        },
+        {
+            "case_id": "case_signature_train",
+            "document_type": "withholding_tax_form",
+            "field_group": "date",
+            "field_name": "signature_date",
+            "text": "2026-01-12",
+            "split": "train",
+            "crop_path": str(image_root / "signature.png"),
+            "quality": {"accepted": True},
+        },
+        {
+            "case_id": "case_issued_on_train",
+            "document_type": "apostille",
+            "field_group": "date",
+            "field_name": "issued_on",
+            "text": "10TH DAY OF APRIL, 2014",
+            "split": "train",
+            "crop_path": str(image_root / "issued_on.png"),
+            "quality": {"accepted": True},
+        },
+        {
+            "case_id": "case_issue_val",
+            "document_type": "residency_certificate",
+            "field_group": "date",
+            "field_name": "issue_date",
+            "text": "April 5, 2021",
+            "split": "val",
+            "crop_path": str(image_root / "issue_val.png"),
+            "quality": {"accepted": True},
+        },
+    ]
+    (field_crops_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in entries) + "\n",
+        encoding="utf-8",
+    )
+
+    output_root = tmp_path / "recognizer"
+    summary = prepare_recognizer_datasets(
+        field_crops_root,
+        output_root,
+        split_field_groups={"date"},
+    )
+
+    assert sorted(summary["groups"]) == ["issue_date", "issued_on", "signature_date"]
+    issue_plan = json.loads((output_root / "issue_date" / "plan.json").read_text(encoding="utf-8"))
+    assert issue_plan["field_group"] == "issue_date"
+    assert issue_plan["source_field_group"] == "date"
+    assert issue_plan["field_names"] == ["issue_date"]
+    train_lines = (
+        (output_root / "issue_date" / "train.txt")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    )
+    val_lines = (output_root / "issue_date" / "val.txt").read_text(encoding="utf-8").splitlines()
+    assert train_lines[0].endswith("\tDate: January 12, 2026")
+    assert val_lines[0].endswith("\tDate: April 5, 2021")
+    dict_chars = (output_root / "issue_date" / "dict.txt").read_text(encoding="utf-8")
+    assert ":" in dict_chars

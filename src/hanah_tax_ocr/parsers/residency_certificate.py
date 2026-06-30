@@ -48,12 +48,19 @@ class ResidencyCertificateParser(BaseDocumentParser):
             self._find_first(r"(\d{4})", self._region_value(ocr_result, "tax_year") or "")
             or self._find_first(r"Tax\s*Year\s*[:;]?\s*(\d{4})", single_line)
         )
-        issue_date = self._normalize_english_date(
+        region_issue_date = self._normalize_english_date(
             self._region_value(ocr_result, "issue_date")
-            or self._find_first(
+        )
+        fallback_issue_date = self._normalize_english_date(
+            self._find_first(
                 r"Date\s*[:;]?\s*([A-Za-z]+\s+\d{1,2}[,.]?\s*\d{4})",
                 single_line,
             )
+        )
+        issue_date = (
+            region_issue_date
+            if self._is_valid_english_date(region_issue_date)
+            else fallback_issue_date
         )
         residency_country = normalize_country(
             "United States of America"

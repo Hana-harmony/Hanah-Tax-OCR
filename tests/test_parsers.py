@@ -34,6 +34,38 @@ def test_residency_parser_extracts_core_fields() -> None:
     assert parsed.quality_checks["has_certification_text"] is True
 
 
+def test_residency_parser_falls_back_when_region_issue_date_is_invalid() -> None:
+    parser = ResidencyCertificateParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "DEPARTMENT OF THE TREASURY",
+                            "INTERNAL REVENUE SERVICE",
+                            "Date: January 12, 2026",
+                            "Taxpayer: MARIA L.CHEN",
+                            "TIN: 987-65-4321",
+                            "Tax Year: 2026",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "issue_date": OCRPage(
+                    page_number=1,
+                    raw_text="Date: Immy 1.202",
+                )
+            },
+        ),
+        "residency.png",
+    )
+
+    assert parsed.fields["issue_date"] == "January 12, 2026"
+
+
 def test_apostille_parser_extracts_standard_items() -> None:
     parser = ApostilleParser()
     parsed = parser.parse(
@@ -179,6 +211,34 @@ def test_withholding_parser_prefers_region_signature_date_over_header_date() -> 
                 "signature_date": OCRPage(
                     page_number=1,
                     raw_text="t.\n2026\n01\n12\nOL",
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["signature_date"] == "2026-01-12"
+
+
+def test_withholding_parser_falls_back_when_region_signature_date_is_invalid() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "[2026.3.20.]",
+                            "2026년 01월 12일 신청인 MARIA L. CHEN",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "signature_date": OCRPage(
+                    page_number=1,
+                    raw_text="2Q26-y1-I2",
                 )
             },
         ),

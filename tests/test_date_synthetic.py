@@ -57,6 +57,11 @@ def test_generate_synthetic_date_hard_cases_appends_manifest_entries(tmp_path: P
     assert len(manifest_entries) == 6
     assert all(entry["augmentation_type"] == "synthetic_date" for entry in manifest_entries)
     assert all(Path(entry["crop_path"]).exists() for entry in manifest_entries)
+    issue_entries = [
+        entry for entry in manifest_entries if entry["field_name"] == "issue_date"
+    ]
+    assert issue_entries
+    assert all(entry["recognizer_text"].startswith("Date: ") for entry in issue_entries)
     assert {entry["field_name"] for entry in manifest_entries} == {
         "issue_date",
         "signature_date",

@@ -65,6 +65,26 @@ class BaseDocumentParser(ABC):
         return normalize_iso_date(value)
 
     @staticmethod
+    def _is_valid_english_date(value: str | None) -> bool:
+        if not value:
+            return False
+        return (
+            re.search(
+                r"\b(January|February|March|April|May|June|July|August|September|October|November|December)\b",
+                value,
+                re.IGNORECASE,
+            )
+            is not None
+            and re.search(r"\b\d{4}\b", value) is not None
+        )
+
+    @staticmethod
+    def _is_valid_iso_date(value: str | None) -> bool:
+        if not value:
+            return False
+        return re.search(r"\b\d{4}-\d{2}-\d{2}\b", value) is not None
+
+    @staticmethod
     def _region_value(ocr_result: OCRResult, region_name: str) -> str | None:
         return ocr_result.region_text(region_name)
 

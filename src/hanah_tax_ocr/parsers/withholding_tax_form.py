@@ -116,10 +116,17 @@ class WithholdingTaxFormParser(BaseDocumentParser):
                 dividend_rate_source,
             )
         )
-        signature_date = self._normalize_iso_date(
+        region_signature_date = self._normalize_iso_date(
             self._region_value(ocr_result, "signature_date")
-            or self._find_first(r"(\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)", single_line)
+        )
+        fallback_signature_date = self._normalize_iso_date(
+            self._find_first(r"(\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)", single_line)
             or self._find_first(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2})", single_line)
+        )
+        signature_date = (
+            region_signature_date
+            if self._is_valid_iso_date(region_signature_date)
+            else fallback_signature_date
         )
         middle_name = self._derive_middle_name(
             middle_name,

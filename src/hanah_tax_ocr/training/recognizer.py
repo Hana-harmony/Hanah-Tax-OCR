@@ -13,6 +13,7 @@ from typing import Any
 
 from hanah_tax_ocr.training.field_crops import export_field_crops
 from hanah_tax_ocr.training.hard_cases import augment_hard_cases
+from hanah_tax_ocr.training.recognizer_labels import recognizer_text_for_entry
 
 DEFAULT_FIELD_CROPS_ROOT = Path("data/training/field_crops")
 DEFAULT_RECOGNIZER_ROOT = Path("data/training/recognizer")
@@ -38,6 +39,27 @@ RECOMMENDED_SETTINGS: dict[str, dict[str, Any]] = {
         "image_shape": "3,48,192",
         "batch_size": 64,
         "learning_rate": 0.0004,
+    },
+    "issue_date": {
+        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
+        "max_text_length": 40,
+        "image_shape": "3,48,256",
+        "batch_size": 48,
+        "learning_rate": 0.0003,
+    },
+    "signature_date": {
+        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
+        "max_text_length": 24,
+        "image_shape": "3,48,192",
+        "batch_size": 64,
+        "learning_rate": 0.0004,
+    },
+    "issued_on": {
+        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
+        "max_text_length": 40,
+        "image_shape": "3,48,256",
+        "batch_size": 32,
+        "learning_rate": 0.0003,
     },
     "korean_mixed_form": {
         "base_config": "configs/rec/PP-OCRv3/multi_language/korean_PP-OCRv3_mobile_rec.yml",
@@ -117,6 +139,12 @@ def parse_args() -> argparse.Namespace:
         default=0.5,
         help="Maximum hard-case share within each train split. Use 1.0 to disable the cap.",
     )
+    parser.add_argument(
+        "--split-field-group",
+        action="append",
+        default=[],
+        help="Emit separate recognizer groups per field_name for the selected field_group.",
+    )
     return parser.parse_args()
 
 
@@ -193,19 +221,24 @@ def _write_label_file(entries: list[dict[str, Any]], output_path: Path) -> None:
             Path(entry["crop_path"]).resolve(),
             dataset_root.resolve(),
         )
-        lines.append(f"{relative_image}\t{entry['text']}")
+        lines.append(f"{relative_image}\t{recognizer_text_for_entry(entry)}")
     output_path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
 
 
 def _recommended_settings(
-    field_group: str,
+    group_key: str,
     sample_count: int,
     max_text_length: int,
+    *,
+    source_field_group: str | None = None,
 ) -> dict[str, Any]:
     settings = dict(
         RECOMMENDED_SETTINGS.get(
-            field_group,
-            RECOMMENDED_SETTINGS["korean_mixed_form"],
+            group_key,
+            RECOMMENDED_SETTINGS.get(
+                source_field_group or "",
+                RECOMMENDED_SETTINGS["korean_mixed_form"],
+            ),
         )
     )
     settings["max_text_length"] = max(settings["max_text_length"], max_text_length)
@@ -698,6 +731,7 @@ def prepare_recognizer_datasets(
     ensure_hard_cases_manifest: bool = False,
     include_rejected_crops: bool = False,
     max_hard_case_ratio: float | None = 0.5,
+    split_field_groups: set[str] | None = None,
 ) -> dict[str, Any]:
     if ensure_crops:
         if labeled_root is None:
@@ -725,16 +759,26 @@ def prepare_recognizer_datasets(
     grouped_entries: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(
         lambda: defaultdict(list)
     )
+    source_field_groups: dict[str, str] = {}
+    split_field_groups = split_field_groups or set()
     for entry in entries:
         quality = entry.get("quality", {})
         if quality and not include_rejected_crops and not quality.get("accepted", True):
             continue
-        grouped_entries[entry["field_group"]][entry["split"]].append(entry)
+        source_field_group = str(entry["field_group"])
+        group_key = (
+            str(entry["field_name"])
+            if source_field_group in split_field_groups
+            else source_field_group
+        )
+        grouped_entries[group_key][entry["split"]].append(entry)
+        source_field_groups.setdefault(group_key, source_field_group)
 
     summary_groups: dict[str, Any] = {}
     for field_group, splits in grouped_entries.items():
         group_root = output_root / field_group
         group_root.mkdir(parents=True, exist_ok=True)
+        source_field_group = source_field_groups.get(field_group, field_group)
 
         hard_case_selection = _limit_hard_case_train_entries(
             splits.get("train", []),
@@ -752,7 +796,7 @@ def prepare_recognizer_datasets(
             {
                 character
                 for entry in train_entries + val_entries
-                for character in entry["text"]
+                for character in recognizer_text_for_entry(entry)
             }
         )
         dict_path = group_root / "dict.txt"
@@ -762,10 +806,15 @@ def prepare_recognizer_datasets(
         )
 
         max_text_length = max(
-            (len(entry["text"]) for entry in train_entries + val_entries),
+            (len(recognizer_text_for_entry(entry)) for entry in train_entries + val_entries),
             default=0,
         )
-        settings = _recommended_settings(field_group, len(train_entries), max_text_length)
+        settings = _recommended_settings(
+            field_group,
+            len(train_entries),
+            max_text_length,
+            source_field_group=source_field_group,
+        )
         data_profile = _build_data_profile(
             train_entries,
             val_entries,
@@ -791,6 +840,7 @@ def prepare_recognizer_datasets(
 
         plan = {
             "field_group": field_group,
+            "source_field_group": source_field_group,
             "settings": settings,
             "field_names": sorted(
                 {entry["field_name"] for entry in train_entries + val_entries}
@@ -819,6 +869,7 @@ def prepare_recognizer_datasets(
         "hard_cases_sync": hard_cases_sync,
         "include_rejected_crops": include_rejected_crops,
         "max_hard_case_ratio": max_hard_case_ratio,
+        "split_field_groups": sorted(split_field_groups),
         "groups": dict(sorted(summary_groups.items())),
     }
     output_root.mkdir(parents=True, exist_ok=True)
@@ -930,6 +981,7 @@ def main() -> None:
         ensure_hard_cases_manifest=args.ensure_hard_cases,
         include_rejected_crops=args.include_rejected_crops,
         max_hard_case_ratio=args.max_hard_case_ratio,
+        split_field_groups=set(args.split_field_group),
     )
     print(json.dumps(summary, ensure_ascii=False))
 

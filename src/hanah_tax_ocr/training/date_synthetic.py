@@ -8,6 +8,8 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+from hanah_tax_ocr.training.recognizer_labels import recognizer_text_for_entry
+
 DEFAULT_FIELD_CROPS_ROOT = Path("data/training/field_crops")
 DEFAULT_OUTPUT_ROOT = Path("data/training/hard_cases")
 DATE_FIELD_NAMES = {"issue_date", "signature_date", "issued_on"}
@@ -136,7 +138,7 @@ def _fit_font(
 
 def _render_synthetic_crop(
     base_entry: dict[str, Any],
-    text: str,
+    recognizer_text: str,
     rng: random.Random,
 ) -> Image.Image:
     field_name = str(base_entry["field_name"])
@@ -146,9 +148,9 @@ def _render_synthetic_crop(
     if rng.random() < 0.6:
         background = background.filter(ImageFilter.GaussianBlur(radius=0.6))
 
-    font = _fit_font(field_name, text, background.size, rng)
+    font = _fit_font(field_name, recognizer_text, background.size, rng)
     draw = ImageDraw.Draw(background)
-    bbox = draw.textbbox((0, 0), text, font=font)
+    bbox = draw.textbbox((0, 0), recognizer_text, font=font)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
     x_margin = max(4, int(background.width * 0.04))
@@ -158,7 +160,7 @@ def _render_synthetic_crop(
     x = rng.randint(x_margin, max_x)
     y = rng.randint(y_margin, max_y)
     ink = rng.randint(12, 48)
-    draw.text((x, y), text, fill=(ink, ink, ink), font=font)
+    draw.text((x, y), recognizer_text, fill=(ink, ink, ink), font=font)
 
     if rng.random() < 0.35:
         background = background.rotate(
@@ -218,7 +220,13 @@ def generate_synthetic_date_hard_cases(
         base_path = Path(entry["crop_path"])
         for variant_index in range(variants_per_entry):
             text = _build_synthetic_text(field_name, rng)
-            image = _render_synthetic_crop(entry, text, rng)
+            recognizer_text = recognizer_text_for_entry(
+                {
+                    "field_name": field_name,
+                    "text": text,
+                }
+            )
+            image = _render_synthetic_crop(entry, recognizer_text, rng)
             output_path = variant_dir / (
                 f"{base_path.stem}__{SYNTHETIC_AUGMENTATION_PREFIX}_{variant_index:02d}.png"
             )
@@ -227,6 +235,7 @@ def generate_synthetic_date_hard_cases(
                 {
                     **entry,
                     "text": text,
+                    "recognizer_text": recognizer_text,
                     "crop_path": str(output_path),
                     "base_crop_path": str(base_path),
                     "augmentation_type": SYNTHETIC_AUGMENTATION_PREFIX,
