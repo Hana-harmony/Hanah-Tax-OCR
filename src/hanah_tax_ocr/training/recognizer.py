@@ -6,6 +6,7 @@ import os
 import shlex
 import subprocess
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +50,19 @@ BLOCKING_READINESS_WARNINGS = {
     "no_train_samples",
     "no_val_samples",
 }
+
+DEFAULT_HARD_CASE_SELECTION_STRATEGY = "base_document_balance"
+SCARCE_BASE_VARIANT_FLOOR_STRATEGY = (
+    "base_document_balance_with_scarce_variant_floor"
+)
+
+
+@dataclass(frozen=True)
+class HardCaseSelectionResult:
+    entries: list[dict[str, Any]]
+    filtered_count: int
+    selection_strategy: str = DEFAULT_HARD_CASE_SELECTION_STRATEGY
+    variant_floor_applied: bool = False
 
 
 def parse_args() -> argparse.Namespace:
@@ -256,6 +270,8 @@ def _build_data_profile(
     *,
     filtered_hard_case_train_count: int = 0,
     max_hard_case_ratio: float | None = None,
+    hard_case_selection_strategy: str = DEFAULT_HARD_CASE_SELECTION_STRATEGY,
+    hard_case_variant_floor_applied: bool = False,
 ) -> dict[str, Any]:
     train_base_entries = [
         entry for entry in train_entries if _source_type_for(entry) == "base"
@@ -302,6 +318,8 @@ def _build_data_profile(
         warnings.append("hard_case_dominant_train_split")
     if filtered_hard_case_train_count:
         warnings.append("hard_case_train_capped")
+    if hard_case_variant_floor_applied:
+        warnings.append("hard_case_variant_floor_applied")
     hard_case_variant_counts = {
         "train": _hard_case_variant_counts(train_entries),
         "val": _hard_case_variant_counts(val_entries),
@@ -348,7 +366,8 @@ def _build_data_profile(
         "hard_case_train_ratio": hard_case_train_ratio,
         "filtered_hard_case_train_count": filtered_hard_case_train_count,
         "max_hard_case_ratio": max_hard_case_ratio,
-        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_selection_strategy": hard_case_selection_strategy,
+        "hard_case_variant_floor_applied": hard_case_variant_floor_applied,
         "warnings": warnings,
     }
 
@@ -523,9 +542,9 @@ def _limit_hard_case_train_entries(
     train_entries: list[dict[str, Any]],
     *,
     max_hard_case_ratio: float | None,
-) -> tuple[list[dict[str, Any]], int]:
+) -> HardCaseSelectionResult:
     if max_hard_case_ratio is None or max_hard_case_ratio >= 1.0:
-        return train_entries, 0
+        return HardCaseSelectionResult(entries=train_entries, filtered_count=0)
     if max_hard_case_ratio < 0.0:
         raise ValueError("max_hard_case_ratio must be greater than or equal to 0")
 
@@ -534,7 +553,7 @@ def _limit_hard_case_train_entries(
         entry for entry in train_entries if _source_type_for(entry) == "hard_case"
     ]
     if not hard_case_entries:
-        return train_entries, 0
+        return HardCaseSelectionResult(entries=train_entries, filtered_count=0)
 
     if not base_entries or max_hard_case_ratio == 0.0:
         allowed_hard_case_count = 0
@@ -542,8 +561,23 @@ def _limit_hard_case_train_entries(
         allowed_hard_case_count = int(
             len(base_entries) * max_hard_case_ratio / (1.0 - max_hard_case_ratio)
         )
+    variant_floor_applied = False
+    selection_strategy = DEFAULT_HARD_CASE_SELECTION_STRATEGY
+    if len(base_entries) == 1 and allowed_hard_case_count > 0:
+        unique_variant_count = len({_entry_variant(entry) for entry in hard_case_entries})
+        minimum_variant_count = min(2, unique_variant_count, len(hard_case_entries))
+        if minimum_variant_count > allowed_hard_case_count:
+            allowed_hard_case_count = minimum_variant_count
+            variant_floor_applied = True
+            selection_strategy = SCARCE_BASE_VARIANT_FLOOR_STRATEGY
+
     if len(hard_case_entries) <= allowed_hard_case_count:
-        return train_entries, 0
+        return HardCaseSelectionResult(
+            entries=train_entries,
+            filtered_count=0,
+            selection_strategy=selection_strategy,
+            variant_floor_applied=variant_floor_applied,
+        )
 
     quotas = _allocate_hard_case_document_quotas(
         base_entries,
@@ -566,7 +600,12 @@ def _limit_hard_case_train_entries(
         for entry in train_entries
         if _source_type_for(entry) == "base" or id(entry) in selected_ids
     ]
-    return retained_entries, len(hard_case_entries) - len(selected_hard_case_entries)
+    return HardCaseSelectionResult(
+        entries=retained_entries,
+        filtered_count=len(hard_case_entries) - len(selected_hard_case_entries),
+        selection_strategy=selection_strategy,
+        variant_floor_applied=variant_floor_applied,
+    )
 
 
 def prepare_recognizer_datasets(
@@ -602,10 +641,12 @@ def prepare_recognizer_datasets(
         group_root = output_root / field_group
         group_root.mkdir(parents=True, exist_ok=True)
 
-        train_entries, filtered_hard_case_train_count = _limit_hard_case_train_entries(
+        hard_case_selection = _limit_hard_case_train_entries(
             splits.get("train", []),
             max_hard_case_ratio=max_hard_case_ratio,
         )
+        train_entries = hard_case_selection.entries
+        filtered_hard_case_train_count = hard_case_selection.filtered_count
         val_entries = splits.get("val", [])
         train_file = group_root / "train.txt"
         val_file = group_root / "val.txt"
@@ -635,6 +676,8 @@ def prepare_recognizer_datasets(
             val_entries,
             filtered_hard_case_train_count=filtered_hard_case_train_count,
             max_hard_case_ratio=max_hard_case_ratio,
+            hard_case_selection_strategy=hard_case_selection.selection_strategy,
+            hard_case_variant_floor_applied=hard_case_selection.variant_floor_applied,
         )
         settings["dictionary_path"] = str(dict_path)
         settings["train_label_path"] = str(train_file)

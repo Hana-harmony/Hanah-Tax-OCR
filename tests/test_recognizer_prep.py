@@ -74,6 +74,8 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     assert plan["data_profile"]["unique_source_counts"] == {"train": 1, "val": 1}
     assert plan["data_profile"]["hard_case_variant_counts"] == {"train": {}, "val": {}}
     assert plan["data_profile"]["unique_hard_case_variant_counts"] == {"train": 0, "val": 0}
+    assert plan["data_profile"]["hard_case_selection_strategy"] == "base_document_balance"
+    assert plan["data_profile"]["hard_case_variant_floor_applied"] is False
     assert plan["training_readiness"] == {
         "status": "review_required",
         "ready_for_execution": True,
@@ -163,6 +165,10 @@ def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: P
         "train": {},
         "val": {},
     }
+    assert (
+        summary["groups"]["english_name_org"]["data_profile"]["hard_case_selection_strategy"]
+        == "base_document_balance"
+    )
     assert summary["groups"]["english_name_org"]["training_readiness"] == {
         "status": "blocked",
         "ready_for_execution": False,
@@ -356,3 +362,72 @@ def test_prepare_recognizer_datasets_tracks_hard_case_variant_coverage(tmp_path:
         "val": {},
     }
     assert profile["unique_hard_case_variant_counts"] == {"train": 2, "val": 0}
+
+
+def test_prepare_recognizer_datasets_preserves_two_variants_for_single_base_group(
+    tmp_path: Path,
+) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    base_path = image_root / "base.png"
+    base_path.write_bytes(b"base")
+    base_entry = {
+        "case_id": "case_001",
+        "document_type": "apostille",
+        "field_group": "korean_mixed_form",
+        "field_name": "issuing_country",
+        "text": "미국",
+        "split": "train",
+        "crop_path": str(base_path),
+        "quality": {"accepted": True},
+    }
+    (field_crops_root / "manifest.jsonl").write_text(
+        json.dumps(base_entry) + "\n",
+        encoding="utf-8",
+    )
+
+    hard_cases_root = tmp_path / "hard_cases"
+    hard_cases_root.mkdir()
+    hard_case_entries = []
+    for variant in ("left_clip", "low_res", "overlay_patch"):
+        hard_path = image_root / f"base__{variant}.png"
+        hard_path.write_bytes(variant.encode("utf-8"))
+        hard_case_entries.append(
+            {
+                **base_entry,
+                "augmentation_type": variant,
+                "base_crop_path": str(base_path),
+                "crop_path": str(hard_path),
+            }
+        )
+    (hard_cases_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in hard_case_entries) + "\n",
+        encoding="utf-8",
+    )
+
+    summary = prepare_recognizer_datasets(
+        field_crops_root,
+        tmp_path / "recognizer",
+        hard_cases_root=hard_cases_root,
+        include_hard_cases=True,
+    )
+
+    profile = summary["groups"]["korean_mixed_form"]["data_profile"]
+    assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 2}
+    assert profile["hard_case_variant_counts"] == {
+        "train": {"left_clip": 1, "low_res": 1},
+        "val": {},
+    }
+    assert profile["unique_hard_case_variant_counts"] == {"train": 2, "val": 0}
+    assert profile["filtered_hard_case_train_count"] == 1
+    assert profile["hard_case_train_ratio"] == 0.6667
+    assert (
+        profile["hard_case_selection_strategy"]
+        == "base_document_balance_with_scarce_variant_floor"
+    )
+    assert profile["hard_case_variant_floor_applied"] is True
+    assert "hard_case_variant_floor_applied" in profile["warnings"]
+    assert "hard_case_dominant_train_split" in profile["warnings"]
+    assert "low_hard_case_variant_diversity" not in profile["warnings"]

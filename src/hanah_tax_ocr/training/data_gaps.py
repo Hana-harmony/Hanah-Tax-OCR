@@ -318,6 +318,14 @@ def build_data_gap_report(
                         "unique_hard_case_variant_counts",
                         {},
                     ),
+                    "hard_case_selection_strategy": data_profile.get(
+                        "hard_case_selection_strategy",
+                        "",
+                    ),
+                    "hard_case_variant_floor_applied": data_profile.get(
+                        "hard_case_variant_floor_applied",
+                        False,
+                    ),
                     "warnings": data_profile.get("warnings", []),
                     "training_readiness": recognizer_group.get("training_readiness", {}),
                 },
