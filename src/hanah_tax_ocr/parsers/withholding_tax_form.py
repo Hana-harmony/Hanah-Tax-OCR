@@ -141,6 +141,12 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             first_name=first_name,
             last_name=last_name,
         )
+        first_name = self._prefer_applicant_first_name(
+            first_name,
+            applicant_name=applicant_name,
+            middle_name=middle_name,
+            last_name=last_name,
+        )
         applicant_name = self._rebuild_applicant_name(
             applicant_name,
             first_name=first_name,
@@ -302,6 +308,29 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             return rebuilt
         return applicant_name
 
+    def _prefer_applicant_first_name(
+        self,
+        first_name: str | None,
+        *,
+        applicant_name: str | None,
+        middle_name: str | None,
+        last_name: str | None,
+    ) -> str | None:
+        derived_first_name, derived_middle_name, derived_last_name = self._derive_name_parts(
+            applicant_name
+        )
+        if not derived_first_name or not first_name:
+            return first_name or derived_first_name
+        if not last_name or derived_last_name != last_name:
+            return first_name
+        if middle_name and derived_middle_name and middle_name != derived_middle_name:
+            return first_name
+        if canonicalize_name(derived_first_name) == canonicalize_name(first_name):
+            return first_name
+        if self._digit_count(derived_first_name) > self._digit_count(first_name):
+            return derived_first_name
+        return first_name
+
     def _format_applicant_name(
         self,
         first_name: str | None,
@@ -320,3 +349,8 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         ):
             formatted_middle = f"{middle_name}."
         return " ".join(part for part in [first_name, formatted_middle, last_name] if part).strip()
+
+    def _digit_count(self, value: str | None) -> int:
+        if not value:
+            return 0
+        return sum(character.isdigit() for character in value)

@@ -244,6 +244,46 @@ def test_paddle_ocr_engine_retries_address_region_with_left_expansion(tmp_path: 
     )
 
 
+def test_paddle_ocr_engine_prefers_applicant_name_variant_with_three_clean_tokens(
+    tmp_path: Path,
+) -> None:
+    image_path = tmp_path / "sample.png"
+    Image.new("RGB", (100, 100), "white").save(image_path)
+
+    class FakePaddleOCR:
+        def __init__(self, **kwargs: str) -> None:
+            self.kwargs = kwargs
+
+        def ocr(self, image_input: object, cls: bool = True) -> list[list[object]]:
+            assert cls is True
+            width = len(image_input[0])  # type: ignore[index]
+            text = "SAMPLE2O\nT\nUSER" if width >= 60 else "SAMPLE2O\nUSER"
+            return [[
+                (
+                    [[0, 0], [width, 0], [width, 1], [0, 1]],
+                    (text, 0.99),
+                )
+            ]]
+
+    fake_module = types.ModuleType("paddleocr")
+    fake_module.PaddleOCR = FakePaddleOCR
+    original = sys.modules.get("paddleocr")
+    sys.modules["paddleocr"] = fake_module
+    try:
+        engine = PaddleOCREngine(lang="korean")
+        regions = engine.run_regions(
+            image_path,
+            [OCRRegionSpec("applicant_name", 0.40, 0.79, 0.72, 0.85)],
+        )
+    finally:
+        if original is None:
+            del sys.modules["paddleocr"]
+        else:
+            sys.modules["paddleocr"] = original
+
+    assert regions["applicant_name"].raw_text == "SAMPLE2O\nT\nUSER"
+
+
 def test_paddle_ocr_engine_prefers_preprocessed_certificate_number_crop(tmp_path: Path) -> None:
     image_path = tmp_path / "sample.png"
     image = Image.new("RGB", (100, 100), "white")

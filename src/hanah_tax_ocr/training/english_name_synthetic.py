@@ -26,6 +26,24 @@ FONT_PATHS = [
     Path("/System/Library/Fonts/Supplemental/Courier New.ttf"),
 ]
 AMBIGUOUS_INITIALS = ("I", "J", "L", "O", "T", "A", "B", "C", "D", "E")
+AMBIGUOUS_NAME_NUMBERS = (
+    1,
+    2,
+    3,
+    8,
+    9,
+    10,
+    11,
+    12,
+    15,
+    18,
+    19,
+    20,
+    21,
+    22,
+    28,
+    30,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,7 +76,7 @@ def _load_manifest_entries(path: Path) -> list[dict[str, Any]]:
 
 
 def _build_first_name(rng: random.Random) -> str:
-    number = rng.randint(1, 30)
+    number = rng.choice(AMBIGUOUS_NAME_NUMBERS)
     return f"SAMPLE{number}"
 
 
@@ -67,8 +85,8 @@ def _build_middle_name(rng: random.Random) -> str:
 
 
 def _build_address(rng: random.Random) -> str:
-    suite = rng.randint(1, 30)
-    street_number = rng.randint(1, 30)
+    suite = rng.choice(AMBIGUOUS_NAME_NUMBERS)
+    street_number = suite if rng.random() < 0.8 else rng.choice(AMBIGUOUS_NAME_NUMBERS)
     street = rng.choice(("Main Street", "Harbor Road", "Broadway", "Market Street"))
     city, state, postal_code = rng.choice(
         (
@@ -84,18 +102,35 @@ def _build_address(rng: random.Random) -> str:
     )
 
 
-def _build_synthetic_text(field_name: str, rng: random.Random) -> str:
+def _build_synthetic_text(field_name: str, rng: random.Random) -> tuple[str, str]:
     if field_name == "first_name":
-        return _build_first_name(rng)
+        text = _build_first_name(rng)
+        return text, text
     if field_name == "middle_name":
-        return _build_middle_name(rng)
+        text = _build_middle_name(rng)
+        return text, text
     if field_name == "applicant_name":
-        return f"{_build_first_name(rng)} {_build_middle_name(rng)} USER"
+        first_name = _build_first_name(rng)
+        middle_name = _build_middle_name(rng)
+        label_text = f"{first_name} {middle_name} USER"
+        render_text = rng.choice(
+            (
+                label_text,
+                f"{first_name}\n{middle_name}\nUSER",
+                f"{first_name}\nUSER\n{middle_name}",
+            )
+        )
+        return label_text, render_text
     if field_name == "signed_by":
-        return f"NOTARY SAMPLE {rng.randint(1, 30)}"
+        text = f"NOTARY SAMPLE {rng.choice(AMBIGUOUS_NAME_NUMBERS)}"
+        return text, text
     if field_name == "taxpayer_name":
-        return f"Sample {rng.randint(1, 30)} User"
-    return _build_address(rng)
+        number = rng.choice(AMBIGUOUS_NAME_NUMBERS)
+        label_text = f"Sample {number} User"
+        render_text = rng.choice((label_text, f"Sample {number}\nUser"))
+        return label_text, render_text
+    text = _build_address(rng)
+    return text, text
 
 
 def _load_font(height: int, rng: random.Random) -> ImageFont.ImageFont:
@@ -170,7 +205,7 @@ def _fit_text(
 
 def _render_synthetic_crop(
     base_entry: dict[str, Any],
-    text: str,
+    render_text: str,
     rng: random.Random,
 ) -> Image.Image:
     base_crop = Image.open(base_entry["crop_path"]).convert("RGB")
@@ -180,7 +215,7 @@ def _render_synthetic_crop(
         background = background.filter(ImageFilter.GaussianBlur(radius=0.5))
 
     field_name = str(base_entry["field_name"])
-    font, rendered_text = _fit_text(field_name, text, background.size, rng)
+    font, rendered_text = _fit_text(field_name, render_text, background.size, rng)
     draw = ImageDraw.Draw(background)
     multiline = "\n" in rendered_text
     text_width, text_height = _measure_text(draw, rendered_text, font, multiline=multiline)
@@ -253,8 +288,8 @@ def generate_synthetic_english_name_hard_cases(
         field_name = str(entry["field_name"])
         base_path = Path(entry["crop_path"])
         for variant_index in range(variants_per_entry):
-            text = _build_synthetic_text(field_name, rng)
-            image = _render_synthetic_crop(entry, text, rng)
+            label_text, render_text = _build_synthetic_text(field_name, rng)
+            image = _render_synthetic_crop(entry, render_text, rng)
             output_path = variant_dir / (
                 f"{base_path.stem}__{SYNTHETIC_AUGMENTATION_PREFIX}_{variant_index:02d}.png"
             )
@@ -262,8 +297,9 @@ def generate_synthetic_english_name_hard_cases(
             synthetic_entries.append(
                 {
                     **entry,
-                    "text": text,
-                    "recognizer_text": text,
+                    "text": label_text,
+                    "recognizer_text": label_text,
+                    "render_text": render_text,
                     "crop_path": str(output_path),
                     "base_crop_path": str(base_path),
                     "augmentation_type": SYNTHETIC_AUGMENTATION_PREFIX,

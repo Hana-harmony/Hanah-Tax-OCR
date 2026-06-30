@@ -294,6 +294,16 @@ class PaddleOCREngine:
                 crop.resize((crop.width * 2, crop.height * 2)).convert("RGB"),
                 crop.convert("RGB"),
             ]
+        elif region_name == "applicant_name":
+            grayscale = ImageOps.grayscale(crop)
+            variants = [
+                crop.convert("RGB"),
+                crop.resize((crop.width * 2, crop.height * 2)).convert("RGB"),
+                grayscale.resize((crop.width * 4, crop.height * 4)).convert("RGB"),
+                crop.filter(ImageFilter.SHARPEN)
+                .resize((crop.width * 4, crop.height * 4))
+                .convert("RGB"),
+            ]
         return variants
 
     def _score_region_pages(
@@ -372,6 +382,30 @@ class PaddleOCREngine:
             if has_leading_number:
                 score += 2
             return (score, len(normalized), -len(normalized))
+
+        if region_name == "applicant_name":
+            lines = [line.strip() for line in text.splitlines() if line.strip()]
+            tokens = re.findall(r"[A-Za-z0-9'.-]+", normalized)
+            alpha_tokens = [
+                token
+                for token in tokens
+                if re.search(r"[A-Za-z]", token)
+            ]
+            clean_tokens = [
+                token
+                for token in alpha_tokens
+                if re.fullmatch(r"[A-Za-z0-9'.-]+", token)
+            ]
+            score = 1
+            if len(clean_tokens) >= 2:
+                score += 1
+            if len(clean_tokens) >= 3:
+                score += 2
+            if len(lines) >= 2:
+                score += 1
+            if any(token.upper() == "USER" for token in clean_tokens):
+                score += 1
+            return (score, len(clean_tokens), -len(normalized))
 
         return (1, len(normalized), -len(normalized))
 
