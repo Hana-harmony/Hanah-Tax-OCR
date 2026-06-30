@@ -62,6 +62,36 @@ class EvalPromotionAssessment(BaseModel):
     notable_improved_fields: list[str] = Field(default_factory=list)
 
 
+class RecognizerTrainingProfile(BaseModel):
+    field_group: str
+    train_count: int = 0
+    val_count: int = 0
+    train_source_count: int = 0
+    val_source_count: int = 0
+    hard_case_train_ratio: float = 0.0
+    unique_hard_case_variant_count: int = 0
+    training_readiness_status: str = ""
+    blocking_warnings: list[str] = Field(default_factory=list)
+    advisory_warnings: list[str] = Field(default_factory=list)
+    hard_case_selection_strategy: str = ""
+    hard_case_variant_floor_applied: bool = False
+
+
+class RecognizerTrainingProfileDelta(BaseModel):
+    field_group: str
+    status: Literal["added", "removed", "improved", "regressed", "mixed", "unchanged"]
+    baseline: RecognizerTrainingProfile | None = None
+    candidate: RecognizerTrainingProfile | None = None
+    train_count_delta: int | None = None
+    val_count_delta: int | None = None
+    train_source_count_delta: int | None = None
+    val_source_count_delta: int | None = None
+    hard_case_train_ratio_delta: float | None = None
+    unique_hard_case_variant_count_delta: int | None = None
+    readiness_rank_delta: int | None = None
+    readiness_transition: str | None = None
+
+
 class FieldErrorReportComparison(BaseModel):
     baseline_compared_cases: int
     candidate_compared_cases: int
@@ -90,6 +120,15 @@ class FieldErrorReportComparison(BaseModel):
     added_field_groups: list[str] = Field(default_factory=list)
     removed_field_groups: list[str] = Field(default_factory=list)
     field_group_deltas: dict[str, FieldMetricDelta] = Field(default_factory=dict)
+    improved_training_field_groups: list[str] = Field(default_factory=list)
+    regressed_training_field_groups: list[str] = Field(default_factory=list)
+    mixed_training_field_groups: list[str] = Field(default_factory=list)
+    unchanged_training_field_groups: list[str] = Field(default_factory=list)
+    added_training_field_groups: list[str] = Field(default_factory=list)
+    removed_training_field_groups: list[str] = Field(default_factory=list)
+    training_profile_deltas: dict[str, RecognizerTrainingProfileDelta] = Field(
+        default_factory=dict
+    )
     overall_delta: FieldMetricDelta | None = None
     promotion_assessment: EvalPromotionAssessment | None = None
 
@@ -102,6 +141,40 @@ def load_harness_run_result(path: str | Path) -> HarnessRunResult:
 def load_field_error_report(path: str | Path) -> FieldErrorReport:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     return FieldErrorReport.model_validate(payload)
+
+
+def load_recognizer_training_profiles(
+    path: str | Path,
+) -> dict[str, RecognizerTrainingProfile]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    groups = payload.get("groups", {})
+    profiles: dict[str, RecognizerTrainingProfile] = {}
+    for field_group, group_payload in sorted(groups.items()):
+        if not isinstance(group_payload, dict):
+            continue
+        data_profile = group_payload.get("data_profile", {})
+        training_readiness = group_payload.get("training_readiness", {})
+        unique_variant_counts = data_profile.get("unique_hard_case_variant_counts", {})
+        unique_source_counts = data_profile.get("unique_source_counts", {})
+        profiles[field_group] = RecognizerTrainingProfile(
+            field_group=field_group,
+            train_count=int(group_payload.get("train_count", 0) or 0),
+            val_count=int(group_payload.get("val_count", 0) or 0),
+            train_source_count=int(unique_source_counts.get("train", 0) or 0),
+            val_source_count=int(unique_source_counts.get("val", 0) or 0),
+            hard_case_train_ratio=float(data_profile.get("hard_case_train_ratio", 0.0) or 0.0),
+            unique_hard_case_variant_count=int(unique_variant_counts.get("train", 0) or 0),
+            training_readiness_status=str(training_readiness.get("status", "") or ""),
+            blocking_warnings=list(training_readiness.get("blocking_warnings", []) or []),
+            advisory_warnings=list(training_readiness.get("advisory_warnings", []) or []),
+            hard_case_selection_strategy=str(
+                data_profile.get("hard_case_selection_strategy", "") or ""
+            ),
+            hard_case_variant_floor_applied=bool(
+                data_profile.get("hard_case_variant_floor_applied", False)
+            ),
+        )
+    return profiles
 
 
 def load_harness_run_results_from_dir(path: str | Path) -> dict[str, HarnessRunResult]:
@@ -496,9 +569,160 @@ def _field_group_for_field_key(field_key: str) -> str:
     return field_group_for(_field_name_for_field_key(field_key))
 
 
+def _training_readiness_rank(status: str) -> int:
+    return {
+        "blocked": 0,
+        "review_required": 1,
+        "ready": 2,
+    }.get(status, -1)
+
+
+def _classify_training_profile_delta(
+    baseline: RecognizerTrainingProfile,
+    candidate: RecognizerTrainingProfile,
+) -> str:
+    positive_signals = 0
+    negative_signals = 0
+
+    readiness_delta = _training_readiness_rank(candidate.training_readiness_status) - (
+        _training_readiness_rank(baseline.training_readiness_status)
+    )
+    if readiness_delta > 0:
+        positive_signals += 1
+    elif readiness_delta < 0:
+        negative_signals += 1
+
+    for delta in (
+        candidate.train_count - baseline.train_count,
+        candidate.val_count - baseline.val_count,
+        candidate.train_source_count - baseline.train_source_count,
+        candidate.val_source_count - baseline.val_source_count,
+        candidate.unique_hard_case_variant_count - baseline.unique_hard_case_variant_count,
+    ):
+        if delta > 0:
+            positive_signals += 1
+        elif delta < 0:
+            negative_signals += 1
+
+    if positive_signals and negative_signals:
+        return "mixed"
+    if positive_signals:
+        return "improved"
+    if negative_signals:
+        return "regressed"
+    return "unchanged"
+
+
+def _compare_training_profiles(
+    baseline_profiles: dict[str, RecognizerTrainingProfile],
+    candidate_profiles: dict[str, RecognizerTrainingProfile],
+) -> dict[str, Any]:
+    deltas: dict[str, RecognizerTrainingProfileDelta] = {}
+    improved_keys: list[str] = []
+    regressed_keys: list[str] = []
+    mixed_keys: list[str] = []
+    unchanged_keys: list[str] = []
+    added_keys: list[str] = []
+    removed_keys: list[str] = []
+
+    all_keys = sorted(set(baseline_profiles) | set(candidate_profiles))
+    for field_group in all_keys:
+        baseline_profile = baseline_profiles.get(field_group)
+        candidate_profile = candidate_profiles.get(field_group)
+        if baseline_profile is None:
+            added_keys.append(field_group)
+            deltas[field_group] = RecognizerTrainingProfileDelta(
+                field_group=field_group,
+                status="added",
+                candidate=candidate_profile,
+            )
+            continue
+        if candidate_profile is None:
+            removed_keys.append(field_group)
+            deltas[field_group] = RecognizerTrainingProfileDelta(
+                field_group=field_group,
+                status="removed",
+                baseline=baseline_profile,
+            )
+            continue
+
+        status = _classify_training_profile_delta(baseline_profile, candidate_profile)
+        if status == "improved":
+            improved_keys.append(field_group)
+        elif status == "regressed":
+            regressed_keys.append(field_group)
+        elif status == "mixed":
+            mixed_keys.append(field_group)
+        else:
+            unchanged_keys.append(field_group)
+
+        deltas[field_group] = RecognizerTrainingProfileDelta(
+            field_group=field_group,
+            status=status,
+            baseline=baseline_profile,
+            candidate=candidate_profile,
+            train_count_delta=candidate_profile.train_count - baseline_profile.train_count,
+            val_count_delta=candidate_profile.val_count - baseline_profile.val_count,
+            train_source_count_delta=(
+                candidate_profile.train_source_count - baseline_profile.train_source_count
+            ),
+            val_source_count_delta=(
+                candidate_profile.val_source_count - baseline_profile.val_source_count
+            ),
+            hard_case_train_ratio_delta=round(
+                candidate_profile.hard_case_train_ratio - baseline_profile.hard_case_train_ratio,
+                4,
+            ),
+            unique_hard_case_variant_count_delta=(
+                candidate_profile.unique_hard_case_variant_count
+                - baseline_profile.unique_hard_case_variant_count
+            ),
+            readiness_rank_delta=(
+                _training_readiness_rank(candidate_profile.training_readiness_status)
+                - _training_readiness_rank(baseline_profile.training_readiness_status)
+            ),
+            readiness_transition=(
+                f"{baseline_profile.training_readiness_status}"
+                f"->{candidate_profile.training_readiness_status}"
+            ),
+        )
+
+    return {
+        "improved_keys": improved_keys,
+        "regressed_keys": regressed_keys,
+        "mixed_keys": mixed_keys,
+        "unchanged_keys": unchanged_keys,
+        "added_keys": added_keys,
+        "removed_keys": removed_keys,
+        "deltas": deltas,
+    }
+
+
+def _normalize_training_profiles(
+    profiles: dict[str, RecognizerTrainingProfile | dict[str, Any]] | None,
+) -> dict[str, RecognizerTrainingProfile]:
+    normalized: dict[str, RecognizerTrainingProfile] = {}
+    for field_group, payload in (profiles or {}).items():
+        if isinstance(payload, RecognizerTrainingProfile):
+            normalized[field_group] = payload
+            continue
+        normalized[field_group] = RecognizerTrainingProfile.model_validate(
+            {
+                "field_group": field_group,
+                **payload,
+            }
+        )
+    return normalized
+
+
 def compare_field_error_reports(
     baseline_report: FieldErrorReport,
     candidate_report: FieldErrorReport,
+    *,
+    baseline_training_profiles: dict[str, RecognizerTrainingProfile | dict[str, Any]] | None = None,
+    candidate_training_profiles: (
+        dict[str, RecognizerTrainingProfile | dict[str, Any]] | None
+    ) = None,
 ) -> FieldErrorReportComparison:
     field_comparison = _compare_metric_summary_maps(
         baseline_report.field_metrics,
@@ -549,6 +773,10 @@ def compare_field_error_reports(
 
     baseline_missing_cases = sorted(baseline_report.missing_cases)
     candidate_missing_cases = sorted(candidate_report.missing_cases)
+    training_profile_comparison = _compare_training_profiles(
+        _normalize_training_profiles(baseline_training_profiles),
+        _normalize_training_profiles(candidate_training_profiles),
+    )
 
     promotion_assessment = _build_promotion_assessment(
         baseline_compared_cases=baseline_report.compared_cases,
@@ -591,6 +819,13 @@ def compare_field_error_reports(
         added_field_groups=field_group_comparison["added_keys"],
         removed_field_groups=field_group_comparison["removed_keys"],
         field_group_deltas=field_group_comparison["metric_deltas"],
+        improved_training_field_groups=training_profile_comparison["improved_keys"],
+        regressed_training_field_groups=training_profile_comparison["regressed_keys"],
+        mixed_training_field_groups=training_profile_comparison["mixed_keys"],
+        unchanged_training_field_groups=training_profile_comparison["unchanged_keys"],
+        added_training_field_groups=training_profile_comparison["added_keys"],
+        removed_training_field_groups=training_profile_comparison["removed_keys"],
+        training_profile_deltas=training_profile_comparison["deltas"],
         overall_delta=overall_comparison["metric_deltas"].get("overall"),
         promotion_assessment=promotion_assessment,
     )
@@ -599,10 +834,28 @@ def compare_field_error_reports(
 def compare_field_error_report_files(
     baseline_path: str | Path,
     candidate_path: str | Path,
+    *,
+    baseline_training_summary_path: str | Path | None = None,
+    candidate_training_summary_path: str | Path | None = None,
 ) -> FieldErrorReportComparison:
     baseline_report = load_field_error_report(baseline_path)
     candidate_report = load_field_error_report(candidate_path)
-    return compare_field_error_reports(baseline_report, candidate_report)
+    baseline_training_profiles = (
+        load_recognizer_training_profiles(baseline_training_summary_path)
+        if baseline_training_summary_path is not None
+        else None
+    )
+    candidate_training_profiles = (
+        load_recognizer_training_profiles(candidate_training_summary_path)
+        if candidate_training_summary_path is not None
+        else None
+    )
+    return compare_field_error_reports(
+        baseline_report,
+        candidate_report,
+        baseline_training_profiles=baseline_training_profiles,
+        candidate_training_profiles=candidate_training_profiles,
+    )
 
 
 def evaluate_run_result(
