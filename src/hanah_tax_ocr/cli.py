@@ -188,3 +188,7 @@ def main() -> int:
         return compare_eval_reports_command(args)
 
     raise ValueError(f"Unsupported command: {args.command}")
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

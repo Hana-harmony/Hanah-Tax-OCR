@@ -4,9 +4,17 @@
   "source_path": "sample_data/거주자증명서/4.jpg",
   "dataset_split": "pending_review",
   "promotion_status": "needs_human_verification",
-  "expected_status": null,
-  "expected_fields": {},
-  "expected_quality_checks": {},
+  "expected_status": "reject",
+  "expected_fields": {
+    "taxpayer_name": "F",
+    "tax_year": "2021",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
   "notes": [
     "Bootstrapped from sample_data coverage report.",
     "Human label review is required before this case enters the reviewed dataset."

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -68,7 +69,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     assert (english_group / "val.txt").exists()
     plan = json.loads((english_group / "plan.json").read_text(encoding="utf-8"))
     assert plan["settings"]["character_count"] > 0
-    assert "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml" in plan["settings"]["base_config"]
+    assert "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml" in plan["settings"]["base_config"]
     assert plan["data_profile"]["counts_by_document_type"]["train"] == {
         "residency_certificate": 1
     }
@@ -96,7 +97,7 @@ def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
     plan_payload = {
         "field_group": "date",
         "settings": {
-            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml",
+            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
             "max_text_length": 32,
             "image_shape": "3,48,192",
             "batch_size": 64,
@@ -104,6 +105,8 @@ def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
             "dictionary_path": str(group_root / "dict.txt"),
             "train_label_path": str(group_root / "train.txt"),
             "val_label_path": str(group_root / "val.txt"),
+            "train_count": 1,
+            "val_count": 1,
         },
     }
     plan_path = group_root / "plan.json"
@@ -111,9 +114,13 @@ def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
 
     command = render_training_command(plan_path, Path("/tmp/PaddleOCR"))
 
-    assert "python /tmp/PaddleOCR/tools/train.py" in command
+    assert f"{sys.executable} /tmp/PaddleOCR/tools/train.py" in command
     assert "Global.character_dict_path=" in command
     assert "Train.dataset.label_file_list=[" in command
+    assert "Train.loader.batch_size_per_card=1" in command
+    assert "Eval.loader.batch_size_per_card=1" in command
+    assert "Train.loader.drop_last=False" in command
+    assert "Global.use_gpu=False" in command
 
 
 def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: Path) -> None:
@@ -193,7 +200,7 @@ def test_run_training_plans_blocks_unready_group_by_default(tmp_path: Path) -> N
     plan_payload = {
         "field_group": "date",
         "settings": {
-            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml",
+            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
             "max_text_length": 32,
             "image_shape": "3,48,192",
             "batch_size": 32,
@@ -240,7 +247,7 @@ def test_run_training_plans_can_execute_against_fake_paddleocr_home(tmp_path: Pa
     plan_payload = {
         "field_group": "numeric_tin_code",
         "settings": {
-            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml",
+            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
             "max_text_length": 24,
             "image_shape": "3,48,160",
             "batch_size": 32,

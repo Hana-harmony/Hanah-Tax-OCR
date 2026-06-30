@@ -4,9 +4,18 @@
   "source_path": "sample_data/아포스티유 샘플/미국 california 주.png",
   "dataset_split": "pending_review",
   "promotion_status": "needs_human_verification",
-  "expected_status": null,
-  "expected_fields": {},
-  "expected_quality_checks": {},
+  "expected_status": "reject",
+  "expected_fields": {
+    "issuing_country": "United States of America",
+    "signer_capacity": "Deputy Registrar-Recorder/County Clerk, County of Los Angeles, State of California",
+    "seal_owner": "County of Los Angeles, State of California",
+    "issued_at": "Los Angeles, California",
+    "certificate_number": "4"
+  },
+  "expected_quality_checks": {
+    "seal_present": true,
+    "signature_present": true
+  },
   "notes": [
     "Bootstrapped from sample_data coverage report.",
     "Human label review is required before this case enters the reviewed dataset."
