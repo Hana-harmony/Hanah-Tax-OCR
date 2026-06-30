@@ -6,6 +6,7 @@ from pathlib import Path
 
 from scripts.evals.run_eval_suite import (
     _discover_case_documents,
+    _materialize_synthetic_source,
     _region_overrides_from_recognizer_root,
 )
 from scripts.training.export_recognizer_inference import (
@@ -63,6 +64,63 @@ def test_discover_case_documents_skips_non_file_sources(tmp_path: Path) -> None:
     cases = _discover_case_documents(expected_dir.parent, tmp_path / "data" / "labeled")
 
     assert cases == {}
+
+
+def test_discover_case_documents_materializes_synthetic_sources(tmp_path: Path) -> None:
+    expected_dir = tmp_path / "evals" / "cases" / "case_001"
+    expected_dir.mkdir(parents=True)
+    (expected_dir / "expected.json").write_text("{}", encoding="utf-8")
+
+    label_dir = tmp_path / "data" / "labeled" / "residency_certificate" / "case_001"
+    label_dir.mkdir(parents=True)
+    payload = {
+        "case_id": "case_001",
+        "document_type": "residency_certificate",
+        "source_path": "synthetic://residency_certificate/case_001",
+        "expected_fields": {
+            "taxpayer_name": "SAMPLE USER",
+            "tin": "101-11-1001",
+            "tax_year": "2021",
+            "issue_date": "January 2, 2026",
+            "residency_country": "United States of America",
+            "residency_country_code": "US",
+        },
+    }
+    (label_dir / "label.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    cases = _discover_case_documents(
+        expected_dir.parent,
+        tmp_path / "data" / "labeled",
+        materialized_root=tmp_path / "materialized",
+    )
+
+    assert sorted(cases) == ["case_001"]
+    materialized_path = Path(cases["case_001"][0].source_path)
+    assert materialized_path.exists()
+    assert materialized_path.suffix == ".png"
+
+
+def test_materialize_synthetic_source_renders_file(tmp_path: Path) -> None:
+    payload = {
+        "case_id": "apostille_regression_001",
+        "document_type": "apostille",
+        "source_path": "synthetic://apostille/apostille_regression_001",
+        "expected_fields": {
+            "issuing_country": "UNITED STATES OF AMERICA",
+            "signed_by": "NOTARY SAMPLE 1",
+            "signer_capacity": "NOTARY PUBLIC",
+            "seal_owner": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+            "issued_at": "Capital City, Sample State 1",
+            "issued_on": "2TH DAY OF APRIL, 2021",
+            "issuing_authority": "Secretary of State State of Sample",
+            "certificate_number": "5001",
+        },
+    }
+
+    output_path = _materialize_synthetic_source(payload, tmp_path / "synthetic")
+
+    assert output_path is not None
+    assert Path(output_path).exists()
 
 
 def test_region_overrides_from_recognizer_root_maps_field_names(tmp_path: Path) -> None:

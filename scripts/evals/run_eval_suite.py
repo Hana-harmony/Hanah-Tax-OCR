@@ -8,11 +8,255 @@ from typing import Any
 from hanah_tax_ocr.harness import CaseDocument, HarnessRunner
 from hanah_tax_ocr.ocr import PaddleOCREngine
 from hanah_tax_ocr.schemas import DocumentType
+from PIL import Image, ImageDraw, ImageFont
 
 
 def _is_ocr_source_available(source_path: str) -> bool:
     path = Path(source_path)
     return path.is_file()
+
+
+def _is_synthetic_source(source_path: str) -> bool:
+    return source_path.startswith("synthetic://")
+
+
+def _safe_marker_filename(document_type: DocumentType, case_id: str) -> str:
+    if document_type == DocumentType.RESIDENCY_CERTIFICATE:
+        return f"{case_id}__거주자증명서.png"
+    if document_type == DocumentType.WITHHOLDING_TAX_FORM:
+        return f"{case_id}__국내원천소득.png"
+    return f"{case_id}__north_carolina.png"
+
+
+def _load_font(size: int) -> ImageFont.ImageFont:
+    candidates = [
+        Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+        Path("/System/Library/Fonts/Supplemental/Times New Roman.ttf"),
+        Path("/System/Library/Fonts/Supplemental/Courier New.ttf"),
+        Path("/System/Library/Fonts/Helvetica.ttc"),
+    ]
+    for path in candidates:
+        if not path.exists():
+            continue
+        try:
+            return ImageFont.truetype(str(path), size=size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
+
+
+def _draw_text_box(
+    draw: ImageDraw.ImageDraw,
+    image_size: tuple[int, int],
+    box: tuple[float, float, float, float],
+    text: str,
+    *,
+    font_size: int = 24,
+) -> None:
+    width, height = image_size
+    left = int(width * box[0])
+    top = int(height * box[1])
+    font = _load_font(font_size)
+    draw.multiline_text((left, top), text, fill=(0, 0, 0), font=font, spacing=4)
+
+
+def _draw_signature_and_seal(
+    draw: ImageDraw.ImageDraw,
+    image_size: tuple[int, int],
+    *,
+    seal_box: tuple[float, float, float, float],
+    signature_box: tuple[float, float, float, float],
+) -> None:
+    width, height = image_size
+    seal = (
+        int(width * seal_box[0]),
+        int(height * seal_box[1]),
+        int(width * seal_box[2]),
+        int(height * seal_box[3]),
+    )
+    signature = (
+        int(width * signature_box[0]),
+        int(height * signature_box[1]),
+        int(width * signature_box[2]),
+        int(height * signature_box[3]),
+    )
+    draw.ellipse(seal, outline=(40, 40, 40), width=4)
+    center_x = (seal[0] + seal[2]) // 2
+    center_y = (seal[1] + seal[3]) // 2
+    draw.ellipse(
+        (center_x - 18, center_y - 18, center_x + 18, center_y + 18),
+        outline=(40, 40, 40),
+        width=3,
+    )
+    step = max(18, (signature[2] - signature[0]) // 6)
+    points = [
+        (signature[0], signature[3] - 6),
+        (signature[0] + step, signature[1] + 8),
+        (signature[0] + step * 2, signature[3] - 10),
+        (signature[0] + step * 3, signature[1] + 12),
+        (signature[0] + step * 4, signature[3] - 8),
+        (signature[2], signature[1] + 10),
+    ]
+    draw.line(points, fill=(20, 20, 20), width=4)
+
+
+def _render_residency_document(payload: dict[str, Any], output_path: Path) -> Path:
+    fields = payload["expected_fields"]
+    image = Image.new("RGB", (850, 1100), "white")
+    draw = ImageDraw.Draw(image)
+    size = image.size
+    heading_font = _load_font(28)
+    subheading_font = _load_font(22)
+    draw.text((270, 30), "DEPARTMENT OF THE TREASURY", fill=(0, 0, 0), font=heading_font)
+    draw.text((290, 68), "INTERNAL REVENUE SERVICE", fill=(0, 0, 0), font=subheading_font)
+    draw.text((305, 100), "PHILADELPHIA, PA 19255", fill=(0, 0, 0), font=subheading_font)
+
+    _draw_text_box(
+        draw,
+        size,
+        (0.60, 0.18, 0.90, 0.24),
+        f"Date: {fields['issue_date']}",
+        font_size=24,
+    )
+    _draw_text_box(
+        draw,
+        size,
+        (0.10, 0.25, 0.36, 0.31),
+        f"Taxpayer: {fields['taxpayer_name']}",
+        font_size=24,
+    )
+    _draw_text_box(
+        draw,
+        size,
+        (0.10, 0.27, 0.28, 0.33),
+        f"TIN: {fields['tin']}",
+        font_size=22,
+    )
+    _draw_text_box(
+        draw,
+        size,
+        (0.10, 0.30, 0.25, 0.36),
+        f"Tax Year: {fields['tax_year']}",
+        font_size=22,
+    )
+    body = (
+        "CERTIFICATION\n"
+        "I certify that the above-named taxpayer is a resident of the "
+        "United States of America for purposes of U.S. taxation."
+    )
+    _draw_text_box(draw, size, (0.10, 0.40, 0.84, 0.58), body, font_size=24)
+    _draw_signature_and_seal(
+        draw,
+        size,
+        seal_box=(0.02, 0.02, 0.17, 0.17),
+        signature_box=(0.51, 0.80, 0.71, 0.88),
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(output_path)
+    return output_path
+
+
+def _render_withholding_document(payload: dict[str, Any], output_path: Path) -> Path:
+    fields = payload["expected_fields"]
+    image = Image.new("RGB", (1400, 1800), "white")
+    draw = ImageDraw.Draw(image)
+    size = image.size
+    heading_font = _load_font(34)
+    draw.text(
+        (180, 60),
+        "국내원천소득 제한세율 적용신청서  비거주자용",
+        fill=(0, 0, 0),
+        font=heading_font,
+    )
+    _draw_text_box(
+        draw,
+        size,
+        (0.14, 0.16, 0.30, 0.20),
+        f"USER\n{fields['last_name']}",
+        font_size=26,
+    )
+    _draw_text_box(draw, size, (0.40, 0.16, 0.54, 0.20), fields["first_name"], font_size=26)
+    _draw_text_box(draw, size, (0.68, 0.16, 0.76, 0.20), fields["middle_name"], font_size=26)
+    _draw_text_box(draw, size, (0.16, 0.21, 0.86, 0.25), fields["address"], font_size=24)
+    _draw_text_box(draw, size, (0.14, 0.27, 0.31, 0.33), fields["tin"], font_size=24)
+    _draw_text_box(draw, size, (0.56, 0.27, 0.83, 0.33), fields["residency_country"], font_size=24)
+    _draw_text_box(
+        draw,
+        size,
+        (0.86, 0.27, 0.98, 0.33),
+        fields["residency_country_code"],
+        font_size=24,
+    )
+    _draw_text_box(draw, size, (0.72, 0.39, 0.90, 0.45), fields["dividend_tax_rate"], font_size=28)
+    _draw_text_box(draw, size, (0.70, 0.74, 0.96, 0.81), fields["signature_date"], font_size=28)
+    _draw_text_box(draw, size, (0.40, 0.79, 0.72, 0.85), fields["applicant_name"], font_size=28)
+    _draw_signature_and_seal(
+        draw,
+        size,
+        seal_box=(0.06, 0.05, 0.15, 0.14),
+        signature_box=(0.73, 0.77, 0.95, 0.84),
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(output_path)
+    return output_path
+
+
+def _render_apostille_document(payload: dict[str, Any], output_path: Path) -> Path:
+    fields = payload["expected_fields"]
+    image = Image.new("RGB", (1200, 1500), "white")
+    draw = ImageDraw.Draw(image)
+    size = image.size
+    heading_font = _load_font(36)
+    body_font = _load_font(24)
+    draw.text((390, 70), "APOSTILLE", fill=(0, 0, 0), font=heading_font)
+    draw.text((250, 120), "Convention de La Haye du 5 octobre 1961", fill=(0, 0, 0), font=body_font)
+
+    lines = [
+        f"1. Country: {fields['issuing_country']}",
+        f"2. This Public Document has been signed by {fields['signed_by']}",
+        f"3. acting in the capacity of {fields['signer_capacity']}",
+        f"4. bears the seal/stamp of {fields['seal_owner']}",
+        f"5. at {fields['issued_at']}",
+        f"6. the {fields['issued_on']}",
+        "7. by Secretary of State or Deputy Secretary of State, State of North Carolina",
+        f"8. No. {fields['certificate_number']}",
+    ]
+    y = 310
+    for line in lines:
+        draw.text((120, y), line, fill=(0, 0, 0), font=body_font)
+        y += 78
+    _draw_signature_and_seal(
+        draw,
+        size,
+        seal_box=(0.08, 0.68, 0.34, 0.96),
+        signature_box=(0.56, 0.70, 0.92, 0.92),
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(output_path)
+    return output_path
+
+
+def _materialize_synthetic_source(
+    payload: dict[str, Any],
+    materialized_root: Path,
+) -> str | None:
+    source_path = str(payload.get("source_path") or "")
+    if not _is_synthetic_source(source_path):
+        return None
+    expected_fields = payload.get("expected_fields")
+    document_type = payload.get("document_type")
+    case_id = str(payload.get("case_id") or "")
+    if not isinstance(expected_fields, dict) or not isinstance(document_type, str) or not case_id:
+        return None
+    doc_type = DocumentType(document_type)
+    output_path = materialized_root / _safe_marker_filename(doc_type, case_id)
+    if output_path.exists():
+        return str(output_path)
+    if doc_type == DocumentType.RESIDENCY_CERTIFICATE:
+        return str(_render_residency_document(payload, output_path))
+    if doc_type == DocumentType.WITHHOLDING_TAX_FORM:
+        return str(_render_withholding_document(payload, output_path))
+    return str(_render_apostille_document(payload, output_path))
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,6 +304,7 @@ def _discover_case_documents(
     expected_root: Path,
     labeled_root: Path,
     *,
+    materialized_root: Path | None = None,
     case_ids: set[str] | None = None,
 ) -> dict[str, list[CaseDocument]]:
     label_index: dict[str, list[dict[str, Any]]] = {}
@@ -73,7 +318,16 @@ def _discover_case_documents(
         if not isinstance(source_path, str) or not isinstance(document_type, str):
             continue
         if not _is_ocr_source_available(source_path):
+            if materialized_root is not None and _is_synthetic_source(source_path):
+                synthetic_source_path = _materialize_synthetic_source(payload, materialized_root)
+                if synthetic_source_path is not None:
+                    source_path = synthetic_source_path
+            if not _is_ocr_source_available(source_path):
+                continue
+        if not _is_ocr_source_available(source_path):
             continue
+        payload = dict(payload)
+        payload["source_path"] = source_path
         label_index.setdefault(case_id, []).append(payload)
 
     cases: dict[str, list[CaseDocument]] = {}
@@ -168,7 +422,13 @@ def run_eval_suite(
     case_ids: set[str] | None = None,
     lang: str = "en",
 ) -> dict[str, Any]:
-    cases = _discover_case_documents(expected_root, labeled_root, case_ids=case_ids)
+    materialized_root = output_dir / "_synthetic_inputs"
+    cases = _discover_case_documents(
+        expected_root,
+        labeled_root,
+        materialized_root=materialized_root,
+        case_ids=case_ids,
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     review_queue_dir = output_dir / "review_queue"
     region_overrides = _region_overrides_from_recognizer_root(

@@ -94,6 +94,7 @@ def normalize_apostille_date(value: str | None) -> str | None:
         return None
     cleaned = normalize_whitespace(value)
     cleaned = re.sub(r"([A-Za-z])(\d{4})", r"\1, \2", cleaned)
+    cleaned = re.sub(r",\s*(\d{4})", r", \1", cleaned)
     cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" ,;:")
     return cleaned or None
 

@@ -229,6 +229,28 @@ def test_apostille_parser_prefers_full_text_over_noisy_regions() -> None:
     assert parsed.fields["issued_at"] == "Raleigh, North Carolina"
 
 
+def test_apostille_parser_normalizes_missing_space_after_year_comma() -> None:
+    parser = ApostilleParser()
+    parsed = parser.parse(
+        build_result(
+            [
+                "APOSTILLE (Convention de La Haye du 5 octobre 1961)",
+                "1. Country: UNITED STATES OF AMERICA",
+                "2. This Public Document has been signed by CHONG U CHOI",
+                "3. acting in the capacity of NOTARY PUBLIC",
+                "4. bears the seal/stamp of COUNTY OF MECKLENBURG, NORTH CAROLINA",
+                "5. at Raleigh, North Carolina",
+                "6. the 10TH DAY OF APRIL,2025",
+                "7. by Secretary of State or Deputy Secretary of State, State of North Carolina",
+                "8. No. 5",
+            ]
+        ),
+        "apostille.jpg",
+    )
+
+    assert parsed.fields["issued_on"] == "10TH DAY OF APRIL, 2025"
+
+
 def test_apostille_california_parser_prefers_full_text_over_misaligned_regions() -> None:
     parser = ApostilleParser()
     parsed = parser.parse(
