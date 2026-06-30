@@ -14,6 +14,8 @@ Each queued case should include the source file path, extracted result, review r
 Promotion flow:
 
 - queue output is written under `data/review_queue/index/`
+- `python -m scripts.training.report_sample_coverage` finds committed `sample_data/` files that still have no reviewed label and reports `pending_review` scaffolds separately
+- `python -m scripts.review_queue.bootstrap_uncovered_samples --coverage-report ...` creates empty `pending_review` label scaffolds for those uncovered samples
 - `python -m scripts.review_queue.report_label_priorities` ranks queued cases using the latest data gap report
 - queue cases that already exist under `data/labeled/<document_type>/<case_id>/label.json` are skipped from the priority report
 - `python -m scripts.review_queue.promote_to_labeled --priority-report ... --limit N` promotes only the top-ranked cases

@@ -1,0 +1,14 @@
+{
+  "case_id": "residency_pdf_001",
+  "document_type": "residency_certificate",
+  "source_path": "sample_data/거주자증명서/2.pdf",
+  "dataset_split": "pending_review",
+  "promotion_status": "needs_human_verification",
+  "expected_status": null,
+  "expected_fields": {},
+  "expected_quality_checks": {},
+  "notes": [
+    "Bootstrapped from sample_data coverage report.",
+    "Human label review is required before this case enters the reviewed dataset."
+  ]
+}

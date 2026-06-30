@@ -15,7 +15,7 @@ Each `label.json` should contain:
 
 Additional working splits:
 
-- `data/labeled/pending_review/`: cases promoted from the review queue and waiting for human verification
+- `data/labeled/pending_review/`: cases waiting for human verification, either promoted from the review queue or bootstrapped from uncovered `sample_data/` fixtures
 - `data/labeled/<document_type>/<case_id>/label.json`: reviewed or deterministic regression label
 
 Keep production data out of git unless it is explicitly sanitized.

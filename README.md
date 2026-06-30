@@ -106,6 +106,21 @@ python -m scripts.training.report_data_gaps \
   --eval-report evals/current_report.json
 ```
 
+Audit which `sample_data/` files are still missing reviewed labels or eval coverage:
+
+```bash
+python -m scripts.training.report_sample_coverage
+```
+
+The report keeps `pending_review` separate from reviewed coverage so unlabeled fixtures do not disappear just because a scaffold exists.
+
+Bootstrap `pending_review` label scaffolds for uncovered `sample_data/` files:
+
+```bash
+python -m scripts.review_queue.bootstrap_uncovered_samples \
+  --coverage-report data/training/reports/sample_data_coverage.json
+```
+
 Rank queued review cases to decide which ones to label first:
 
 ```bash
