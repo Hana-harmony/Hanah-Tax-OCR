@@ -5,74 +5,7 @@ import json
 import shutil
 from pathlib import Path
 
-SAMPLE_DATASET = [
-    {
-        "source": "sample_data/거주자증명서/4.jpg",
-        "split": "train",
-        "document_type": "residency_certificate",
-        "case_id": "residency_legacy_001",
-    },
-    {
-        "source": "sample_data/거주자증명서/5.jpg",
-        "split": "train",
-        "document_type": "residency_certificate",
-        "case_id": "residency_john_doe_001",
-    },
-    {
-        "source": "sample_data/거주자증명서/6.jpg",
-        "split": "val",
-        "document_type": "residency_certificate",
-        "case_id": "residency_university_hawaii_001",
-    },
-    {
-        "source": "sample_data/거주자증명서/미국 TREASURY주.png",
-        "split": "test",
-        "document_type": "residency_certificate",
-        "case_id": "residency_maria_chen_001",
-    },
-    {
-        "source": "sample_data/거주자증명서/2.pdf",
-        "split": "test",
-        "document_type": "residency_certificate",
-        "case_id": "residency_pdf_001",
-    },
-    {
-        "source": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
-        "split": "test",
-        "document_type": "withholding_tax_form",
-        "case_id": "withholding_maria_chen_001",
-    },
-    {
-        "source": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
-        "split": "train",
-        "document_type": "withholding_tax_form",
-        "case_id": "withholding_hana_payer_001",
-    },
-    {
-        "source": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
-        "split": "test",
-        "document_type": "withholding_tax_form",
-        "case_id": "withholding_pdf_001",
-    },
-    {
-        "source": "sample_data/아포스티유 샘플/미국 california 주.png",
-        "split": "train",
-        "document_type": "apostille",
-        "case_id": "apostille_california_001",
-    },
-    {
-        "source": "sample_data/아포스티유 샘플/미국 michigan 주.jpg",
-        "split": "val",
-        "document_type": "apostille",
-        "case_id": "apostille_michigan_001",
-    },
-    {
-        "source": "sample_data/아포스티유 샘플/미국 california 주2.jpg",
-        "split": "test",
-        "document_type": "apostille",
-        "case_id": "apostille_north_carolina_001",
-    },
-]
+from hanah_tax_ocr.training.sample_dataset import SAMPLE_DATASET
 
 
 def bootstrap_sample_dataset(
