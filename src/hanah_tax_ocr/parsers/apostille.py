@@ -71,14 +71,60 @@ class ApostilleParser(BaseDocumentParser):
         ocr_result: OCRResult,
         source_path: str | Path,
     ) -> tuple[dict[str, str | None], dict[str, object]]:
-        return self._parse_generic(
+        fields, quality_checks = self._parse_generic(
             ocr_result,
             source_path,
             authority_pattern=r"7\.\s*by\s+(Deputy Secretary of State.*?California)",
-            place_pattern=r"5\.\s*At\s+([A-Za-z ,]+?)(?=\s+6\.|$)",
+            place_pattern=r"5\.\s*At\s+([A-Za-z ,]+?)(?=\s+6\.|\s+7\.|$)",
             date_pattern=r"((?:\d{1,2}(?:ST|ND|RD|TH)?\s+DAY\s+OF\s+[A-Z]+[,]?\s*\d{4}))",
             seal_pattern=r"bears the seal/stamp of[:\s]*(.+?)(?=\s+CERTIFIED|\s+5\.|$)",
         )
+        single_line = self._normalize_whitespace(ocr_result.combined_text())
+        issuing_country = self._normalize_country_value(
+            self._clean_item_value(
+                self._find_first(
+                    r"Country[:\s]*(.+?)(?=\s+This\s+public\s+document|\s+2\.|$)",
+                    single_line,
+                )
+                or self._region_value(ocr_result, "issuing_country"),
+                stop_phrases=["This public document"],
+            )
+        )
+        if issuing_country == "UNITED STATES OF AMERICA":
+            issuing_country = "United States of America"
+        fields["issuing_country"] = issuing_country
+        fields["signer_capacity"] = self._normalize_california_capacity(
+            self._clean_item_value(
+                self._find_first(
+                    r"acting in the capacity of\s+(.+?)(?=\s+4\.|\s+bears the seal|$)",
+                    single_line,
+                )
+                or self._region_value(ocr_result, "signer_capacity"),
+                stop_phrases=["bears the seal", "CERTIFIED"],
+            )
+        )
+        fields["seal_owner"] = self._normalize_california_seal_owner(
+            self._clean_item_value(
+                self._find_first(
+                    r"bears the seal/stamp of[:\s]*(.+?)(?=\s+CERTIFIED|\s+5\.|$)",
+                    single_line,
+                )
+                or self._region_value(ocr_result, "seal_owner"),
+                stop_phrases=["CERTIFIED"],
+            )
+        )
+        fields["issued_at"] = self._normalize_california_issued_at(
+            self._clean_item_value(
+                self._find_first(
+                    r"5\.\s*At\s+([A-Za-z ,]+?)(?=\s+6\.|\s+7\.|$)",
+                    single_line,
+                )
+                or self._region_value(ocr_result, "issued_at"),
+                stop_phrases=["SEC"],
+                normalize_commas=True,
+            )
+        )
+        return fields, quality_checks
 
     def _parse_generic(
         self,
@@ -222,3 +268,46 @@ class ApostilleParser(BaseDocumentParser):
         if compact_alpha.endswith("STATESOFAMERICA"):
             return "UNITED STATES OF AMERICA"
         return value
+
+    def _normalize_california_capacity(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        cleaned = value.replace("Angeies", "Angeles")
+        cleaned = re.sub(
+            r"(Deputy Registrar-Recorder/County Clerk)\s+(County of Los Angeles)",
+            r"\1, \2",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r"(County of Los Angeles)\s+(State of California)",
+            r"\1, \2",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        return cleaned.strip() or None
+
+    def _normalize_california_seal_owner(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        cleaned = value.replace("Caltornia", "California")
+        cleaned = re.sub(r"^the\s+", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(
+            r"(County of Los Angeles)\s+(State of California)",
+            r"\1, \2",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        return cleaned.strip() or None
+
+    def _normalize_california_issued_at(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        cleaned = re.sub(r"\bSEC\b.*$", "", value, flags=re.IGNORECASE).strip()
+        cleaned = re.sub(
+            r"(Los Angeles)\s*(California)",
+            r"\1, \2",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        return cleaned.strip(" ,") or None

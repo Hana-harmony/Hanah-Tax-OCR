@@ -188,6 +188,73 @@ def test_apostille_parser_prefers_full_text_over_noisy_regions() -> None:
     assert parsed.fields["issued_at"] == "Raleigh, North Carolina"
 
 
+def test_apostille_california_parser_prefers_full_text_over_misaligned_regions() -> None:
+    parser = ApostilleParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "Statrantcalrinnia",
+                            "SECRETARY OF STATE",
+                            "APOSTILLE",
+                            "Convention de La Haye du 5 octobre 1961",
+                            "1.CountryUnited States of America",
+                            "This public document",
+                            "2.has been signed by",
+                            "3. acting in the capacity of Deputy Registrar-Recorder/County Clerk",
+                            "County of Los Angeies, State of California",
+                            "4.bears the seal/stamp of the County of Los Angeles",
+                            "State of California",
+                            "CERTIFIED",
+                            "5.At Los AngelesCalifornia",
+                            "SEC",
+                            "6.the 18thday of",
+                            "7.by Deputy Secretary of State,State of California",
+                            "8.No.",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "issuing_country": OCRPage(
+                    page_number=1,
+                    raw_text="ry:United States of America\nublic document",
+                ),
+                "signed_by": OCRPage(
+                    page_number=1,
+                    raw_text="cting n the capacity of Deputy\nnty of Los Angees, State of Ca",
+                ),
+                "signer_capacity": OCRPage(
+                    page_number=1,
+                    raw_text="state of California\nCERTIFIED",
+                ),
+                "seal_owner": OCRPage(
+                    page_number=1,
+                    raw_text="tLos Angeles,Caltornia\ne 18th day of",
+                ),
+                "issued_at": OCRPage(
+                    page_number=1,
+                    raw_text="0.4\neal/Stamp:",
+                ),
+                "certificate_number": OCRPage(page_number=1, raw_text="9"),
+            },
+        ),
+        "sample_data/아포스티유 샘플/미국 california 주.png",
+    )
+
+    assert parsed.fields["issuing_country"] == "United States of America"
+    assert (
+        parsed.fields["signer_capacity"]
+        == "Deputy Registrar-Recorder/County Clerk, County of Los Angeles, State of California"
+    )
+    assert parsed.fields["seal_owner"] == "County of Los Angeles, State of California"
+    assert parsed.fields["issued_at"] == "Los Angeles, California"
+    assert parsed.fields["certificate_number"] == "9"
+
+
 def test_withholding_parser_extracts_sample_fields() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(
