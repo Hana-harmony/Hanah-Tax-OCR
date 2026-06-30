@@ -85,6 +85,7 @@ python -m scripts.training.prepare_recognizer_finetune --ensure-field-crops
 ```
 
 Field crop export writes quality metadata and marks rejected crops. The quality filter now flags crops that are too small, too blank, too low-contrast, or densely filled by edge-heavy foreground content such as seals and noise. Recognizer prep skips rejected crops by default unless `--include-rejected-crops` is set, caps train hard-case share at `0.5` unless `--max-hard-case-ratio 1.0` is used, preserves the base document-type mix when selecting capped hard cases, and each group plan includes document-type coverage, source-type counts, source-diversity counts, and hard-case ratio warnings.
+Each recognizer plan also includes `training_readiness`; `run_recognizer_finetune --execute` blocks groups with no train or validation samples unless `--allow-unready` is passed for manual inspection.
 Field crop splitting now keeps the same `source_path` in a single split to avoid source leakage. Validation coverage is preserved only when a document type has at least two distinct source documents.
 
 Render per-field-group recognizer training commands:

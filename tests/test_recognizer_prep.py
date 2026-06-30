@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from hanah_tax_ocr.training.recognizer import (
     _select_hard_case_entries,
     prepare_recognizer_datasets,
@@ -71,6 +72,12 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     }
     assert plan["data_profile"]["counts_by_document_type"]["val"] == {"apostille": 1}
     assert plan["data_profile"]["unique_source_counts"] == {"train": 1, "val": 1}
+    assert plan["training_readiness"] == {
+        "status": "review_required",
+        "ready_for_execution": True,
+        "blocking_warnings": [],
+        "advisory_warnings": ["low_train_sample_count", "low_val_source_diversity"],
+    }
 
 
 def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
@@ -150,6 +157,59 @@ def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: P
         summary["groups"]["english_name_org"]["data_profile"]["unique_source_counts"]["train"]
         == 1
     )
+    assert summary["groups"]["english_name_org"]["training_readiness"] == {
+        "status": "blocked",
+        "ready_for_execution": False,
+        "blocking_warnings": ["no_val_samples"],
+        "advisory_warnings": ["low_train_sample_count", "low_val_source_diversity"],
+    }
+
+
+def test_run_training_plans_blocks_unready_group_by_default(tmp_path: Path) -> None:
+    plan_root = tmp_path / "recognizer" / "date"
+    plan_root.mkdir(parents=True)
+    for name in ("train.txt", "val.txt", "dict.txt"):
+        (plan_root / name).write_text("sample\n", encoding="utf-8")
+
+    plan_payload = {
+        "field_group": "date",
+        "settings": {
+            "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml",
+            "max_text_length": 32,
+            "image_shape": "3,48,192",
+            "batch_size": 32,
+            "learning_rate": 0.0004,
+            "dictionary_path": str(plan_root / "dict.txt"),
+            "train_label_path": str(plan_root / "train.txt"),
+            "val_label_path": str(plan_root / "val.txt"),
+            "train_count": 1,
+            "val_count": 0,
+            "character_count": 8,
+        },
+        "data_profile": {"warnings": ["no_val_samples"]},
+        "training_readiness": {
+            "status": "blocked",
+            "ready_for_execution": False,
+            "blocking_warnings": ["no_val_samples"],
+            "advisory_warnings": [],
+        },
+    }
+    (plan_root / "plan.json").write_text(
+        json.dumps(plan_payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    paddleocr_home = tmp_path / "PaddleOCR" / "tools"
+    paddleocr_home.mkdir(parents=True)
+    (paddleocr_home / "train.py").write_text("print('should not run')\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="date\\(no_val_samples\\)"):
+        run_training_plans(
+            tmp_path / "recognizer",
+            tmp_path / "PaddleOCR",
+            field_groups=["date"],
+            execute=True,
+        )
 
 
 def test_run_training_plans_can_execute_against_fake_paddleocr_home(tmp_path: Path) -> None:
@@ -169,6 +229,16 @@ def test_run_training_plans_can_execute_against_fake_paddleocr_home(tmp_path: Pa
             "dictionary_path": str(plan_root / "dict.txt"),
             "train_label_path": str(plan_root / "train.txt"),
             "val_label_path": str(plan_root / "val.txt"),
+            "train_count": 1,
+            "val_count": 1,
+            "character_count": 6,
+        },
+        "data_profile": {"warnings": []},
+        "training_readiness": {
+            "status": "ready",
+            "ready_for_execution": True,
+            "blocking_warnings": [],
+            "advisory_warnings": [],
         },
     }
     (plan_root / "plan.json").write_text(
