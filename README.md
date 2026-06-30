@@ -84,6 +84,8 @@ Prepare PaddleOCR recognizer fine-tuning datasets and plans:
 python -m scripts.training.prepare_recognizer_finetune --ensure-field-crops
 ```
 
+Field crop export writes quality metadata and marks rejected crops. Recognizer prep skips rejected crops by default unless `--include-rejected-crops` is set.
+
 Render per-field-group recognizer training commands:
 
 ```bash

@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-from PIL import Image
+from PIL import Image, ImageStat
 
 from hanah_tax_ocr.schemas import DocumentType
 from hanah_tax_ocr.template_profiles import classify_template
@@ -55,6 +55,10 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=0.2,
     )
+    parser.add_argument("--min-width", type=int, default=24)
+    parser.add_argument("--min-height", type=int, default=16)
+    parser.add_argument("--min-dark-ratio", type=float, default=0.01)
+    parser.add_argument("--min-contrast", type=float, default=8.0)
     return parser.parse_args()
 
 
@@ -98,17 +102,60 @@ def _box_from_region(
     return box
 
 
+def compute_crop_quality(
+    crop: Image.Image,
+    *,
+    min_width: int,
+    min_height: int,
+    min_dark_ratio: float,
+    min_contrast: float,
+) -> dict[str, Any]:
+    grayscale = crop.convert("L")
+    histogram = grayscale.histogram()
+    total_pixels = max(1, crop.width * crop.height)
+    dark_pixels = sum(count for index, count in enumerate(histogram) if index < 200)
+    dark_ratio = dark_pixels / total_pixels
+    stat = ImageStat.Stat(grayscale)
+    contrast = float(stat.stddev[0]) if stat.stddev else 0.0
+    quality_flags: list[str] = []
+    if crop.width < min_width:
+        quality_flags.append("too_narrow")
+    if crop.height < min_height:
+        quality_flags.append("too_short")
+    if dark_ratio < min_dark_ratio:
+        quality_flags.append("low_dark_ratio")
+    if contrast < min_contrast:
+        quality_flags.append("low_contrast")
+
+    return {
+        "width": crop.width,
+        "height": crop.height,
+        "aspect_ratio": round(crop.width / max(1, crop.height), 4),
+        "dark_ratio": round(dark_ratio, 6),
+        "contrast": round(contrast, 4),
+        "quality_flags": quality_flags,
+        "accepted": not quality_flags,
+    }
+
+
 def export_field_crops(
     labeled_root: Path,
     output_root: Path,
     *,
     val_ratio: float = 0.2,
+    min_width: int = 24,
+    min_height: int = 16,
+    min_dark_ratio: float = 0.01,
+    min_contrast: float = 8.0,
 ) -> dict[str, Any]:
     manifest_entries: list[dict[str, Any]] = []
     counts_by_group = Counter()
     counts_by_split = Counter()
     counts_by_document = Counter()
     skipped_reasons = Counter()
+    quality_flag_counts = Counter()
+    accepted_count = 0
+    rejected_count = 0
 
     for label_path in discover_label_paths(labeled_root):
         payload = load_label(label_path)
@@ -174,6 +221,13 @@ def export_field_crops(
 
             crop = image.crop(box)
             crop.save(crop_path)
+            quality = compute_crop_quality(
+                crop,
+                min_width=min_width,
+                min_height=min_height,
+                min_dark_ratio=min_dark_ratio,
+                min_contrast=min_contrast,
+            )
 
             manifest_entry = {
                 "case_id": case_id,
@@ -192,11 +246,17 @@ def export_field_crops(
                     "right": box[2],
                     "bottom": box[3],
                 },
+                "quality": quality,
             }
             manifest_entries.append(manifest_entry)
             counts_by_group[field_group] += 1
             counts_by_split[split] += 1
             counts_by_document[document_type.value] += 1
+            if quality["accepted"]:
+                accepted_count += 1
+            else:
+                rejected_count += 1
+                quality_flag_counts.update(quality["quality_flags"])
 
     output_root.mkdir(parents=True, exist_ok=True)
     manifest_path = output_root / "manifest.jsonl"
@@ -222,9 +282,12 @@ def export_field_crops(
     summary = {
         "manifest_path": str(manifest_path),
         "total_crops": len(manifest_entries),
+        "accepted_crops": accepted_count,
+        "rejected_crops": rejected_count,
         "counts_by_group": dict(sorted(counts_by_group.items())),
         "counts_by_split": dict(sorted(counts_by_split.items())),
         "counts_by_document_type": dict(sorted(counts_by_document.items())),
+        "quality_flag_counts": dict(sorted(quality_flag_counts.items())),
         "skipped_reasons": dict(sorted(skipped_reasons.items())),
     }
     (output_root / "summary.json").write_text(
@@ -240,6 +303,10 @@ def main() -> None:
         args.labeled_root,
         args.output_root,
         val_ratio=args.val_ratio,
+        min_width=args.min_width,
+        min_height=args.min_height,
+        min_dark_ratio=args.min_dark_ratio,
+        min_contrast=args.min_contrast,
     )
     print(json.dumps(summary, ensure_ascii=False))
 
