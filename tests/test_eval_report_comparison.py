@@ -166,6 +166,8 @@ def test_compare_field_error_reports_classifies_metric_changes() -> None:
 def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> None:
     baseline_path = tmp_path / "baseline.json"
     candidate_path = tmp_path / "candidate.json"
+    baseline_training_summary_path = tmp_path / "baseline_summary.json"
+    candidate_training_summary_path = tmp_path / "candidate_summary.json"
     baseline_path.write_text(
         json.dumps(
             {
@@ -208,11 +210,80 @@ def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> Non
         ),
         encoding="utf-8",
     )
+    baseline_training_summary_path.write_text(
+        json.dumps(
+            {
+                "groups": {
+                    "english_name_org": {
+                        "train_count": 12,
+                        "val_count": 1,
+                        "data_profile": {
+                            "unique_source_counts": {"train": 2, "val": 1},
+                            "hard_case_train_ratio": 0.5,
+                            "unique_hard_case_variant_counts": {"train": 1, "val": 0},
+                            "hard_case_selection_strategy": "base_document_balance",
+                            "hard_case_variant_floor_applied": False,
+                        },
+                        "training_readiness": {
+                            "status": "blocked",
+                            "blocking_warnings": ["no_val_samples"],
+                            "advisory_warnings": ["low_train_sample_count"],
+                        },
+                    }
+                }
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    candidate_training_summary_path.write_text(
+        json.dumps(
+            {
+                "groups": {
+                    "english_name_org": {
+                        "train_count": 18,
+                        "val_count": 3,
+                        "data_profile": {
+                            "unique_source_counts": {"train": 3, "val": 2},
+                            "hard_case_train_ratio": 0.5,
+                            "unique_hard_case_variant_counts": {"train": 3, "val": 0},
+                            "hard_case_selection_strategy": "base_document_balance",
+                            "hard_case_variant_floor_applied": False,
+                        },
+                        "training_readiness": {
+                            "status": "ready",
+                            "blocking_warnings": [],
+                            "advisory_warnings": [],
+                        },
+                    }
+                }
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
-    comparison = compare_field_error_report_files(baseline_path, candidate_path)
+    comparison = compare_field_error_report_files(
+        baseline_path,
+        candidate_path,
+        baseline_training_summary_path=baseline_training_summary_path,
+        candidate_training_summary_path=candidate_training_summary_path,
+    )
     assert comparison.improved_fields == ["residency_certificate.taxpayer_name"]
     assert comparison.improved_documents == ["residency_certificate"]
     assert comparison.improved_field_groups == ["english_name_org"]
+    assert comparison.improved_training_field_groups == ["english_name_org"]
+    training_delta = comparison.training_profile_deltas["english_name_org"]
+    assert training_delta.status == "improved"
+    assert training_delta.train_count_delta == 6
+    assert training_delta.val_count_delta == 2
+    assert training_delta.train_source_count_delta == 1
+    assert training_delta.val_source_count_delta == 1
+    assert training_delta.unique_hard_case_variant_count_delta == 2
+    assert training_delta.readiness_transition == "blocked->ready"
+    assert training_delta.readiness_rank_delta == 2
     assert comparison.overall_delta is not None
     assert comparison.overall_delta.status == "improved"
 
@@ -224,6 +295,10 @@ def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> Non
         str(baseline_path),
         "--candidate",
         str(candidate_path),
+        "--baseline-training-summary",
+        str(baseline_training_summary_path),
+        "--candidate-training-summary",
+        str(candidate_training_summary_path),
     ]
     try:
         exit_code = main()
@@ -235,10 +310,105 @@ def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> Non
     assert payload["improved_fields"] == ["residency_certificate.taxpayer_name"]
     assert payload["improved_documents"] == ["residency_certificate"]
     assert payload["improved_field_groups"] == ["english_name_org"]
+    assert payload["improved_training_field_groups"] == ["english_name_org"]
+    assert payload["training_profile_deltas"]["english_name_org"]["status"] == "improved"
+    assert (
+        payload["training_profile_deltas"]["english_name_org"]["readiness_transition"]
+        == "blocked->ready"
+    )
     assert payload["overall_delta"]["status"] == "improved"
     assert payload["promotion_assessment"]["status"] == "promote"
     assert payload["promotion_assessment"]["blocking_reasons"] == []
     assert payload["promotion_assessment"]["warning_reasons"] == []
+
+
+def test_compare_field_error_reports_classifies_training_profile_regressions_and_additions(
+) -> None:
+    baseline_report = FieldErrorReport(
+        compared_cases=1,
+        missing_cases=[],
+        field_metrics={
+            "apostille.signed_by": build_metric(
+                comparisons=1,
+                exact_matches=1,
+                exact_match_rate=1.0,
+                average_character_error_rate=0.0,
+                average_word_error_rate=0.0,
+            )
+        },
+    )
+    candidate_report = FieldErrorReport(
+        compared_cases=1,
+        missing_cases=[],
+        field_metrics={
+            "apostille.signed_by": build_metric(
+                comparisons=1,
+                exact_matches=1,
+                exact_match_rate=1.0,
+                average_character_error_rate=0.0,
+                average_word_error_rate=0.0,
+            )
+        },
+    )
+
+    comparison = compare_field_error_reports(
+        baseline_report,
+        candidate_report,
+        baseline_training_profiles={
+            "english_name_org": {
+                "field_group": "english_name_org",
+                "train_count": 20,
+                "val_count": 3,
+                "train_source_count": 3,
+                "val_source_count": 2,
+                "hard_case_train_ratio": 0.5,
+                "unique_hard_case_variant_count": 4,
+                "training_readiness_status": "ready",
+            },
+            "numeric_tin_code": {
+                "field_group": "numeric_tin_code",
+                "train_count": 22,
+                "val_count": 0,
+                "train_source_count": 3,
+                "val_source_count": 0,
+                "hard_case_train_ratio": 0.5,
+                "unique_hard_case_variant_count": 4,
+                "training_readiness_status": "blocked",
+            },
+        },
+        candidate_training_profiles={
+            "english_name_org": {
+                "field_group": "english_name_org",
+                "train_count": 18,
+                "val_count": 2,
+                "train_source_count": 3,
+                "val_source_count": 1,
+                "hard_case_train_ratio": 0.5,
+                "unique_hard_case_variant_count": 3,
+                "training_readiness_status": "review_required",
+            },
+            "korean_mixed_form": {
+                "field_group": "korean_mixed_form",
+                "train_count": 3,
+                "val_count": 1,
+                "train_source_count": 1,
+                "val_source_count": 1,
+                "hard_case_train_ratio": 0.6667,
+                "unique_hard_case_variant_count": 2,
+                "training_readiness_status": "review_required",
+            },
+        },
+    )
+
+    assert comparison.regressed_training_field_groups == ["english_name_org"]
+    assert comparison.added_training_field_groups == ["korean_mixed_form"]
+    assert comparison.removed_training_field_groups == ["numeric_tin_code"]
+    assert comparison.training_profile_deltas["english_name_org"].status == "regressed"
+    assert comparison.training_profile_deltas["english_name_org"].readiness_transition == (
+        "ready->review_required"
+    )
+    assert comparison.training_profile_deltas["korean_mixed_form"].status == "added"
+    assert comparison.training_profile_deltas["numeric_tin_code"].status == "removed"
 
 
 def test_compare_field_error_reports_rolls_up_document_level_metrics() -> None:

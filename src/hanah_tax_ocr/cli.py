@@ -69,6 +69,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     compare_eval_reports.add_argument("--baseline", type=Path, required=True)
     compare_eval_reports.add_argument("--candidate", type=Path, required=True)
+    compare_eval_reports.add_argument(
+        "--baseline-training-summary",
+        type=Path,
+        help="Optional recognizer summary.json used to explain baseline training-data context.",
+    )
+    compare_eval_reports.add_argument(
+        "--candidate-training-summary",
+        type=Path,
+        help="Optional recognizer summary.json used to explain candidate training-data context.",
+    )
 
     return parser
 
@@ -154,7 +164,12 @@ def eval_report_command(args: argparse.Namespace) -> int:
 
 
 def compare_eval_reports_command(args: argparse.Namespace) -> int:
-    comparison = compare_field_error_report_files(args.baseline, args.candidate)
+    comparison = compare_field_error_report_files(
+        args.baseline,
+        args.candidate,
+        baseline_training_summary_path=args.baseline_training_summary,
+        candidate_training_summary_path=args.candidate_training_summary,
+    )
     print(json.dumps(comparison.model_dump(mode="json"), ensure_ascii=False))
     return 0
 
