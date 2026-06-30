@@ -120,6 +120,8 @@ python -m scripts.review_queue.promote_to_labeled \
   --limit 2
 ```
 
+Promoted label scaffolds keep the matched field groups, priority score, and recommended action list in `priority_context`.
+
 Build a field-level CER/WER report from run results:
 
 ```bash

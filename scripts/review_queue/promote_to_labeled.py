@@ -5,6 +5,16 @@ import json
 from pathlib import Path
 
 
+def load_priority_cases(path: Path) -> dict[str, dict]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    cases = payload.get("cases", [])
+    return {
+        str(case["case_id"]): case
+        for case in cases
+        if isinstance(case, dict) and case.get("case_id")
+    }
+
+
 def load_priority_order(path: Path) -> list[str]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     return [str(case_id) for case_id in payload.get("priority_order", [])]
@@ -51,6 +61,7 @@ def promote_review_queue(
     overwrite: bool = False,
 ) -> list[Path]:
     written: list[Path] = []
+    priority_cases: dict[str, dict] = {}
     queue_paths = {
         queue_path.stem: queue_path
         for queue_path in sorted(review_queue_dir.glob("*.json"))
@@ -58,6 +69,7 @@ def promote_review_queue(
 
     ordered_case_ids: list[str]
     if priority_report_path is not None and priority_report_path.exists():
+        priority_cases = load_priority_cases(priority_report_path)
         ordered_case_ids = [
             case_id
             for case_id in load_priority_order(priority_report_path)
@@ -78,6 +90,7 @@ def promote_review_queue(
 
         queue_path = queue_paths[case_id]
         payload = json.loads(queue_path.read_text(encoding="utf-8"))
+        priority_case = priority_cases.get(case_id)
         wrote_for_case = False
         for document in payload.get("documents", []):
             document_type = document["document_type"]
@@ -98,6 +111,14 @@ def promote_review_queue(
                 "expected_quality_checks": document.get("quality_checks", {}),
                 "source_findings": payload.get("review_result", {}).get("findings", []),
             }
+            if priority_case is not None:
+                label_payload["priority_context"] = {
+                    "priority_score": priority_case.get("priority_score"),
+                    "status": priority_case.get("status"),
+                    "matched_field_groups": priority_case.get("matched_field_groups", []),
+                    "recommendations": priority_case.get("recommendations", []),
+                    "score_breakdown": priority_case.get("score_breakdown", {}),
+                }
             label_path.write_text(
                 json.dumps(label_payload, ensure_ascii=False, indent=2),
                 encoding="utf-8",

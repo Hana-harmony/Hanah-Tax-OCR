@@ -65,6 +65,24 @@ def test_promote_review_queue_can_follow_priority_report_with_limit(tmp_path: Pa
         json.dumps(
             {
                 "priority_order": ["queue_003", "queue_001", "queue_002"],
+                "cases": [
+                    {
+                        "case_id": "queue_003",
+                        "priority_score": 40.0,
+                        "status": "reject",
+                        "matched_field_groups": ["numeric_tin_code"],
+                        "recommendations": ["collect_base_train_samples"],
+                        "score_breakdown": {"gap_score": 37.5},
+                    },
+                    {
+                        "case_id": "queue_001",
+                        "priority_score": 20.0,
+                        "status": "reject",
+                        "matched_field_groups": ["english_name_org"],
+                        "recommendations": ["expand_train_document_coverage"],
+                        "score_breakdown": {"gap_score": 19.0},
+                    },
+                ],
             },
             ensure_ascii=False,
             indent=2,
@@ -82,3 +100,11 @@ def test_promote_review_queue_can_follow_priority_report_with_limit(tmp_path: Pa
     assert len(written) == 2
     assert written[0].as_posix().endswith("residency_certificate/queue_003/label.json")
     assert written[1].as_posix().endswith("withholding_tax_form/queue_001/label.json")
+    first_payload = json.loads(written[0].read_text(encoding="utf-8"))
+    assert first_payload["priority_context"] == {
+        "priority_score": 40.0,
+        "status": "reject",
+        "matched_field_groups": ["numeric_tin_code"],
+        "recommendations": ["collect_base_train_samples"],
+        "score_breakdown": {"gap_score": 37.5},
+    }
