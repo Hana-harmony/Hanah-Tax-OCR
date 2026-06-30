@@ -78,8 +78,41 @@ def split_for_group(group_key: str, val_ratio: float) -> str:
     return "val" if split_score_for_text(group_key) < val_ratio else "train"
 
 
+def _ensure_split_coverage(
+    group_assignments: dict[str, str],
+    source_paths: list[str],
+) -> None:
+    unique_source_paths = sorted(
+        set(source_paths),
+        key=lambda source_path: (split_score_for_text(source_path), source_path),
+    )
+    if len(unique_source_paths) < 2:
+        return
+
+    if not any(group_assignments[source_path] == "val" for source_path in unique_source_paths):
+        group_assignments[unique_source_paths[0]] = "val"
+    if not any(group_assignments[source_path] == "train" for source_path in unique_source_paths):
+        group_assignments[unique_source_paths[-1]] = "train"
+
+
+def _field_groups_for_case_document(item: dict[str, Any]) -> list[str]:
+    raw_groups = item.get("field_groups")
+    if isinstance(raw_groups, str):
+        return [raw_groups]
+    if isinstance(raw_groups, list):
+        return [
+            str(group)
+            for group in raw_groups
+            if isinstance(group, str) and group
+        ]
+    raw_group = item.get("field_group")
+    if isinstance(raw_group, str) and raw_group:
+        return [raw_group]
+    return []
+
+
 def assign_case_splits(
-    case_documents: list[dict[str, str]],
+    case_documents: list[dict[str, Any]],
     *,
     val_ratio: float,
 ) -> dict[str, str]:
@@ -93,7 +126,7 @@ def assign_case_splits(
     }
     if not 0.0 < val_ratio < 1.0:
         return {
-            item["case_id"]: group_assignments[item["source_path"]]
+            str(item.get("split_key") or item["case_id"]): group_assignments[item["source_path"]]
             for item in case_documents
         }
 
@@ -102,22 +135,18 @@ def assign_case_splits(
         by_document_type[item["document_type"]].append(item["source_path"])
 
     for source_paths in by_document_type.values():
-        unique_source_paths = sorted(
-            set(source_paths),
-            key=lambda source_path: (split_score_for_text(source_path), source_path),
-        )
-        if len(unique_source_paths) < 2:
-            continue
+        _ensure_split_coverage(group_assignments, source_paths)
 
-        if not any(group_assignments[source_path] == "val" for source_path in unique_source_paths):
-            group_assignments[unique_source_paths[0]] = "val"
-        if not any(
-            group_assignments[source_path] == "train" for source_path in unique_source_paths
-        ):
-            group_assignments[unique_source_paths[-1]] = "train"
+    by_field_group: dict[str, list[str]] = defaultdict(list)
+    for item in case_documents:
+        for field_group in _field_groups_for_case_document(item):
+            by_field_group[field_group].append(item["source_path"])
+
+    for source_paths in by_field_group.values():
+        _ensure_split_coverage(group_assignments, source_paths)
 
     return {
-        item["case_id"]: group_assignments[item["source_path"]]
+        str(item.get("split_key") or item["case_id"]): group_assignments[item["source_path"]]
         for item in case_documents
     }
 
@@ -439,13 +468,24 @@ def export_field_crops(
             continue
 
         case_id = payload.get("case_id", label_path.parent.name)
+        available_region_names = {region.name for region in profile.ocr_regions}
+        field_groups = sorted(
+            {
+                field_group_for(field_name)
+                for field_name, expected_value in expected_fields.items()
+                if expected_value not in {None, ""}
+                and field_name in available_region_names
+            }
+        )
         prepared_cases.append(
             {
+                "split_key": f"{document_type.value}:{case_id}",
                 "case_id": case_id,
                 "document_type": document_type.value,
                 "source_path": source_path,
                 "label_path": label_path,
                 "expected_fields": expected_fields,
+                "field_groups": field_groups,
                 "profile": profile,
                 "image": image,
             }
@@ -454,9 +494,11 @@ def export_field_crops(
     case_splits = assign_case_splits(
         [
             {
+                "split_key": item["split_key"],
                 "case_id": item["case_id"],
                 "document_type": item["document_type"],
                 "source_path": str(item["source_path"]),
+                "field_groups": item["field_groups"],
             }
             for item in prepared_cases
         ],
@@ -464,6 +506,7 @@ def export_field_crops(
     )
 
     for prepared_case in prepared_cases:
+        split_key = prepared_case["split_key"]
         case_id = prepared_case["case_id"]
         document_type = DocumentType(prepared_case["document_type"])
         source_path = Path(prepared_case["source_path"])
@@ -471,7 +514,7 @@ def export_field_crops(
         expected_fields = prepared_case["expected_fields"]
         profile = prepared_case["profile"]
         image = prepared_case["image"]
-        split = case_splits[case_id]
+        split = case_splits[split_key]
 
         for region in profile.ocr_regions:
             expected_value = expected_fields.get(region.name)

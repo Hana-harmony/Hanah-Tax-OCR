@@ -286,6 +286,72 @@ def test_assign_case_splits_keeps_same_source_in_single_split() -> None:
     assert assignments["cross_check_case"] == assignments["review_case"]
 
 
+def test_assign_case_splits_supports_duplicate_case_ids_with_distinct_split_keys() -> None:
+    assignments = assign_case_splits(
+        [
+            {
+                "split_key": "residency_certificate:cross_check_case",
+                "case_id": "cross_check_case",
+                "document_type": "residency_certificate",
+                "source_path": "sample_data/residency_shared.png",
+                "field_groups": ["date", "numeric_tin_code"],
+            },
+            {
+                "split_key": "withholding_tax_form:cross_check_case",
+                "case_id": "cross_check_case",
+                "document_type": "withholding_tax_form",
+                "source_path": "sample_data/withholding_shared.png",
+                "field_groups": ["date", "numeric_tin_code"],
+            },
+        ],
+        val_ratio=0.2,
+    )
+
+    assert sorted(assignments) == [
+        "residency_certificate:cross_check_case",
+        "withholding_tax_form:cross_check_case",
+    ]
+
+
+def test_assign_case_splits_keeps_field_groups_in_both_splits_when_possible() -> None:
+    assignments = assign_case_splits(
+        [
+            {
+                "case_id": "apostille_case_001",
+                "document_type": "apostille",
+                "source_path": "sample_data/apostille_001.png",
+                "field_groups": ["date", "numeric_tin_code"],
+            },
+            {
+                "case_id": "residency_case_001",
+                "document_type": "residency_certificate",
+                "source_path": "sample_data/residency_001.png",
+                "field_groups": ["date", "numeric_tin_code"],
+            },
+            {
+                "case_id": "withholding_case_001",
+                "document_type": "withholding_tax_form",
+                "source_path": "sample_data/withholding_001.png",
+                "field_groups": ["date", "numeric_tin_code"],
+            },
+        ],
+        val_ratio=0.2,
+    )
+
+    date_splits = {
+        assignments["apostille_case_001"],
+        assignments["residency_case_001"],
+        assignments["withholding_case_001"],
+    }
+    numeric_splits = {
+        assignments["apostille_case_001"],
+        assignments["residency_case_001"],
+        assignments["withholding_case_001"],
+    }
+    assert date_splits == {"train", "val"}
+    assert numeric_splits == {"train", "val"}
+
+
 def test_export_field_crops_assigns_val_case_per_document_type_when_possible(
     tmp_path: Path,
 ) -> None:
@@ -359,6 +425,71 @@ def test_export_field_crops_assigns_val_case_per_document_type_when_possible(
     assert splits_by_document_type["residency_certificate"] == {"train", "val"}
 
 
+def test_export_field_crops_assigns_val_case_per_field_group_when_possible(
+    tmp_path: Path,
+) -> None:
+    sample_dir = tmp_path / "sample_data"
+    sample_dir.mkdir(parents=True)
+    apostille_image = sample_dir / "apostille.png"
+    residency_image = sample_dir / "residency.png"
+    withholding_image = sample_dir / "withholding.png"
+    Image.new("RGB", (400, 300), "white").save(apostille_image)
+    Image.new("RGB", (400, 300), "white").save(residency_image)
+    Image.new("RGB", (400, 300), "white").save(withholding_image)
+
+    label_specs = [
+        (
+            "apostille",
+            "apostille_case_001",
+            apostille_image,
+            {"certificate_number": "A-123", "issued_on": "2026-01-12"},
+        ),
+        (
+            "residency_certificate",
+            "residency_case_001",
+            residency_image,
+            {"tin": "123-45-6789", "issue_date": "January 12, 2026"},
+        ),
+        (
+            "withholding_tax_form",
+            "withholding_case_001",
+            withholding_image,
+            {"tin": "987-65-4321", "signature_date": "2026-01-13"},
+        ),
+    ]
+    for document_type, case_id, image_path, expected_fields in label_specs:
+        label_root = tmp_path / "data" / "labeled" / document_type / case_id
+        label_root.mkdir(parents=True)
+        (label_root / "label.json").write_text(
+            json.dumps(
+                {
+                    "case_id": case_id,
+                    "document_type": document_type,
+                    "source_path": str(image_path),
+                    "expected_fields": expected_fields,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+    output_root = tmp_path / "field_crops"
+    export_field_crops(tmp_path / "data" / "labeled", output_root, val_ratio=0.2)
+
+    manifest_entries = [
+        json.loads(line)
+        for line in (output_root / "manifest.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    splits_by_field_group: dict[str, set[str]] = {}
+    for entry in manifest_entries:
+        splits_by_field_group.setdefault(entry["field_group"], set()).add(entry["split"])
+
+    assert splits_by_field_group["date"] == {"train", "val"}
+    assert splits_by_field_group["numeric_tin_code"] == {"train", "val"}
+
+
 def test_export_field_crops_keeps_same_source_path_in_one_split(tmp_path: Path) -> None:
     sample_dir = tmp_path / "sample_data"
     sample_dir.mkdir(parents=True)
@@ -402,3 +533,64 @@ def test_export_field_crops_keeps_same_source_path_in_one_split(tmp_path: Path) 
         splits_by_source.setdefault(entry["source_path"], set()).add(entry["split"])
 
     assert splits_by_source[str(shared_image)] in ({"train"}, {"val"})
+
+
+def test_export_field_crops_keeps_duplicate_case_ids_distinct_across_document_types(
+    tmp_path: Path,
+) -> None:
+    sample_dir = tmp_path / "sample_data"
+    sample_dir.mkdir(parents=True)
+    residency_image = sample_dir / "residency.png"
+    withholding_image = sample_dir / "withholding.png"
+    Image.new("RGB", (400, 300), "white").save(residency_image)
+    Image.new("RGB", (400, 300), "white").save(withholding_image)
+
+    label_specs = [
+        (
+            "residency_certificate",
+            "cross_check_case",
+            residency_image,
+            {"tin": "123-45-6789", "issue_date": "January 12, 2026"},
+        ),
+        (
+            "withholding_tax_form",
+            "cross_check_case",
+            withholding_image,
+            {"tin": "123-45-6789", "signature_date": "2026-01-12"},
+        ),
+    ]
+    for document_type, case_id, image_path, expected_fields in label_specs:
+        label_root = tmp_path / "data" / "labeled" / document_type / case_id
+        label_root.mkdir(parents=True)
+        (label_root / "label.json").write_text(
+            json.dumps(
+                {
+                    "case_id": case_id,
+                    "document_type": document_type,
+                    "source_path": str(image_path),
+                    "expected_fields": expected_fields,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+    output_root = tmp_path / "field_crops"
+    export_field_crops(tmp_path / "data" / "labeled", output_root, val_ratio=0.2)
+
+    manifest_entries = [
+        json.loads(line)
+        for line in (output_root / "manifest.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    splits_by_document_type = {
+        entry["document_type"]: entry["split"]
+        for entry in manifest_entries
+        if entry["field_group"] == "date"
+    }
+
+    assert sorted(splits_by_document_type) == [
+        "residency_certificate",
+        "withholding_tax_form",
+    ]
