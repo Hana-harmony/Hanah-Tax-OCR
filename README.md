@@ -122,6 +122,16 @@ python -m scripts.training.report_sample_coverage
 
 The report keeps `pending_review` separate from reviewed coverage so unlabeled fixtures do not disappear just because a scaffold exists.
 
+Prioritize `sample_data/` labels that are most likely to unblock current recognizer gaps:
+
+```bash
+python -m scripts.training.report_sample_label_priorities \
+  --coverage-report data/training/reports/sample_data_coverage.json \
+  --data-gap-report data/training/reports/data_gap_report.json
+```
+
+The priority output boosts pending-review samples that already have label scaffolds and highlights `val` fixtures when blocked recognizer groups are missing validation coverage.
+
 Bootstrap `pending_review` label scaffolds for uncovered `sample_data/` files:
 
 ```bash

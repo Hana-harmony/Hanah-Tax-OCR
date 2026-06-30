@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
-import unicodedata
 from pathlib import Path
 from typing import Any
+
+from hanah_tax_ocr.training.sample_dataset import build_sample_index, normalize_path_text
 
 DEFAULT_SAMPLE_ROOT = Path("sample_data")
 DEFAULT_LABELED_ROOT = Path("data/labeled")
@@ -26,18 +27,13 @@ def parse_args() -> argparse.Namespace:
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def normalize_path_text(path: str | Path) -> str:
-    return unicodedata.normalize("NFC", str(path))
-
-
 def build_sample_data_coverage_report(
     sample_root: Path,
     labeled_root: Path,
     eval_root: Path,
 ) -> dict[str, Any]:
     sample_paths = sorted(path for path in sample_root.rglob("*") if path.is_file())
+    sample_index = build_sample_index(sample_root)
     labels_by_sample: dict[str, list[dict[str, str]]] = {}
     labels_by_case_id: dict[str, list[dict[str, str]]] = {}
     pending_review_by_sample: dict[str, list[dict[str, str]]] = {}
@@ -89,6 +85,7 @@ def build_sample_data_coverage_report(
     )
     for sample_path in sample_paths:
         sample_key = normalize_path_text(sample_path)
+        sample_dataset_entry = sample_index.get(sample_key)
         label_records = labels_by_sample.get(sample_key, [])
         pending_review_records = pending_review_by_sample.get(sample_key, [])
         sample_eval_case_ids = sorted(set(eval_by_sample.get(sample_key, [])))
@@ -107,6 +104,16 @@ def build_sample_data_coverage_report(
                 ),
                 "eval_case_ids": sample_eval_case_ids,
                 "document_types": sorted({record["document_type"] for record in label_records}),
+                "known_to_sample_dataset": sample_dataset_entry is not None,
+                "sample_dataset_document_type": None
+                if sample_dataset_entry is None
+                else sample_dataset_entry["document_type"],
+                "sample_dataset_case_id": None
+                if sample_dataset_entry is None
+                else sample_dataset_entry["case_id"],
+                "sample_dataset_split": None
+                if sample_dataset_entry is None
+                else sample_dataset_entry["split"],
             }
         )
 

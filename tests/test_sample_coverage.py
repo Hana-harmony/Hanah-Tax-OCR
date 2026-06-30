@@ -49,6 +49,10 @@ def test_build_sample_data_coverage_report_matches_normalized_paths(tmp_path: Pa
     assert report["samples"][0]["label_case_ids"] == ["case_001"]
     assert report["samples"][0]["pending_review_case_ids"] == []
     assert report["samples"][0]["eval_case_ids"] == ["case_001"]
+    assert report["samples"][0]["known_to_sample_dataset"] is False
+    assert report["samples"][0]["sample_dataset_document_type"] is None
+    assert report["samples"][0]["sample_dataset_case_id"] is None
+    assert report["samples"][0]["sample_dataset_split"] is None
 
 
 def test_build_sample_data_coverage_report_lists_uncovered_and_missing_eval(
@@ -114,3 +118,23 @@ def test_build_sample_data_coverage_report_separates_pending_review_labels(
     assert report["covered_by_pending_review_count"] == 1
     assert report["uncovered_sample_paths"] == [unicodedata.normalize("NFC", str(sample_path))]
     assert report["samples"][0]["pending_review_case_ids"] == ["case_003"]
+
+
+def test_build_sample_data_coverage_report_adds_sample_dataset_metadata_for_known_samples(
+    tmp_path: Path,
+) -> None:
+    sample_root = tmp_path / "sample_data"
+    labeled_root = tmp_path / "data" / "labeled"
+    eval_root = tmp_path / "evals" / "cases"
+    known_sample = sample_root / "거주자증명서" / "6.jpg"
+    known_sample.parent.mkdir(parents=True)
+    known_sample.write_bytes(b"known")
+
+    report = build_sample_data_coverage_report(sample_root, labeled_root, eval_root)
+
+    by_path = {item["sample_path"]: item for item in report["samples"]}
+    known_sample = by_path[unicodedata.normalize("NFC", str(known_sample))]
+    assert known_sample["known_to_sample_dataset"] is True
+    assert known_sample["sample_dataset_document_type"] == "residency_certificate"
+    assert known_sample["sample_dataset_case_id"] == "residency_university_hawaii_001"
+    assert known_sample["sample_dataset_split"] == "val"

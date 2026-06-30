@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import unicodedata
 from pathlib import Path
 
-from scripts.ingest.bootstrap_sample_dataset import SAMPLE_DATASET
+from hanah_tax_ocr.training.sample_dataset import build_sample_index, normalize_path_text
 
 
 def parse_args() -> argparse.Namespace:
@@ -24,14 +23,6 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
-
-
-def build_sample_index() -> dict[str, dict[str, str]]:
-    return {normalize_path_text(entry["source"]): entry for entry in SAMPLE_DATASET}
-
-
-def normalize_path_text(path: str | Path) -> str:
-    return unicodedata.normalize("NFC", str(path))
 
 
 def bootstrap_uncovered_samples(
