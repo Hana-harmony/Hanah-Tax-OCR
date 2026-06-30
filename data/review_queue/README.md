@@ -18,3 +18,4 @@ Promotion flow:
 - `python -m scripts.review_queue.promote_to_labeled --priority-report ... --limit N` promotes only the top-ranked cases
 - `python -m scripts.review_queue.promote_to_labeled` copies queue JSON into `data/labeled/pending_review/`
 - promoted labels are marked for human verification before they enter the reviewed dataset
+- promoted label scaffolds can include `priority_context` so reviewers see why the case was selected first
