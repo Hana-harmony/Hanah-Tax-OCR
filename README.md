@@ -84,7 +84,7 @@ Prepare PaddleOCR recognizer fine-tuning datasets and plans:
 python -m scripts.training.prepare_recognizer_finetune --ensure-field-crops
 ```
 
-Field crop export writes quality metadata and marks rejected crops. Recognizer prep skips rejected crops by default unless `--include-rejected-crops` is set, caps train hard-case share at `0.5` unless `--max-hard-case-ratio 1.0` is used, preserves the base document-type mix when selecting capped hard cases, and each group plan includes document-type coverage, source-type counts, and hard-case ratio warnings.
+Field crop export writes quality metadata and marks rejected crops. The quality filter now flags crops that are too small, too blank, too low-contrast, or densely filled by edge-heavy foreground content such as seals and noise. Recognizer prep skips rejected crops by default unless `--include-rejected-crops` is set, caps train hard-case share at `0.5` unless `--max-hard-case-ratio 1.0` is used, preserves the base document-type mix when selecting capped hard cases, and each group plan includes document-type coverage, source-type counts, and hard-case ratio warnings.
 Field crop splitting keeps case-level separation but tries to preserve at least one validation case per document type when two or more cases exist.
 
 Render per-field-group recognizer training commands:

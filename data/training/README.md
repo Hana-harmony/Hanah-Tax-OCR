@@ -6,6 +6,7 @@ Typical contents:
 
 - `field_crops/`: field-level crop images and manifests for recognizer fine-tuning
   each entry includes quality metadata such as size, dark ratio, contrast, and acceptance flags,
+  plus foreground bbox and edge-contact signals that help reject seal-heavy or noise-dominated crops,
   and train/val split assignment keeps document-type validation coverage when possible
 - `recognizer/`: PaddleOCR recognizer train/val label files, per-group dictionaries, and plan files
   each plan/summary includes document-type coverage, source-type counts, hard-case ratio warnings,

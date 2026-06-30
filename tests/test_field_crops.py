@@ -99,6 +99,47 @@ def test_export_field_crops_marks_low_quality_blank_crop_as_rejected(tmp_path: P
     assert summary["quality_flag_counts"]["low_dark_ratio"] == 1
 
 
+def test_export_field_crops_rejects_dense_edge_content_crop(tmp_path: Path) -> None:
+    sample_dir = tmp_path / "sample_data" / "거주자증명서"
+    sample_dir.mkdir(parents=True)
+    image_path = sample_dir / "dense_crop.png"
+    Image.new("RGB", (400, 300), "black").save(image_path)
+
+    label_root = tmp_path / "data" / "labeled" / "residency_certificate" / "case_dense"
+    label_root.mkdir(parents=True)
+    (label_root / "label.json").write_text(
+        json.dumps(
+            {
+                "case_id": "residency_case_dense",
+                "document_type": "residency_certificate",
+                "source_path": str(image_path),
+                "expected_fields": {"taxpayer_name": "MARIA L. CHEN"},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    output_root = tmp_path / "field_crops"
+    summary = export_field_crops(tmp_path / "data" / "labeled", output_root)
+    manifest_entry = json.loads(
+        (output_root / "manifest.jsonl").read_text(encoding="utf-8").splitlines()[0]
+    )
+
+    assert summary["rejected_crops"] == 1
+    assert summary["quality_flag_counts"]["foreground_fills_crop"] == 1
+    assert summary["quality_flag_counts"]["dense_edge_content"] == 1
+    assert manifest_entry["quality"]["accepted"] is False
+    assert manifest_entry["quality"]["foreground_bbox_ratio"] == 1.0
+    assert sorted(manifest_entry["quality"]["touched_edges"]) == [
+        "bottom",
+        "left",
+        "right",
+        "top",
+    ]
+
+
 def test_assign_case_splits_keeps_document_types_in_both_splits_when_possible() -> None:
     assignments = assign_case_splits(
         [
