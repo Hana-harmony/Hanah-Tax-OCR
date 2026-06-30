@@ -61,6 +61,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--min-contrast", type=float, default=8.0)
     parser.add_argument("--max-foreground-bbox-ratio", type=float, default=0.85)
     parser.add_argument("--dense-edge-dark-ratio", type=float, default=0.45)
+    parser.add_argument("--max-edge-trim-ratio", type=float, default=0.18)
     return parser.parse_args()
 
 
@@ -269,6 +270,113 @@ def compute_crop_quality(
     }
 
 
+def _dense_edge_trim_pixels(
+    crop: Image.Image,
+    *,
+    dense_edge_dark_ratio: float,
+    max_edge_trim_ratio: float,
+) -> dict[str, int]:
+    grayscale = crop.convert("L")
+    max_left_right_trim = int(crop.width * max_edge_trim_ratio)
+    max_top_bottom_trim = int(crop.height * max_edge_trim_ratio)
+
+    def column_dark_ratio(x: int) -> float:
+        return (
+            sum(1 for y in range(crop.height) if grayscale.getpixel((x, y)) < 200)
+            / max(1, crop.height)
+        )
+
+    def row_dark_ratio(y: int) -> float:
+        return (
+            sum(1 for x in range(crop.width) if grayscale.getpixel((x, y)) < 200)
+            / max(1, crop.width)
+        )
+
+    trim: dict[str, int] = {"left": 0, "right": 0, "top": 0, "bottom": 0}
+    for edge_name, limit in {
+        "left": max_left_right_trim,
+        "right": max_left_right_trim,
+        "top": max_top_bottom_trim,
+        "bottom": max_top_bottom_trim,
+    }.items():
+        for offset in range(limit):
+            if edge_name == "left":
+                ratio = column_dark_ratio(offset)
+            elif edge_name == "right":
+                ratio = column_dark_ratio(crop.width - 1 - offset)
+            elif edge_name == "top":
+                ratio = row_dark_ratio(offset)
+            else:
+                ratio = row_dark_ratio(crop.height - 1 - offset)
+            if ratio < dense_edge_dark_ratio:
+                break
+            trim[edge_name] += 1
+    return trim
+
+
+def _salvage_dense_edge_crop(
+    crop: Image.Image,
+    quality: dict[str, Any],
+    *,
+    min_width: int,
+    min_height: int,
+    min_dark_ratio: float,
+    min_contrast: float,
+    max_foreground_bbox_ratio: float,
+    dense_edge_dark_ratio: float,
+    max_edge_trim_ratio: float,
+    max_trim_passes: int = 3,
+) -> tuple[Image.Image, dict[str, Any], dict[str, int] | None]:
+    if not {"foreground_fills_crop", "dense_edge_content"} & set(quality["quality_flags"]):
+        return crop, quality, None
+
+    cumulative_trim = {"left": 0, "right": 0, "top": 0, "bottom": 0}
+    candidate_crop = crop
+    candidate_quality = quality
+
+    for _ in range(max_trim_passes):
+        trim = _dense_edge_trim_pixels(
+            candidate_crop,
+            dense_edge_dark_ratio=dense_edge_dark_ratio,
+            max_edge_trim_ratio=max_edge_trim_ratio,
+        )
+        if not any(trim.values()):
+            break
+
+        left = trim["left"]
+        top = trim["top"]
+        right = candidate_crop.width - trim["right"]
+        bottom = candidate_crop.height - trim["bottom"]
+        if right - left < min_width or bottom - top < min_height:
+            break
+
+        candidate_crop = candidate_crop.crop((left, top, right, bottom))
+        candidate_quality = compute_crop_quality(
+            candidate_crop,
+            min_width=min_width,
+            min_height=min_height,
+            min_dark_ratio=min_dark_ratio,
+            min_contrast=min_contrast,
+            max_foreground_bbox_ratio=max_foreground_bbox_ratio,
+            dense_edge_dark_ratio=dense_edge_dark_ratio,
+        )
+        cumulative_trim["left"] += trim["left"]
+        cumulative_trim["right"] += trim["right"]
+        cumulative_trim["top"] += trim["top"]
+        cumulative_trim["bottom"] += trim["bottom"]
+        if candidate_quality["accepted"]:
+            break
+
+    if not candidate_quality["accepted"] or not any(cumulative_trim.values()):
+        return crop, quality, None
+
+    candidate_quality["salvage_applied"] = True
+    candidate_quality["original_quality_flags"] = list(quality["quality_flags"])
+    candidate_quality["salvage_strategy"] = "trim_dense_edges"
+    candidate_quality["trim_pixels"] = cumulative_trim
+    return candidate_crop, candidate_quality, cumulative_trim
+
+
 def export_field_crops(
     labeled_root: Path,
     output_root: Path,
@@ -280,6 +388,7 @@ def export_field_crops(
     min_contrast: float = 8.0,
     max_foreground_bbox_ratio: float = 0.85,
     dense_edge_dark_ratio: float = 0.45,
+    max_edge_trim_ratio: float = 0.18,
 ) -> dict[str, Any]:
     manifest_entries: list[dict[str, Any]] = []
     prepared_cases: list[dict[str, Any]] = []
@@ -290,6 +399,7 @@ def export_field_crops(
     quality_flag_counts = Counter()
     accepted_count = 0
     rejected_count = 0
+    salvaged_count = 0
 
     for label_path in discover_label_paths(labeled_root):
         payload = load_label(label_path)
@@ -386,7 +496,6 @@ def export_field_crops(
             crop_path = crop_dir / crop_name
 
             crop = image.crop(box)
-            crop.save(crop_path)
             quality = compute_crop_quality(
                 crop,
                 min_width=min_width,
@@ -396,6 +505,27 @@ def export_field_crops(
                 max_foreground_bbox_ratio=max_foreground_bbox_ratio,
                 dense_edge_dark_ratio=dense_edge_dark_ratio,
             )
+            original_box = box
+            crop, quality, trim = _salvage_dense_edge_crop(
+                crop,
+                quality,
+                min_width=min_width,
+                min_height=min_height,
+                min_dark_ratio=min_dark_ratio,
+                min_contrast=min_contrast,
+                max_foreground_bbox_ratio=max_foreground_bbox_ratio,
+                dense_edge_dark_ratio=dense_edge_dark_ratio,
+                max_edge_trim_ratio=max_edge_trim_ratio,
+            )
+            if trim is not None:
+                box = (
+                    box[0] + trim["left"],
+                    box[1] + trim["top"],
+                    box[2] - trim["right"],
+                    box[3] - trim["bottom"],
+                )
+                salvaged_count += 1
+            crop.save(crop_path)
 
             manifest_entry = {
                 "case_id": case_id,
@@ -416,6 +546,13 @@ def export_field_crops(
                 },
                 "quality": quality,
             }
+            if trim is not None:
+                manifest_entry["original_box"] = {
+                    "left": original_box[0],
+                    "top": original_box[1],
+                    "right": original_box[2],
+                    "bottom": original_box[3],
+                }
             manifest_entries.append(manifest_entry)
             counts_by_group[field_group] += 1
             counts_by_split[split] += 1
@@ -452,6 +589,7 @@ def export_field_crops(
         "total_crops": len(manifest_entries),
         "accepted_crops": accepted_count,
         "rejected_crops": rejected_count,
+        "salvaged_crops": salvaged_count,
         "unique_source_count": len({str(item["source_path"]) for item in prepared_cases}),
         "counts_by_group": dict(sorted(counts_by_group.items())),
         "counts_by_split": dict(sorted(counts_by_split.items())),
@@ -478,6 +616,7 @@ def main() -> None:
         min_contrast=args.min_contrast,
         max_foreground_bbox_ratio=args.max_foreground_bbox_ratio,
         dense_edge_dark_ratio=args.dense_edge_dark_ratio,
+        max_edge_trim_ratio=args.max_edge_trim_ratio,
     )
     print(json.dumps(summary, ensure_ascii=False))
 

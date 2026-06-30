@@ -3,8 +3,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from hanah_tax_ocr.training.field_crops import assign_case_splits, export_field_crops
-from PIL import Image
+from hanah_tax_ocr.training.field_crops import (
+    _salvage_dense_edge_crop,
+    assign_case_splits,
+    compute_crop_quality,
+    export_field_crops,
+)
+from PIL import Image, ImageDraw
 
 
 def test_export_field_crops_writes_manifest_and_grouped_outputs(tmp_path: Path) -> None:
@@ -139,6 +144,82 @@ def test_export_field_crops_rejects_dense_edge_content_crop(tmp_path: Path) -> N
         "right",
         "top",
     ]
+
+
+def test_salvage_dense_edge_crop_trims_border_noise_and_accepts_crop() -> None:
+    crop = Image.new("RGB", (100, 40), "white")
+    draw = ImageDraw.Draw(crop)
+    draw.rectangle((0, 0, 99, 7), fill="black")
+    draw.rectangle((0, 0, 7, 39), fill="black")
+    draw.rectangle((92, 0, 99, 39), fill="black")
+    draw.rectangle((28, 18, 72, 24), fill="black")
+
+    quality = compute_crop_quality(
+        crop,
+        min_width=24,
+        min_height=16,
+        min_dark_ratio=0.01,
+        min_contrast=8.0,
+        max_foreground_bbox_ratio=0.85,
+        dense_edge_dark_ratio=0.45,
+    )
+    salvaged_crop, salvaged_quality, trim = _salvage_dense_edge_crop(
+        crop,
+        quality,
+        min_width=24,
+        min_height=16,
+        min_dark_ratio=0.01,
+        min_contrast=8.0,
+        max_foreground_bbox_ratio=0.85,
+        dense_edge_dark_ratio=0.45,
+        max_edge_trim_ratio=0.18,
+    )
+
+    assert "dense_edge_content" in quality["quality_flags"]
+    assert trim == {"left": 8, "right": 8, "top": 7, "bottom": 0}
+    assert salvaged_crop.size == (84, 33)
+    assert salvaged_quality["accepted"] is True
+    assert salvaged_quality["salvage_applied"] is True
+    assert salvaged_quality["salvage_strategy"] == "trim_dense_edges"
+    assert salvaged_quality["original_quality_flags"] == [
+        "foreground_fills_crop",
+        "dense_edge_content",
+    ]
+
+
+def test_salvage_dense_edge_crop_can_trim_heavy_left_edge_noise() -> None:
+    crop = Image.new("RGB", (100, 40), "white")
+    draw = ImageDraw.Draw(crop)
+    draw.rectangle((0, 0, 24, 39), fill="black")
+    draw.rectangle((96, 0, 99, 39), fill="black")
+    draw.rectangle((0, 33, 99, 39), fill="black")
+    draw.rectangle((42, 12, 56, 22), fill="black")
+
+    quality = compute_crop_quality(
+        crop,
+        min_width=24,
+        min_height=16,
+        min_dark_ratio=0.01,
+        min_contrast=8.0,
+        max_foreground_bbox_ratio=0.85,
+        dense_edge_dark_ratio=0.45,
+    )
+    _, salvaged_quality, trim = _salvage_dense_edge_crop(
+        crop,
+        quality,
+        min_width=24,
+        min_height=16,
+        min_dark_ratio=0.01,
+        min_contrast=8.0,
+        max_foreground_bbox_ratio=0.85,
+        dense_edge_dark_ratio=0.45,
+        max_edge_trim_ratio=0.18,
+    )
+
+    assert "dense_edge_content" in quality["quality_flags"]
+    assert trim is not None
+    assert trim["left"] >= 18
+    assert salvaged_quality["accepted"] is True
 
 
 def test_assign_case_splits_keeps_document_types_in_both_splits_when_possible() -> None:
