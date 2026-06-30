@@ -5,6 +5,11 @@ import json
 from pathlib import Path
 
 
+def load_priority_order(path: Path) -> list[str]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return [str(case_id) for case_id in payload.get("priority_order", [])]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Promote queued review payloads into label scaffolds for human verification."
@@ -19,6 +24,18 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("data/labeled/pending_review"),
     )
+    parser.add_argument(
+        "--priority-report",
+        type=Path,
+        default=None,
+        help="Optional review_queue priority report used to promote top-ranked cases first.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Optional maximum number of cases to promote. Applied after priority ordering.",
+    )
     parser.add_argument("--case-id", action="append")
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
@@ -28,16 +45,40 @@ def promote_review_queue(
     review_queue_dir: Path,
     output_root: Path,
     *,
+    priority_report_path: Path | None = None,
+    limit: int | None = None,
     case_ids: set[str] | None = None,
     overwrite: bool = False,
 ) -> list[Path]:
     written: list[Path] = []
-    for queue_path in sorted(review_queue_dir.glob("*.json")):
-        case_id = queue_path.stem
+    queue_paths = {
+        queue_path.stem: queue_path
+        for queue_path in sorted(review_queue_dir.glob("*.json"))
+    }
+
+    ordered_case_ids: list[str]
+    if priority_report_path is not None and priority_report_path.exists():
+        ordered_case_ids = [
+            case_id
+            for case_id in load_priority_order(priority_report_path)
+            if case_id in queue_paths
+        ]
+        ordered_case_ids.extend(
+            case_id for case_id in sorted(queue_paths) if case_id not in ordered_case_ids
+        )
+    else:
+        ordered_case_ids = sorted(queue_paths)
+
+    promoted_case_ids: set[str] = set()
+    for case_id in ordered_case_ids:
+        if limit is not None and len(promoted_case_ids) >= limit:
+            break
         if case_ids and case_id not in case_ids:
             continue
 
+        queue_path = queue_paths[case_id]
         payload = json.loads(queue_path.read_text(encoding="utf-8"))
+        wrote_for_case = False
         for document in payload.get("documents", []):
             document_type = document["document_type"]
             label_dir = output_root / document_type / case_id
@@ -62,6 +103,9 @@ def promote_review_queue(
                 encoding="utf-8",
             )
             written.append(label_path)
+            wrote_for_case = True
+        if wrote_for_case:
+            promoted_case_ids.add(case_id)
     return written
 
 
@@ -70,6 +114,8 @@ def main() -> None:
     written = promote_review_queue(
         args.review_queue_dir,
         args.output_root,
+        priority_report_path=args.priority_report,
+        limit=args.limit,
         case_ids=set(args.case_id or []),
         overwrite=args.overwrite,
     )

@@ -112,6 +112,14 @@ Rank queued review cases to decide which ones to label first:
 python -m scripts.review_queue.report_label_priorities
 ```
 
+Promote only the highest-priority queued cases into `pending_review`:
+
+```bash
+python -m scripts.review_queue.promote_to_labeled \
+  --priority-report data/training/reports/review_queue_priority.json \
+  --limit 2
+```
+
 Build a field-level CER/WER report from run results:
 
 ```bash
