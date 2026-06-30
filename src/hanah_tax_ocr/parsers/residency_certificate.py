@@ -24,15 +24,21 @@ class ResidencyCertificateParser(BaseDocumentParser):
                 if part
             )
         )
-
+        region_taxpayer_raw = self._region_value(ocr_result, "taxpayer_name")
+        region_taxpayer = self._clean_taxpayer_value(region_taxpayer_raw)
+        fallback_taxpayer = self._clean_taxpayer_value(
+            self._find_first(r"Taxpayer\s*[:;]?\s*([^\n]+)", text)
+        ) or self._clean_taxpayer_value(
+            self._find_first(
+                r"Taxpayer\s*[:;]?\s*(.+?)\s+(?:TIN|Tax Year|Date)\b",
+                single_line,
+            )
+        )
         taxpayer_name = self._normalize_name(
-            self._clean_taxpayer_value(self._region_value(ocr_result, "taxpayer_name"))
-            or self._clean_taxpayer_value(self._find_first(r"Taxpayer\s*[:;]?\s*([^\n]+)", text))
-            or self._clean_taxpayer_value(
-                self._find_first(
-                    r"Taxpayer\s*[:;]?\s*(.+?)\s+(?:TIN|Tax Year|Date)\b",
-                    single_line,
-                )
+            self._select_taxpayer_name_candidate(
+                region_taxpayer,
+                fallback_taxpayer,
+                region_taxpayer_raw=region_taxpayer_raw,
             )
         )
         tin = self._extract_first_pattern(
@@ -116,3 +122,26 @@ class ResidencyCertificateParser(BaseDocumentParser):
         cleaned = re.sub(r"[^A-Za-z .'-]", " ", cleaned)
         cleaned = self._normalize_whitespace(cleaned)
         return cleaned or None
+
+    def _select_taxpayer_name_candidate(
+        self,
+        region_value: str | None,
+        fallback_value: str | None,
+        *,
+        region_taxpayer_raw: str | None,
+    ) -> str | None:
+        if fallback_value is None:
+            return region_value
+        if region_value is None:
+            return fallback_value
+
+        region_raw = (region_taxpayer_raw or "").lower()
+        region_normalized = region_value.lower()
+        if (
+            "tin" in region_raw
+            or region_normalized.startswith("payer ")
+            or " tin " in f" {region_normalized} "
+            or len(region_value) + 4 < len(fallback_value)
+        ):
+            return fallback_value
+        return region_value

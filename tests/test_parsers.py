@@ -66,6 +66,66 @@ def test_residency_parser_falls_back_when_region_issue_date_is_invalid() -> None
     assert parsed.fields["issue_date"] == "January 12, 2026"
 
 
+def test_residency_parser_prefers_full_text_taxpayer_when_region_is_truncated() -> None:
+    parser = ResidencyCertificateParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "DEPARTMENT OF THE TREASURY",
+                            "Taxpayer: UNIVERSITY OF WASHINGTON",
+                            "TIN: 91-6001537",
+                            "Tax Year: 2025",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "taxpayer_name": OCRPage(
+                    page_number=1,
+                    raw_text="payer UNIVERSITY OF WA",
+                )
+            },
+        ),
+        "residency.png",
+    )
+
+    assert parsed.fields["taxpayer_name"] == "UNIVERSITY OF WASHINGTON"
+
+
+def test_residency_parser_prefers_full_text_taxpayer_when_region_bleeds_into_tin() -> None:
+    parser = ResidencyCertificateParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "DEPARTMENT OF THE TREASURY",
+                            "Taxpayer: UNIVERSITY OF HAWAII",
+                            "TIN: 99-6000354",
+                            "Tax Year: 2019",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "taxpayer_name": OCRPage(
+                    page_number=1,
+                    raw_text="UNIVERSITY TIN - .",
+                )
+            },
+        ),
+        "residency.png",
+    )
+
+    assert parsed.fields["taxpayer_name"] == "UNIVERSITY OF HAWAII"
+
+
 def test_apostille_parser_extracts_standard_items() -> None:
     parser = ApostilleParser()
     parsed = parser.parse(

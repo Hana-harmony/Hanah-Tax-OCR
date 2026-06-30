@@ -12,6 +12,10 @@ from PIL import Image
 from hanah_tax_ocr.schemas import OCRPage, OCRResult, OCRWordBox
 from hanah_tax_ocr.template_profiles import OCRRegionSpec
 
+REGION_FALLBACK_VERTICAL_OFFSETS: dict[str, tuple[float, ...]] = {
+    "issue_date": (-0.08, -0.06, -0.04, -0.02),
+}
+
 
 class _CheckpointRecognizer:
     def __init__(self, overrides: dict[str, Any]) -> None:
@@ -186,12 +190,44 @@ class PaddleOCREngine:
         regions: dict[str, OCRPage] = {}
         for region_spec in region_specs:
             region_engine = self._load(self._region_overrides.get(region_spec.name))
+            pages = self._run_region_with_fallbacks(
+                image,
+                region_spec,
+                region_engine,
+            )
+            if pages:
+                regions[region_spec.name] = pages[0]
+        return regions
+
+    def _run_region_with_fallbacks(
+        self,
+        image: Image.Image,
+        region_spec: OCRRegionSpec,
+        region_engine: Any,
+    ) -> list[OCRPage]:
+        region_boxes = [region_spec]
+        for vertical_offset in REGION_FALLBACK_VERTICAL_OFFSETS.get(region_spec.name, ()):
+            shifted_top = max(0.0, region_spec.top + vertical_offset)
+            shifted_bottom = min(1.0, region_spec.bottom + vertical_offset)
+            if shifted_bottom <= shifted_top:
+                continue
+            region_boxes.append(
+                OCRRegionSpec(
+                    region_spec.name,
+                    region_spec.left,
+                    shifted_top,
+                    region_spec.right,
+                    shifted_bottom,
+                )
+            )
+
+        for candidate_region in region_boxes:
             crop = image.crop(
                 (
-                    int(image.width * region_spec.left),
-                    int(image.height * region_spec.top),
-                    int(image.width * region_spec.right),
-                    int(image.height * region_spec.bottom),
+                    int(image.width * candidate_region.left),
+                    int(image.height * candidate_region.top),
+                    int(image.width * candidate_region.right),
+                    int(image.height * candidate_region.bottom),
                 )
             )
             raw_result = region_engine.ocr(
@@ -199,9 +235,9 @@ class PaddleOCREngine:
                 cls=self._kwargs.get("use_angle_cls", True),
             )
             pages = self._build_pages(raw_result)
-            if pages:
-                regions[region_spec.name] = pages[0]
-        return regions
+            if any(page.raw_text.strip() for page in pages):
+                return pages
+        return []
 
     def _build_pages(self, raw_result: Any) -> list[OCRPage]:
         pages: list[OCRPage] = []

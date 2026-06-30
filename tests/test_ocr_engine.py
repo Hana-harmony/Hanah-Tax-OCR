@@ -87,3 +87,52 @@ def test_paddle_ocr_engine_uses_checkpoint_region_overrides(tmp_path: Path) -> N
         engine_module._CheckpointRecognizer = original
 
     assert regions["tin"].raw_text == "CKPT"
+
+
+def test_paddle_ocr_engine_retries_issue_date_region_with_upward_shift(tmp_path: Path) -> None:
+    image_path = tmp_path / "sample.png"
+    image = Image.new("RGB", (100, 100), "white")
+    for x in range(60, 90):
+        for y in range(14, 20):
+            image.putpixel((x, y), (0, 0, 0))
+    image.save(image_path)
+
+    class FakePaddleOCR:
+        def __init__(self, **kwargs: str) -> None:
+            self.kwargs = kwargs
+
+        def ocr(self, image_input: object, cls: bool = True) -> list[list[object]]:
+            assert cls is True
+            width = len(image_input[0])  # type: ignore[index]
+            height = len(image_input)  # type: ignore[arg-type]
+            dark_pixels = 0
+            for row in image_input:  # type: ignore[assignment]
+                for pixel in row:
+                    if int(pixel[0]) < 64:
+                        dark_pixels += 1
+            if dark_pixels == 0:
+                return [[]]
+            return [[
+                (
+                    [[0, 0], [width, 0], [width, height], [0, height]],
+                    ("Date: April 5, 2021", 0.99),
+                )
+            ]]
+
+    fake_module = types.ModuleType("paddleocr")
+    fake_module.PaddleOCR = FakePaddleOCR
+    original = sys.modules.get("paddleocr")
+    sys.modules["paddleocr"] = fake_module
+    try:
+        engine = PaddleOCREngine(lang="en")
+        regions = engine.run_regions(
+            image_path,
+            [OCRRegionSpec("issue_date", 0.60, 0.22, 0.90, 0.28)],
+        )
+    finally:
+        if original is None:
+            del sys.modules["paddleocr"]
+        else:
+            sys.modules["paddleocr"] = original
+
+    assert regions["issue_date"].raw_text == "Date: April 5, 2021"
