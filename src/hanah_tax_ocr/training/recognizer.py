@@ -5,7 +5,7 @@ import json
 import os
 import shlex
 import subprocess
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -177,6 +177,65 @@ def _recommended_settings(
     return settings
 
 
+def _source_type_for(entry: dict[str, Any]) -> str:
+    return "hard_case" if entry.get("augmentation_type") else "base"
+
+
+def _counts_by(entries: list[dict[str, Any]], key: str) -> dict[str, int]:
+    counter = Counter()
+    for entry in entries:
+        value = entry.get(key) or "unknown"
+        counter[str(value)] += 1
+    return dict(sorted(counter.items()))
+
+
+def _build_data_profile(
+    train_entries: list[dict[str, Any]],
+    val_entries: list[dict[str, Any]],
+) -> dict[str, Any]:
+    source_counts = {
+        "train": _counts_by(
+            [
+                {"source_type": _source_type_for(entry)}
+                for entry in train_entries
+            ],
+            "source_type",
+        ),
+        "val": _counts_by(
+            [
+                {"source_type": _source_type_for(entry)}
+                for entry in val_entries
+            ],
+            "source_type",
+        ),
+    }
+    hard_case_train_count = source_counts["train"].get("hard_case", 0)
+    train_count = len(train_entries)
+    hard_case_train_ratio = (
+        round(hard_case_train_count / train_count, 4) if train_count else 0.0
+    )
+
+    warnings: list[str] = []
+    if train_count == 0:
+        warnings.append("no_train_samples")
+    elif train_count < 20:
+        warnings.append("low_train_sample_count")
+    if not val_entries:
+        warnings.append("no_val_samples")
+    if hard_case_train_ratio > 0.5:
+        warnings.append("hard_case_dominant_train_split")
+
+    return {
+        "counts_by_document_type": {
+            "train": _counts_by(train_entries, "document_type"),
+            "val": _counts_by(val_entries, "document_type"),
+        },
+        "counts_by_source_type": source_counts,
+        "hard_case_train_ratio": hard_case_train_ratio,
+        "warnings": warnings,
+    }
+
+
 def prepare_recognizer_datasets(
     field_crops_root: Path,
     output_root: Path,
@@ -234,6 +293,7 @@ def prepare_recognizer_datasets(
             default=0,
         )
         settings = _recommended_settings(field_group, len(train_entries), max_text_length)
+        data_profile = _build_data_profile(train_entries, val_entries)
         settings["dictionary_path"] = str(dict_path)
         settings["train_label_path"] = str(train_file)
         settings["val_label_path"] = str(val_file)
@@ -248,6 +308,7 @@ def prepare_recognizer_datasets(
             "field_names": sorted(
                 {entry["field_name"] for entry in train_entries + val_entries}
             ),
+            "data_profile": data_profile,
         }
         plan_path = group_root / "plan.json"
         plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -257,6 +318,7 @@ def prepare_recognizer_datasets(
             "val_count": len(val_entries),
             "character_count": len(unique_chars),
             "plan_path": str(plan_path),
+            "data_profile": data_profile,
         }
 
     summary = {
