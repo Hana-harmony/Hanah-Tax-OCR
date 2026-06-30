@@ -98,6 +98,13 @@ Generate hard-case augmented training crops:
 python -m scripts.training.augment_hard_cases
 ```
 
+Rank field-group labeling gaps before collecting more base samples:
+
+```bash
+python -m scripts.training.report_data_gaps \
+  --eval-report evals/current_report.json
+```
+
 Build a field-level CER/WER report from run results:
 
 ```bash
