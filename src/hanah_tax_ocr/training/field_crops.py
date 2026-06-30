@@ -66,10 +66,45 @@ def field_group_for(field_name: str) -> str:
     return FIELD_GROUPS.get(field_name, "korean_mixed_form")
 
 
-def split_for_case(case_id: str, val_ratio: float) -> str:
+def split_score_for_case(case_id: str) -> float:
     digest = hashlib.sha1(case_id.encode("utf-8")).hexdigest()
-    bucket = int(digest[:8], 16) / 0xFFFFFFFF
-    return "val" if bucket < val_ratio else "train"
+    return int(digest[:8], 16) / 0xFFFFFFFF
+
+
+def split_for_case(case_id: str, val_ratio: float) -> str:
+    return "val" if split_score_for_case(case_id) < val_ratio else "train"
+
+
+def assign_case_splits(
+    case_documents: list[dict[str, str]],
+    *,
+    val_ratio: float,
+) -> dict[str, str]:
+    assignments = {
+        item["case_id"]: split_for_case(item["case_id"], val_ratio)
+        for item in case_documents
+    }
+    if not 0.0 < val_ratio < 1.0:
+        return assignments
+
+    by_document_type: dict[str, list[str]] = defaultdict(list)
+    for item in case_documents:
+        by_document_type[item["document_type"]].append(item["case_id"])
+
+    for case_ids in by_document_type.values():
+        unique_case_ids = sorted(
+            set(case_ids),
+            key=lambda case_id: (split_score_for_case(case_id), case_id),
+        )
+        if len(unique_case_ids) < 2:
+            continue
+
+        if not any(assignments[case_id] == "val" for case_id in unique_case_ids):
+            assignments[unique_case_ids[0]] = "val"
+        if not any(assignments[case_id] == "train" for case_id in unique_case_ids):
+            assignments[unique_case_ids[-1]] = "train"
+
+    return assignments
 
 
 def discover_label_paths(labeled_root: Path) -> list[Path]:
@@ -149,6 +184,7 @@ def export_field_crops(
     min_contrast: float = 8.0,
 ) -> dict[str, Any]:
     manifest_entries: list[dict[str, Any]] = []
+    prepared_cases: list[dict[str, Any]] = []
     counts_by_group = Counter()
     counts_by_split = Counter()
     counts_by_document = Counter()
@@ -195,7 +231,38 @@ def export_field_crops(
             continue
 
         case_id = payload.get("case_id", label_path.parent.name)
-        split = split_for_case(case_id, val_ratio)
+        prepared_cases.append(
+            {
+                "case_id": case_id,
+                "document_type": document_type.value,
+                "source_path": source_path,
+                "label_path": label_path,
+                "expected_fields": expected_fields,
+                "profile": profile,
+                "image": image,
+            }
+        )
+
+    case_splits = assign_case_splits(
+        [
+            {
+                "case_id": item["case_id"],
+                "document_type": item["document_type"],
+            }
+            for item in prepared_cases
+        ],
+        val_ratio=val_ratio,
+    )
+
+    for prepared_case in prepared_cases:
+        case_id = prepared_case["case_id"]
+        document_type = DocumentType(prepared_case["document_type"])
+        source_path = Path(prepared_case["source_path"])
+        label_path = Path(prepared_case["label_path"])
+        expected_fields = prepared_case["expected_fields"]
+        profile = prepared_case["profile"]
+        image = prepared_case["image"]
+        split = case_splits[case_id]
 
         for region in profile.ocr_regions:
             expected_value = expected_fields.get(region.name)

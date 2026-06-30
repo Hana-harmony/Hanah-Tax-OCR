@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from hanah_tax_ocr.training.field_crops import export_field_crops
+from hanah_tax_ocr.training.field_crops import assign_case_splits, export_field_crops
 from PIL import Image
 
 
@@ -97,3 +97,95 @@ def test_export_field_crops_marks_low_quality_blank_crop_as_rejected(tmp_path: P
 
     assert summary["rejected_crops"] == 1
     assert summary["quality_flag_counts"]["low_dark_ratio"] == 1
+
+
+def test_assign_case_splits_keeps_document_types_in_both_splits_when_possible() -> None:
+    assignments = assign_case_splits(
+        [
+            {"case_id": "apostille_case_001", "document_type": "apostille"},
+            {"case_id": "apostille_case_002", "document_type": "apostille"},
+            {"case_id": "residency_case_001", "document_type": "residency_certificate"},
+            {"case_id": "residency_case_002", "document_type": "residency_certificate"},
+        ],
+        val_ratio=0.2,
+    )
+
+    apostille_splits = {
+        assignments["apostille_case_001"],
+        assignments["apostille_case_002"],
+    }
+    residency_splits = {
+        assignments["residency_case_001"],
+        assignments["residency_case_002"],
+    }
+    assert apostille_splits == {"train", "val"}
+    assert residency_splits == {"train", "val"}
+
+
+def test_export_field_crops_assigns_val_case_per_document_type_when_possible(
+    tmp_path: Path,
+) -> None:
+    sample_dir = tmp_path / "sample_data"
+    sample_dir.mkdir(parents=True)
+    residency_image = sample_dir / "residency_treasury.png"
+    apostille_image = sample_dir / "california_apostille.png"
+    Image.new("RGB", (400, 300), "white").save(residency_image)
+    Image.new("RGB", (400, 300), "white").save(apostille_image)
+
+    label_specs = [
+        (
+            "residency_certificate",
+            "residency_case_001",
+            residency_image,
+            {"taxpayer_name": "RESIDENCY ONE"},
+        ),
+        (
+            "residency_certificate",
+            "residency_case_002",
+            residency_image,
+            {"taxpayer_name": "RESIDENCY TWO"},
+        ),
+        (
+            "apostille",
+            "apostille_case_001",
+            apostille_image,
+            {"signed_by": "APOSTILLE ONE"},
+        ),
+        (
+            "apostille",
+            "apostille_case_002",
+            apostille_image,
+            {"signed_by": "APOSTILLE TWO"},
+        ),
+    ]
+    for document_type, case_id, image_path, expected_fields in label_specs:
+        label_root = tmp_path / "data" / "labeled" / document_type / case_id
+        label_root.mkdir(parents=True)
+        (label_root / "label.json").write_text(
+            json.dumps(
+                {
+                    "case_id": case_id,
+                    "document_type": document_type,
+                    "source_path": str(image_path),
+                    "expected_fields": expected_fields,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+    output_root = tmp_path / "field_crops"
+    export_field_crops(tmp_path / "data" / "labeled", output_root, val_ratio=0.2)
+
+    manifest_entries = [
+        json.loads(line)
+        for line in (output_root / "manifest.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    splits_by_document_type: dict[str, set[str]] = {}
+    for entry in manifest_entries:
+        splits_by_document_type.setdefault(entry["document_type"], set()).add(entry["split"])
+
+    assert splits_by_document_type["apostille"] == {"train", "val"}
+    assert splits_by_document_type["residency_certificate"] == {"train", "val"}
