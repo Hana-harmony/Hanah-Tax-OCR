@@ -81,11 +81,16 @@ class ResidencyCertificateParser(BaseDocumentParser):
             )
         residency_country = normalize_country(
             "United States of America"
-            if self._contains_any(
+            if re.search(
+                r"resident of the united states(?: of america)?",
+                single_line,
+                re.IGNORECASE,
+            )
+            or self._contains_any(
                 single_line,
                 [
-                    "resident of the united states of america",
                     "united states of america for purposes of u.s. taxation",
+                    "united states for purposes of u.s. taxation",
                 ],
             )
             else None
@@ -130,7 +135,7 @@ class ResidencyCertificateParser(BaseDocumentParser):
             return None
         cleaned = re.sub(r"Taxpayer\s*:?", " ", value, flags=re.IGNORECASE)
         cleaned = re.sub(r"TIN\s*:?.*$", " ", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"[^A-Za-z .'-]", " ", cleaned)
+        cleaned = re.sub(r"[^A-Za-z0-9 .'-]", " ", cleaned)
         cleaned = self._normalize_whitespace(cleaned)
         return cleaned or None
 

@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from hanah_tax_ocr.normalization import (
+    canonicalize_name,
     normalize_address,
     normalize_country,
     normalize_country_code,
@@ -134,6 +135,12 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             first_name=first_name,
             last_name=last_name,
         )
+        applicant_name = self._rebuild_applicant_name(
+            applicant_name,
+            first_name=first_name,
+            middle_name=middle_name,
+            last_name=last_name,
+        )
 
         fields = {
             "first_name": first_name,
@@ -166,7 +173,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if not value:
             return None
         cleaned = re.sub(r"\b(Last|First|Middle|Name)\b", " ", value, flags=re.IGNORECASE)
-        cleaned = re.sub(r"[^A-Za-z .'-]", " ", cleaned)
+        cleaned = re.sub(r"[^A-Za-z0-9 .'-]", " ", cleaned)
         cleaned = self._normalize_whitespace(cleaned)
         return cleaned or None
 
@@ -218,3 +225,41 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if tokens[0].lower() == first_name.lower() and tokens[-1].lower() == last_name.lower():
             return tokens[1][:1].upper()
         return middle_name
+
+    def _rebuild_applicant_name(
+        self,
+        applicant_name: str | None,
+        *,
+        first_name: str | None,
+        middle_name: str | None,
+        last_name: str | None,
+    ) -> str | None:
+        rebuilt = self._format_applicant_name(first_name, middle_name, last_name)
+        if not rebuilt:
+            return applicant_name
+        if not applicant_name:
+            return rebuilt
+        if canonicalize_name(applicant_name) != canonicalize_name(rebuilt):
+            return rebuilt
+        if applicant_name != rebuilt and re.fullmatch(r"[A-Za-z '.-]+", rebuilt):
+            return rebuilt
+        return applicant_name
+
+    def _format_applicant_name(
+        self,
+        first_name: str | None,
+        middle_name: str | None,
+        last_name: str | None,
+    ) -> str | None:
+        if not first_name and not middle_name and not last_name:
+            return None
+        formatted_middle = middle_name
+        if (
+            middle_name
+            and len(middle_name) == 1
+            and middle_name.isalpha()
+            and (first_name or "").isalpha()
+            and (last_name or "").isalpha()
+        ):
+            formatted_middle = f"{middle_name}."
+        return " ".join(part for part in [first_name, formatted_middle, last_name] if part).strip()

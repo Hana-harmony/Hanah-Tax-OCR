@@ -46,8 +46,8 @@ class ApostilleParser(BaseDocumentParser):
         return self._parse_generic(
             ocr_result,
             source_path,
-            authority_pattern=r"by\s+(Secretary of State.*?North Carolina)",
-            place_pattern=r"5\.\s*at\s+([A-Za-z ,]+?)(?=\s+6\.|$)",
+            authority_pattern=r"7\.\s*by\s+(.+?)(?=\s+8\.|$)",
+            place_pattern=r"5\.\s*at\s+([A-Za-z0-9 ,.-]+?)(?=\s+6\.|$)",
             date_pattern=r"((?:\d{1,2}(?:ST|ND|RD|TH)?\s+DAY\s+OF\s+[A-Z]+[,]?\s*\d{4}))",
             seal_pattern=r"seal(?:/stamp)?\s+of[_\s]*([A-Z ,]+?)(?=\s+CERTIFIED|\s+5\.|$)",
         )
@@ -61,7 +61,7 @@ class ApostilleParser(BaseDocumentParser):
             ocr_result,
             source_path,
             authority_pattern=r"7\.\s*by\s+(Secretary of State.*?Michigan)",
-            place_pattern=r"5\.\s*at\s+([A-Za-z ,]+?)(?=\s+6\.|$)",
+            place_pattern=r"5\.\s*at\s+([A-Za-z0-9 ,.-]+?)(?=\s+6\.|$)",
             date_pattern=r"((?:\d{1,2}(?:ST|ND|RD|TH)?\s+OF\s+[A-Z]+[,]?\s*\d{4}))",
             seal_pattern=r"bears the seal of[:\s]*(.+?)(?=\s+CERTIFIED|\s+5\.|$)",
         )
@@ -75,7 +75,7 @@ class ApostilleParser(BaseDocumentParser):
             ocr_result,
             source_path,
             authority_pattern=r"7\.\s*by\s+(Deputy Secretary of State.*?California)",
-            place_pattern=r"5\.\s*At\s+([A-Za-z ,]+?)(?=\s+6\.|\s+7\.|$)",
+            place_pattern=r"5\.\s*At\s+([A-Za-z0-9 ,.-]+?)(?=\s+6\.|\s+7\.|$)",
             date_pattern=r"((?:\d{1,2}(?:ST|ND|RD|TH)?\s+DAY\s+OF\s+[A-Z]+[,]?\s*\d{4}))",
             seal_pattern=r"bears the seal/stamp of[:\s]*(.+?)(?=\s+CERTIFIED|\s+5\.|$)",
         )
@@ -116,7 +116,7 @@ class ApostilleParser(BaseDocumentParser):
         fields["issued_at"] = self._normalize_california_issued_at(
             self._clean_item_value(
                 self._find_first(
-                    r"5\.\s*At\s+([A-Za-z ,]+?)(?=\s+6\.|\s+7\.|$)",
+                    r"5\.\s*At\s+([A-Za-z0-9 ,.-]+?)(?=\s+6\.|\s+7\.|$)",
                     single_line,
                 )
                 or self._region_value(ocr_result, "issued_at"),
@@ -175,7 +175,7 @@ class ApostilleParser(BaseDocumentParser):
             ),
             "issued_at": self._clean_item_value(
                 self._find_first(
-                    place_pattern or r"5\.\s*at\s+([A-Za-z ,]+?)(?=\s+6\.|$)",
+                    place_pattern or r"5\.\s*at\s+([A-Za-z0-9 ,.-]+?)(?=\s+6\.|$)",
                     single_line,
                 )
                 or self._region_value(ocr_result, "issued_at"),
@@ -254,7 +254,7 @@ class ApostilleParser(BaseDocumentParser):
     def _normalize_signed_by(self, value: str | None) -> str | None:
         if not value:
             return None
-        cleaned = value.strip()
+        cleaned = value.strip().rstrip(".,;:")
         if re.fullmatch(r"\d+\.?", cleaned):
             return None
         return cleaned or None

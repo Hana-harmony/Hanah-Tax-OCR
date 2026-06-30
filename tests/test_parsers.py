@@ -34,6 +34,28 @@ def test_residency_parser_extracts_core_fields() -> None:
     assert parsed.quality_checks["has_certification_text"] is True
 
 
+def test_residency_parser_accepts_partial_united_states_phrase() -> None:
+    parser = ResidencyCertificateParser()
+    parsed = parser.parse(
+        build_result(
+            [
+                "DEPARTMENT OF THE TREASURY",
+                "INTERNAL REVENUE SERVICE",
+                "Date: January 12, 2026",
+                "Taxpayer: Sample 1 User",
+                "TIN: 987-65-4321",
+                "Tax Year: 2026",
+                "I certify that the above-named taxpayer is a resident of the United States",
+            ]
+        ),
+        "residency.png",
+    )
+
+    assert parsed.fields["taxpayer_name"] == "Sample 1 User"
+    assert parsed.fields["residency_country"] == "United States of America"
+    assert parsed.fields["residency_country_code"] == "US"
+
+
 def test_residency_parser_falls_back_when_region_issue_date_is_invalid() -> None:
     parser = ResidencyCertificateParser()
     parsed = parser.parse(
@@ -229,6 +251,30 @@ def test_apostille_parser_prefers_full_text_over_noisy_regions() -> None:
     assert parsed.fields["issued_at"] == "Raleigh, North Carolina"
 
 
+def test_apostille_parser_accepts_digits_in_issued_at_and_generic_authority() -> None:
+    parser = ApostilleParser()
+    parsed = parser.parse(
+        build_result(
+            [
+                "APOSTILLE (Convention de La Haye du 5 octobre 1961)",
+                "1. Country: UNITED STATES OF AMERICA",
+                "2. This Public Document has been signed by NOTARY SAMPLE 1.",
+                "3. acting in the capacity of NOTARY PUBLIC",
+                "4. bears the seal/stamp of COUNTY OF SAMPLE, STATE OF SAMPLE",
+                "5. at Capital City, Sample State 1",
+                "6. the 2TH DAY OF APRIL, 2021",
+                "7. by Secretary of State State of Sample",
+                "8. No. 5001",
+            ]
+        ),
+        "apostille.jpg",
+    )
+
+    assert parsed.fields["signed_by"] == "NOTARY SAMPLE 1"
+    assert parsed.fields["issued_at"] == "Capital City, Sample State 1"
+    assert parsed.fields["issuing_authority"] == "Secretary of State State of Sample"
+
+
 def test_apostille_parser_normalizes_missing_space_after_year_comma() -> None:
     parser = ApostilleParser()
     parsed = parser.parse(
@@ -342,6 +388,36 @@ def test_withholding_parser_extracts_sample_fields() -> None:
     assert parsed.fields["signature_date"] == "2026-01-12"
 
 
+def test_withholding_parser_preserves_digits_and_rebuilds_applicant_name() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "201-21-2001",
+                            "2026-01-02",
+                            "SAMPLE1 A USER",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "first_name": OCRPage(page_number=1, raw_text="SAMPLE1"),
+                "middle_name": OCRPage(page_number=1, raw_text="A"),
+                "last_name": OCRPage(page_number=1, raw_text="USER"),
+                "applicant_name": OCRPage(page_number=1, raw_text="SAMPLET A USER"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["first_name"] == "SAMPLE1"
+    assert parsed.fields["applicant_name"] == "SAMPLE1 A USER"
+
+
 def test_withholding_parser_recovers_from_region_ocr_noise() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(
@@ -380,6 +456,7 @@ def test_withholding_parser_recovers_from_region_ocr_noise() -> None:
     assert parsed.fields["last_name"] == "CHEN"
     assert parsed.fields["residency_country"] == "United States of America"
     assert parsed.fields["residency_country_code"] == "US"
+    assert parsed.fields["applicant_name"] == "MARIA L. CHEN"
 
 
 def test_withholding_parser_prefers_region_signature_date_over_header_date() -> None:

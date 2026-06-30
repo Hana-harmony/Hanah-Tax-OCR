@@ -8,6 +8,7 @@ from typing import Any
 from hanah_tax_ocr.harness import CaseDocument, HarnessRunner
 from hanah_tax_ocr.ocr import PaddleOCREngine
 from hanah_tax_ocr.schemas import DocumentType
+from hanah_tax_ocr.template_profiles import classify_template
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -26,6 +27,12 @@ def _safe_marker_filename(document_type: DocumentType, case_id: str) -> str:
     if document_type == DocumentType.WITHHOLDING_TAX_FORM:
         return f"{case_id}__국내원천소득.png"
     return f"{case_id}__north_carolina.png"
+
+
+def _default_ocr_lang(document_type: DocumentType) -> str:
+    if document_type == DocumentType.WITHHOLDING_TAX_FORM:
+        return "korean"
+    return "en"
 
 
 def _load_font(size: int) -> ImageFont.ImageFont:
@@ -218,7 +225,7 @@ def _render_apostille_document(payload: dict[str, Any], output_path: Path) -> Pa
         f"4. bears the seal/stamp of {fields['seal_owner']}",
         f"5. at {fields['issued_at']}",
         f"6. the {fields['issued_on']}",
-        "7. by Secretary of State or Deputy Secretary of State, State of North Carolina",
+        f"7. by {fields['issuing_authority']}",
         f"8. No. {fields['certificate_number']}",
     ]
     y = 310
@@ -340,6 +347,7 @@ def _discover_case_documents(
             CaseDocument(
                 document_type=DocumentType(str(payload["document_type"])),
                 source_path=str(payload["source_path"]),
+                ocr_lang=_default_ocr_lang(DocumentType(str(payload["document_type"]))),
             )
             for payload in payloads
         ]
@@ -436,8 +444,8 @@ def run_eval_suite(
         inference_subdir=inference_subdir,
         paddleocr_home=paddleocr_home,
     )
-    engine = PaddleOCREngine(lang=lang, region_overrides=region_overrides)
-    runner = HarnessRunner(review_queue_dir=review_queue_dir, ocr_engine=engine)
+    runner = HarnessRunner(review_queue_dir=review_queue_dir)
+    engines: dict[str, PaddleOCREngine] = {}
 
     written_case_ids: list[str] = []
     missing_case_ids: list[str] = []
@@ -449,7 +457,31 @@ def run_eval_suite(
         if not documents:
             missing_case_ids.append(case_id)
             continue
-        run_result = runner.run_case(case_id, documents)
+        hydrated_documents: list[CaseDocument] = []
+        for document in documents:
+            document_lang = document.ocr_lang or lang
+            engine = engines.get(document_lang)
+            if engine is None:
+                engine = PaddleOCREngine(lang=document_lang, region_overrides=region_overrides)
+                engines[document_lang] = engine
+            ocr_result = engine.run(document.source_path)
+            profile = classify_template(
+                document.document_type,
+                document.source_path,
+                ocr_result.combined_text(),
+            )
+            if profile is not None:
+                ocr_result.template_id = profile.template_id
+                ocr_result.regions = engine.run_regions(document.source_path, profile.ocr_regions)
+            hydrated_documents.append(
+                CaseDocument(
+                    document_type=document.document_type,
+                    source_path=document.source_path,
+                    ocr_lang=document_lang,
+                    ocr_result=ocr_result,
+                )
+            )
+        run_result = runner.run_case(case_id, hydrated_documents)
         runner.write_run_result(run_result, output_dir / f"{case_id}.json")
         written_case_ids.append(case_id)
 

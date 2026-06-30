@@ -4,7 +4,10 @@ import json
 import sys
 from pathlib import Path
 
+from hanah_tax_ocr.schemas import DocumentType
+
 from scripts.evals.run_eval_suite import (
+    _default_ocr_lang,
     _discover_case_documents,
     _materialize_synthetic_source,
     _region_overrides_from_recognizer_root,
@@ -41,6 +44,7 @@ def test_discover_case_documents_uses_labels_for_expected_cases(tmp_path: Path) 
     assert sorted(cases) == ["case_001"]
     assert cases["case_001"][0].source_path == str(sample_path)
     assert cases["case_001"][0].document_type.value == "residency_certificate"
+    assert cases["case_001"][0].ocr_lang == "en"
 
 
 def test_discover_case_documents_skips_non_file_sources(tmp_path: Path) -> None:
@@ -98,6 +102,12 @@ def test_discover_case_documents_materializes_synthetic_sources(tmp_path: Path) 
     materialized_path = Path(cases["case_001"][0].source_path)
     assert materialized_path.exists()
     assert materialized_path.suffix == ".png"
+    assert cases["case_001"][0].ocr_lang == "en"
+
+
+def test_default_ocr_lang_uses_korean_for_withholding() -> None:
+    assert _default_ocr_lang(DocumentType.WITHHOLDING_TAX_FORM) == "korean"
+    assert _default_ocr_lang(DocumentType.APOSTILLE) == "en"
 
 
 def test_materialize_synthetic_source_renders_file(tmp_path: Path) -> None:
