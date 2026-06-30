@@ -55,7 +55,8 @@ def test_generate_synthetic_date_hard_cases_appends_manifest_entries(tmp_path: P
         if line.strip()
     ]
     assert len(manifest_entries) == 6
-    assert all(entry["augmentation_type"] == "synthetic_date" for entry in manifest_entries)
+    assert all(entry["augmentation_type"].startswith("synthetic_date.") for entry in manifest_entries)
+    assert all(entry["render_variant"] for entry in manifest_entries)
     assert all(Path(entry["crop_path"]).exists() for entry in manifest_entries)
     issue_entries = [
         entry for entry in manifest_entries if entry["field_name"] == "issue_date"
@@ -67,3 +68,4 @@ def test_generate_synthetic_date_hard_cases_appends_manifest_entries(tmp_path: P
         "signature_date",
         "issued_on",
     }
+    assert sum(summary["counts_by_variant"].values()) == summary["synthetic_entry_count"]

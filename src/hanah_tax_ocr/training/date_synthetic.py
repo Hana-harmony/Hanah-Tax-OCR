@@ -14,6 +14,7 @@ DEFAULT_FIELD_CROPS_ROOT = Path("data/training/field_crops")
 DEFAULT_OUTPUT_ROOT = Path("data/training/hard_cases")
 DATE_FIELD_NAMES = {"issue_date", "signature_date", "issued_on"}
 SYNTHETIC_AUGMENTATION_PREFIX = "synthetic_date"
+RENDER_VARIANTS = ("plain", "context_header", "context_footer", "underline_noise", "left_clip")
 MONTHS = (
     "January",
     "February",
@@ -44,6 +45,11 @@ FONT_PATHS = {
         Path("/System/Library/Fonts/Helvetica.ttc"),
         Path("/System/Library/Fonts/Supplemental/Courier New.ttf"),
     ],
+}
+CONTEXT_NOISE_SNIPPETS = {
+    "issue_date": ("CERTIFICATION", "TIN:", "Tax Year: 2026"),
+    "signature_date": ("신청인", "SIGNATURE", "DATE"),
+    "issued_on": ("6. the", "Done at", "No. 5001"),
 }
 
 
@@ -136,17 +142,50 @@ def _fit_font(
     return ImageFont.load_default()
 
 
+def _draw_context_noise(
+    image: Image.Image,
+    field_name: str,
+    rng: random.Random,
+    *,
+    position: str,
+) -> None:
+    snippets = CONTEXT_NOISE_SNIPPETS.get(field_name, ())
+    if not snippets:
+        return
+    draw = ImageDraw.Draw(image)
+    snippet = rng.choice(snippets)
+    font = _load_font(field_name, max(12, int(image.height * 0.22)), rng)
+    bbox = draw.textbbox((0, 0), snippet, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+    x = rng.randint(2, max(2, image.width - text_width - 2))
+    if position == "header":
+        y_min = 0
+        y_max = max(0, min(int(image.height * 0.08), image.height - text_height))
+    else:
+        y_min = max(0, min(int(image.height * 0.72), image.height - text_height))
+        y_max = max(y_min, image.height - text_height)
+    y = rng.randint(y_min, y_max)
+    ink = rng.randint(120, 168)
+    draw.text((x, y), snippet, fill=(ink, ink, ink), font=font)
+
+
 def _render_synthetic_crop(
     base_entry: dict[str, Any],
     recognizer_text: str,
     rng: random.Random,
-) -> Image.Image:
+) -> tuple[Image.Image, str]:
     field_name = str(base_entry["field_name"])
     base_crop = Image.open(base_entry["crop_path"]).convert("RGB")
     background = base_crop.convert("L").convert("RGB")
     background = Image.blend(background, Image.new("RGB", background.size, "white"), 0.9)
     if rng.random() < 0.6:
         background = background.filter(ImageFilter.GaussianBlur(radius=0.6))
+    render_variant = rng.choices(
+        RENDER_VARIANTS,
+        weights=(0.2, 0.24, 0.22, 0.18, 0.16),
+        k=1,
+    )[0]
 
     font = _fit_font(field_name, recognizer_text, background.size, rng)
     draw = ImageDraw.Draw(background)
@@ -159,8 +198,27 @@ def _render_synthetic_crop(
     max_y = max(y_margin, background.height - text_height - y_margin)
     x = rng.randint(x_margin, max_x)
     y = rng.randint(y_margin, max_y)
+    if render_variant == "left_clip":
+        x = max(0, x - rng.randint(4, max(4, int(background.width * 0.08))))
     ink = rng.randint(12, 48)
     draw.text((x, y), recognizer_text, fill=(ink, ink, ink), font=font)
+
+    if render_variant == "context_header":
+        _draw_context_noise(background, field_name, rng, position="header")
+    elif render_variant == "context_footer":
+        _draw_context_noise(background, field_name, rng, position="footer")
+    elif render_variant == "underline_noise":
+        underline_y = min(background.height - 2, y + text_height + rng.randint(1, 4))
+        draw.line(
+            (
+                max(0, x - 2),
+                underline_y,
+                min(background.width - 1, x + text_width + 2),
+                underline_y,
+            ),
+            fill=(rng.randint(90, 136),) * 3,
+            width=1,
+        )
 
     if rng.random() < 0.35:
         background = background.rotate(
@@ -179,7 +237,7 @@ def _render_synthetic_crop(
         background = resized.resize(background.size, resample=Image.Resampling.BILINEAR)
     if rng.random() < 0.5:
         background = background.filter(ImageFilter.GaussianBlur(radius=0.4))
-    return background
+    return background, render_variant
 
 
 def generate_synthetic_date_hard_cases(
@@ -212,6 +270,7 @@ def generate_synthetic_date_hard_cases(
 
     synthetic_entries: list[dict[str, Any]] = []
     counts_by_field_name: dict[str, int] = {field_name: 0 for field_name in DATE_FIELD_NAMES}
+    counts_by_variant: dict[str, int] = {variant: 0 for variant in RENDER_VARIANTS}
     variant_dir = output_root / "date" / SYNTHETIC_AUGMENTATION_PREFIX
     variant_dir.mkdir(parents=True, exist_ok=True)
 
@@ -226,7 +285,7 @@ def generate_synthetic_date_hard_cases(
                     "text": text,
                 }
             )
-            image = _render_synthetic_crop(entry, recognizer_text, rng)
+            image, render_variant = _render_synthetic_crop(entry, recognizer_text, rng)
             output_path = variant_dir / (
                 f"{base_path.stem}__{SYNTHETIC_AUGMENTATION_PREFIX}_{variant_index:02d}.png"
             )
@@ -238,7 +297,8 @@ def generate_synthetic_date_hard_cases(
                     "recognizer_text": recognizer_text,
                     "crop_path": str(output_path),
                     "base_crop_path": str(base_path),
-                    "augmentation_type": SYNTHETIC_AUGMENTATION_PREFIX,
+                    "augmentation_type": f"{SYNTHETIC_AUGMENTATION_PREFIX}.{render_variant}",
+                    "render_variant": render_variant,
                     "quality": {
                         "accepted": True,
                         "synthetic": True,
@@ -248,6 +308,7 @@ def generate_synthetic_date_hard_cases(
                 }
             )
             counts_by_field_name[field_name] += 1
+            counts_by_variant[render_variant] += 1
 
     manifest_entries = existing_entries + synthetic_entries
     manifest_path.write_text(
@@ -266,6 +327,9 @@ def generate_synthetic_date_hard_cases(
             field_name: count
             for field_name, count in sorted(counts_by_field_name.items())
             if count > 0
+        },
+        "counts_by_variant": {
+            variant: count for variant, count in sorted(counts_by_variant.items()) if count > 0
         },
     }
     (output_root / "synthetic_date_summary.json").write_text(
