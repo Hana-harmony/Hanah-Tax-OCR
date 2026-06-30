@@ -95,6 +95,10 @@ def test_prepare_recognizer_datasets_can_include_hard_cases(tmp_path: Path) -> N
     assert summary["max_hard_case_ratio"] == 0.5
     profile = summary["groups"]["numeric_tin_code"]["data_profile"]
     assert profile["counts_by_document_type"]["train"] == {"withholding_tax_form": 2}
+    assert profile["counts_by_document_type_and_source"]["train"] == {
+        "base": {"withholding_tax_form": 1},
+        "hard_case": {"withholding_tax_form": 1},
+    }
     assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 1}
     assert profile["hard_case_train_ratio"] == 0.5
     assert profile["filtered_hard_case_train_count"] == 0
@@ -154,6 +158,9 @@ def test_prepare_recognizer_datasets_caps_hard_case_share(tmp_path: Path) -> Non
 
     profile = summary["groups"]["numeric_tin_code"]["data_profile"]
     assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 1}
+    assert profile["counts_by_document_type_and_source"]["train"]["hard_case"] == {
+        "withholding_tax_form": 1
+    }
     assert profile["filtered_hard_case_train_count"] == 2
     assert profile["hard_case_train_ratio"] == 0.5
     assert "hard_case_train_capped" in profile["warnings"]
@@ -163,3 +170,83 @@ def test_prepare_recognizer_datasets_caps_hard_case_share(tmp_path: Path) -> Non
         .splitlines()
     )
     assert len(train_lines) == 2
+
+
+def test_prepare_recognizer_datasets_balances_capped_hard_cases_by_document_type(
+    tmp_path: Path,
+) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+
+    base_entries = []
+    for case_id, document_type in (
+        ("apostille_case", "apostille"),
+        ("residency_case", "residency_certificate"),
+        ("withholding_case_001", "withholding_tax_form"),
+        ("withholding_case_002", "withholding_tax_form"),
+    ):
+        image_path = image_root / f"{case_id}.png"
+        Image.new("RGB", (120, 40), "white").save(image_path)
+        base_entries.append(
+            {
+                "case_id": case_id,
+                "document_type": document_type,
+                "field_group": "english_name_org",
+                "field_name": "taxpayer_name",
+                "text": case_id.upper(),
+                "split": "train",
+                "crop_path": str(image_path),
+            }
+        )
+    (field_crops_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in base_entries) + "\n",
+        encoding="utf-8",
+    )
+
+    hard_cases_root = tmp_path / "hard_cases"
+    hard_cases_root.mkdir()
+    hard_case_entries = []
+    for entry in base_entries:
+        source_path = Path(entry["crop_path"])
+        for variant in ("left_clip", "rotate", "low_res"):
+            augmented_path = tmp_path / f"{source_path.stem}__{variant}.png"
+            Image.new("RGB", (120, 40), "white").save(augmented_path)
+            hard_case_entries.append(
+                {
+                    **entry,
+                    "augmentation_type": variant,
+                    "base_crop_path": str(source_path),
+                    "crop_path": str(augmented_path),
+                }
+            )
+    (hard_cases_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in hard_case_entries) + "\n",
+        encoding="utf-8",
+    )
+
+    summary = prepare_recognizer_datasets(
+        field_crops_root,
+        tmp_path / "recognizer",
+        hard_cases_root=hard_cases_root,
+        include_hard_cases=True,
+    )
+
+    profile = summary["groups"]["english_name_org"]["data_profile"]
+    assert profile["counts_by_document_type_and_source"]["train"]["base"] == {
+        "apostille": 1,
+        "residency_certificate": 1,
+        "withholding_tax_form": 2,
+    }
+    assert profile["counts_by_document_type_and_source"]["train"]["hard_case"] == {
+        "apostille": 1,
+        "residency_certificate": 1,
+        "withholding_tax_form": 2,
+    }
+    assert profile["counts_by_document_type"]["train"] == {
+        "apostille": 2,
+        "residency_certificate": 2,
+        "withholding_tax_form": 4,
+    }
+    assert profile["filtered_hard_case_train_count"] == 8
