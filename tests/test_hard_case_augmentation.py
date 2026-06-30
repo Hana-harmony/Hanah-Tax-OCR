@@ -56,6 +56,7 @@ def test_prepare_recognizer_datasets_can_include_hard_cases(tmp_path: Path) -> N
     Image.new("RGB", (120, 40), "white").save(image_path)
     field_entry = {
         "case_id": "case_001",
+        "document_type": "withholding_tax_form",
         "field_group": "numeric_tin_code",
         "field_name": "tin",
         "text": "987-65-4321",
@@ -91,6 +92,10 @@ def test_prepare_recognizer_datasets_can_include_hard_cases(tmp_path: Path) -> N
     )
 
     assert summary["include_hard_cases"] is True
+    profile = summary["groups"]["numeric_tin_code"]["data_profile"]
+    assert profile["counts_by_document_type"]["train"] == {"withholding_tax_form": 2}
+    assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 1}
+    assert profile["hard_case_train_ratio"] == 0.5
     train_lines = (
         (output_root / "numeric_tin_code" / "train.txt")
         .read_text(encoding="utf-8")

@@ -21,6 +21,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     manifest_entries = [
         {
             "case_id": "case_001",
+            "document_type": "residency_certificate",
             "field_group": "english_name_org",
             "field_name": "taxpayer_name",
             "text": "MARIA L CHEN",
@@ -30,6 +31,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
         },
         {
             "case_id": "case_002",
+            "document_type": "apostille",
             "field_group": "english_name_org",
             "field_name": "signed_by",
             "text": "CHONG U CHOI",
@@ -39,6 +41,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
         },
         {
             "case_id": "case_003",
+            "document_type": "withholding_tax_form",
             "field_group": "numeric_tin_code",
             "field_name": "tin",
             "text": "987-65-4321",
@@ -62,6 +65,10 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     plan = json.loads((english_group / "plan.json").read_text(encoding="utf-8"))
     assert plan["settings"]["character_count"] > 0
     assert "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml" in plan["settings"]["base_config"]
+    assert plan["data_profile"]["counts_by_document_type"]["train"] == {
+        "residency_certificate": 1
+    }
+    assert plan["data_profile"]["counts_by_document_type"]["val"] == {"apostille": 1}
 
 
 def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
@@ -105,6 +112,7 @@ def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: P
     entries = [
         {
             "case_id": "case_accepted",
+            "document_type": "residency_certificate",
             "field_group": "english_name_org",
             "field_name": "taxpayer_name",
             "text": "MARIA",
@@ -114,6 +122,7 @@ def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: P
         },
         {
             "case_id": "case_rejected",
+            "document_type": "apostille",
             "field_group": "english_name_org",
             "field_name": "signed_by",
             "text": "CHOI",
@@ -130,6 +139,11 @@ def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: P
     summary = prepare_recognizer_datasets(field_crops_root, tmp_path / "recognizer")
 
     assert summary["groups"]["english_name_org"]["train_count"] == 1
+    assert summary["groups"]["english_name_org"]["data_profile"]["counts_by_document_type"] == {
+        "train": {"residency_certificate": 1},
+        "val": {},
+    }
+    assert "no_val_samples" in summary["groups"]["english_name_org"]["data_profile"]["warnings"]
 
 
 def test_run_training_plans_can_execute_against_fake_paddleocr_home(tmp_path: Path) -> None:
