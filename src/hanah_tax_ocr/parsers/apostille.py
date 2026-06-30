@@ -145,7 +145,7 @@ class ApostilleParser(BaseDocumentParser):
                 self._clean_item_value(
                     self._find_first(r"Country[:\s]+(.+?)(?=\s+2\.|$)", single_line)
                     or self._region_value(ocr_result, "issuing_country"),
-                    stop_phrases=["This public document"],
+                    stop_phrases=["This public document", "2.", "3.", "4.", "5.", "6.", "7.", "8."],
                 )
             ),
             "signed_by": self._normalize_signed_by(
@@ -214,11 +214,11 @@ class ApostilleParser(BaseDocumentParser):
         return fields, quality_checks
 
     def _extract_item_block(self, text: str, current: int, next_item: int) -> str:
-        pattern = rf"{current}\.?\s*(.+?)(?=\s+{next_item}\.?\s)"
+        pattern = rf"(?:^|\s){current}\.\s*(.+?)(?=\s+{next_item}\.\s)"
         match = self._find_first(pattern, text)
         if match:
             return match
-        tail_pattern = rf"{current}\.?\s*(.+)$"
+        tail_pattern = rf"(?:^|\s){current}\.\s*(.+)$"
         return self._find_first(tail_pattern, text) or ""
 
     def _clean_item_value(
@@ -240,7 +240,7 @@ class ApostilleParser(BaseDocumentParser):
                 cleaned = cleaned[: match.start()].strip()
         if normalize_commas:
             cleaned = re.sub(r"\s*,\s*", ", ", cleaned)
-        cleaned = cleaned.strip(" :;|\\/")
+        cleaned = cleaned.strip(" .,:;|\\/")
         if not any(character.isalnum() for character in cleaned):
             return None
         return cleaned or None
@@ -264,7 +264,7 @@ class ApostilleParser(BaseDocumentParser):
         region_value: str | None,
         item_8_value: str | None,
     ) -> str | None:
-        for source in [region_value, item_8_value]:
+        for source in [item_8_value, region_value]:
             if not source:
                 continue
             normalized = self._normalize_whitespace(source)
@@ -284,6 +284,8 @@ class ApostilleParser(BaseDocumentParser):
                 if token not in {"8", "9", "10"}:
                     return token
             if re.fullmatch(r"[A-Z0-9-]+", normalized, re.IGNORECASE):
+                if not re.search(r"\d", normalized):
+                    continue
                 if normalized not in {"8", "9", "10"}:
                     return normalized
             digits = [

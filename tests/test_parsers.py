@@ -275,6 +275,61 @@ def test_apostille_parser_accepts_digits_in_issued_at_and_generic_authority() ->
     assert parsed.fields["issuing_authority"] == "Secretary of State State of Sample"
 
 
+def test_apostille_parser_prefers_item_eight_certificate_number_over_noisy_region() -> None:
+    parser = ApostilleParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "APOSTILLE",
+                            "1. Country: UNITED STATES OF AMERICA",
+                            "2. This Public Document has been signed by NOTARY SAMPLE 8",
+                            "3. acting in the capacity of NOTARY PUBLIC",
+                            "4. bears the seal/stamp of COUNTY OF SAMPLE, STATE OF SAMPLE",
+                            "5. at Capital City, Sample State 8",
+                            "6. the 9TH DAY OF APRIL, 2028",
+                            "7. by Secretary of State State of Sample",
+                            "8. No. 5008",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "certificate_number": OCRPage(page_number=1, raw_text="TARY"),
+            },
+        ),
+        "apostille.jpg",
+    )
+
+    assert parsed.fields["certificate_number"] == "5008"
+
+
+def test_apostille_parser_trims_country_region_bleed_and_place_punctuation() -> None:
+    parser = ApostilleParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[OCRPage(page_number=1, raw_text="APOSTILLE")],
+            regions={
+                "issuing_country": OCRPage(
+                    page_number=1,
+                    raw_text=(
+                        "UNITED STATES OF AMERICA 3. acting in the capacity of NOTARY PUBLIC "
+                        "4. bears the seal/stamp of COUNTY OF SAMPLE, STATE OF SAMPLE"
+                    ),
+                ),
+                "issued_at": OCRPage(page_number=1, raw_text="Capital City, Sample State 5."),
+            },
+        ),
+        "apostille.jpg",
+    )
+
+    assert parsed.fields["issuing_country"] == "UNITED STATES OF AMERICA"
+    assert parsed.fields["issued_at"] == "Capital City, Sample State 5"
+
+
 def test_apostille_parser_normalizes_missing_space_after_year_comma() -> None:
     parser = ApostilleParser()
     parsed = parser.parse(
@@ -384,8 +439,30 @@ def test_withholding_parser_extracts_sample_fields() -> None:
     assert parsed.fields["last_name"] == "CHEN"
     assert parsed.fields["first_name"] == "MARIA"
     assert parsed.fields["middle_name"] == "L"
+    assert (
+        parsed.fields["address"]
+        == "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America"
+    )
     assert parsed.fields["dividend_tax_rate"] == "15%"
     assert parsed.fields["signature_date"] == "2026-01-12"
+
+
+def test_withholding_parser_extracts_single_digit_street_number_from_full_text() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        build_result(
+            [
+                "1 Main Street Suite 1 New York NY 10001 United States of America",
+                "201-21-2001",
+            ]
+        ),
+        "withholding.png",
+    )
+
+    assert (
+        parsed.fields["address"]
+        == "1 Main Street Suite 1 New York NY 10001 United States of America"
+    )
 
 
 def test_withholding_parser_preserves_digits_and_rebuilds_applicant_name() -> None:

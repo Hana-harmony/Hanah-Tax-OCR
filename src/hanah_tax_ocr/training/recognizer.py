@@ -18,6 +18,7 @@ from hanah_tax_ocr.training.recognizer_labels import recognizer_text_for_entry
 
 DEFAULT_FIELD_CROPS_ROOT = Path("data/training/field_crops")
 DEFAULT_RECOGNIZER_ROOT = Path("data/training/recognizer")
+DEFAULT_PADDLEOCR_HOME = Path("PaddleOCR")
 
 RECOMMENDED_SETTINGS: dict[str, dict[str, Any]] = {
     "english_name_org": {
@@ -201,6 +202,55 @@ def load_hard_case_manifest(hard_cases_root: Path) -> list[dict[str, Any]]:
         if line.strip():
             entries.append(json.loads(line))
     return entries
+
+
+def _read_dictionary_chars(path: Path) -> list[str]:
+    return path.read_text(encoding="utf-8").splitlines()
+
+
+def _default_dictionary_path(
+    base_config: str,
+    *,
+    paddleocr_home: Path = DEFAULT_PADDLEOCR_HOME,
+) -> Path | None:
+    config_path = paddleocr_home / base_config
+    if not config_path.exists():
+        return None
+    for raw_line in config_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.split("#", 1)[0].rstrip()
+        if "character_dict_path:" not in line:
+            continue
+        _, value = line.split(":", 1)
+        dict_relpath = value.strip().strip("'\"")
+        if not dict_relpath:
+            return None
+        dict_path = paddleocr_home / dict_relpath
+        if dict_path.exists():
+            return dict_path
+        return None
+    return None
+
+
+def _build_dictionary_chars(
+    entries: list[dict[str, Any]],
+    *,
+    base_config: str,
+    paddleocr_home: Path = DEFAULT_PADDLEOCR_HOME,
+) -> list[str]:
+    observed_chars = {
+        character for entry in entries for character in recognizer_text_for_entry(entry)
+    }
+    default_dict_path = _default_dictionary_path(
+        base_config,
+        paddleocr_home=paddleocr_home,
+    )
+    if default_dict_path is None:
+        return sorted(observed_chars)
+
+    dictionary_chars = _read_dictionary_chars(default_dict_path)
+    known_chars = set(dictionary_chars)
+    extra_chars = sorted(observed_chars - known_chars)
+    return dictionary_chars + extra_chars
 
 
 def ensure_field_crops(field_crops_root: Path, labeled_root: Path) -> dict[str, Any]:
@@ -793,19 +843,6 @@ def prepare_recognizer_datasets(
         _write_label_file(train_entries, train_file)
         _write_label_file(val_entries, val_file)
 
-        unique_chars = sorted(
-            {
-                character
-                for entry in train_entries + val_entries
-                for character in recognizer_text_for_entry(entry)
-            }
-        )
-        dict_path = group_root / "dict.txt"
-        dict_path.write_text(
-            "\n".join(unique_chars) + ("\n" if unique_chars else ""),
-            encoding="utf-8",
-        )
-
         max_text_length = max(
             (len(recognizer_text_for_entry(entry)) for entry in train_entries + val_entries),
             default=0,
@@ -815,6 +852,15 @@ def prepare_recognizer_datasets(
             len(train_entries),
             max_text_length,
             source_field_group=source_field_group,
+        )
+        unique_chars = _build_dictionary_chars(
+            train_entries + val_entries,
+            base_config=str(settings["base_config"]),
+        )
+        dict_path = group_root / "dict.txt"
+        dict_path.write_text(
+            "\n".join(unique_chars) + ("\n" if unique_chars else ""),
+            encoding="utf-8",
         )
         data_profile = _build_data_profile(
             train_entries,

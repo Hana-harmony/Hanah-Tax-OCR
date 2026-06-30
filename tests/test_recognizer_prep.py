@@ -88,6 +88,83 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     }
 
 
+def test_prepare_recognizer_datasets_preserves_pretrained_dictionary_order(
+    tmp_path: Path,
+) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    image_path = image_root / "name.png"
+    image_path.write_bytes(b"fake-image")
+    (field_crops_root / "manifest.jsonl").write_text(
+        json.dumps(
+            {
+                "case_id": "case_001",
+                "document_type": "residency_certificate",
+                "field_group": "english_name_org",
+                "field_name": "taxpayer_name",
+                "text": "SAMPLE10 USER",
+                "split": "train",
+                "crop_path": str(image_path),
+                "quality": {"accepted": True},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    output_root = tmp_path / "recognizer"
+    prepare_recognizer_datasets(field_crops_root, output_root)
+
+    generated_dict = (output_root / "english_name_org" / "dict.txt").read_text(
+        encoding="utf-8"
+    ).splitlines()
+    base_dict = Path("PaddleOCR/ppocr/utils/en_dict.txt").read_text(
+        encoding="utf-8"
+    ).splitlines()
+
+    assert generated_dict[: len(base_dict)] == base_dict
+    assert generated_dict[len(base_dict) :] == []
+
+
+def test_prepare_recognizer_datasets_falls_back_to_observed_chars_when_base_dict_is_missing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    image_path = image_root / "name.png"
+    image_path.write_bytes(b"fake-image")
+    (field_crops_root / "manifest.jsonl").write_text(
+        json.dumps(
+            {
+                "case_id": "case_001",
+                "document_type": "residency_certificate",
+                "field_group": "english_name_org",
+                "field_name": "taxpayer_name",
+                "text": "A1",
+                "split": "train",
+                "crop_path": str(image_path),
+                "quality": {"accepted": True},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    output_root = tmp_path / "recognizer"
+    prepare_recognizer_datasets(field_crops_root, output_root)
+
+    generated_dict = (output_root / "english_name_org" / "dict.txt").read_text(
+        encoding="utf-8"
+    ).splitlines()
+    assert generated_dict == ["1", "A"]
+
+
 def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
     group_root = tmp_path / "recognizer" / "date"
     group_root.mkdir(parents=True)

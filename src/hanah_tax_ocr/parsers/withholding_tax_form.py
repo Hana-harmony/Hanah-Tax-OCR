@@ -82,7 +82,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         )
         address = normalize_address(
             self._find_first(
-                r"(1\d{3,4}\s+[A-Za-z0-9 ,.'#-]+?(?:United States of America|USA))",
+                r"(\d{1,5}\s+[A-Za-z0-9 ,.'#-]+?(?:United States of America|USA))",
                 single_line,
             )
             or self._region_value(ocr_result, "address")
