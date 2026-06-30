@@ -12,6 +12,8 @@ Typical contents:
   and any capped hard-case counts applied during train split balancing
 - `hard_cases/`: left-clip, rotation, low-res, and overlay-based hard-case augmentations
 - `reports/`: field-level OCR error maps such as CER, WER, exact-match summaries,
-  and field-group data gap prioritization reports for manual labeling order
+  field-group data gap prioritization reports for manual labeling order,
+  and sample-data coverage reports for uncovered fixtures
+  coverage reports separate reviewed labels from `pending_review` scaffolds
 
 Generated images and manifests are reproducible and should generally stay out of git unless a small sanitized fixture is explicitly needed.

@@ -1,0 +1,14 @@
+{
+  "case_id": "apostille_california_001",
+  "document_type": "apostille",
+  "source_path": "sample_data/아포스티유 샘플/미국 california 주.png",
+  "dataset_split": "pending_review",
+  "promotion_status": "needs_human_verification",
+  "expected_status": null,
+  "expected_fields": {},
+  "expected_quality_checks": {},
+  "notes": [
+    "Bootstrapped from sample_data coverage report.",
+    "Human label review is required before this case enters the reviewed dataset."
+  ]
+}

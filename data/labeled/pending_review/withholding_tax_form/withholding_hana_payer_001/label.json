@@ -1,0 +1,14 @@
+{
+  "case_id": "withholding_hana_payer_001",
+  "document_type": "withholding_tax_form",
+  "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
+  "dataset_split": "pending_review",
+  "promotion_status": "needs_human_verification",
+  "expected_status": null,
+  "expected_fields": {},
+  "expected_quality_checks": {},
+  "notes": [
+    "Bootstrapped from sample_data coverage report.",
+    "Human label review is required before this case enters the reviewed dataset."
+  ]
+}
