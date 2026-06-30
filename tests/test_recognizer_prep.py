@@ -74,6 +74,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     assert plan["data_profile"]["unique_source_counts"] == {"train": 1, "val": 1}
     assert plan["data_profile"]["hard_case_variant_counts"] == {"train": {}, "val": {}}
     assert plan["data_profile"]["unique_hard_case_variant_counts"] == {"train": 0, "val": 0}
+    assert plan["data_profile"]["filtered_stale_hard_case_count"] == 0
     assert plan["data_profile"]["hard_case_selection_strategy"] == "base_document_balance"
     assert plan["data_profile"]["hard_case_variant_floor_applied"] is False
     assert plan["training_readiness"] == {
@@ -165,6 +166,10 @@ def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: P
         "train": {},
         "val": {},
     }
+    assert (
+        summary["groups"]["english_name_org"]["data_profile"]["filtered_stale_hard_case_count"]
+        == 0
+    )
     assert (
         summary["groups"]["english_name_org"]["data_profile"]["hard_case_selection_strategy"]
         == "base_document_balance"
@@ -431,3 +436,87 @@ def test_prepare_recognizer_datasets_preserves_two_variants_for_single_base_grou
     assert "hard_case_variant_floor_applied" in profile["warnings"]
     assert "hard_case_dominant_train_split" in profile["warnings"]
     assert "low_hard_case_variant_diversity" not in profile["warnings"]
+
+
+def test_prepare_recognizer_datasets_filters_stale_hard_cases_from_non_train_bases(
+    tmp_path: Path,
+) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    train_base_path = image_root / "train_base.png"
+    train_base_path.write_bytes(b"train")
+    val_base_path = image_root / "val_base.png"
+    val_base_path.write_bytes(b"val")
+    entries = [
+        {
+            "case_id": "case_train",
+            "document_type": "withholding_tax_form",
+            "field_group": "numeric_tin_code",
+            "field_name": "tin",
+            "text": "987-65-4321",
+            "split": "train",
+            "crop_path": str(train_base_path),
+            "quality": {"accepted": True},
+        },
+        {
+            "case_id": "case_val",
+            "document_type": "withholding_tax_form",
+            "field_group": "numeric_tin_code",
+            "field_name": "tin",
+            "text": "987-65-4321",
+            "split": "val",
+            "crop_path": str(val_base_path),
+            "quality": {"accepted": True},
+        },
+    ]
+    (field_crops_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in entries) + "\n",
+        encoding="utf-8",
+    )
+
+    hard_cases_root = tmp_path / "hard_cases"
+    hard_cases_root.mkdir()
+    hard_case_entries = []
+    for base_path, variant in (
+        (train_base_path, "left_clip"),
+        (val_base_path, "rotate"),
+    ):
+        hard_path = image_root / f"{base_path.stem}__{variant}.png"
+        hard_path.write_bytes(variant.encode("utf-8"))
+        hard_case_entries.append(
+            {
+                "case_id": base_path.stem,
+                "document_type": "withholding_tax_form",
+                "field_group": "numeric_tin_code",
+                "field_name": "tin",
+                "text": "987-65-4321",
+                "split": "train",
+                "augmentation_type": variant,
+                "base_crop_path": str(base_path),
+                "crop_path": str(hard_path),
+                "quality": {"accepted": True},
+            }
+        )
+    (hard_cases_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in hard_case_entries) + "\n",
+        encoding="utf-8",
+    )
+
+    summary = prepare_recognizer_datasets(
+        field_crops_root,
+        tmp_path / "recognizer",
+        hard_cases_root=hard_cases_root,
+        include_hard_cases=True,
+        max_hard_case_ratio=1.0,
+    )
+
+    profile = summary["groups"]["numeric_tin_code"]["data_profile"]
+    assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 1}
+    assert profile["hard_case_variant_counts"] == {
+        "train": {"left_clip": 1},
+        "val": {},
+    }
+    assert profile["filtered_stale_hard_case_count"] == 1
+    assert "stale_hard_cases_filtered" in profile["warnings"]

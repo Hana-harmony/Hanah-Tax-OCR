@@ -269,6 +269,7 @@ def _build_data_profile(
     val_entries: list[dict[str, Any]],
     *,
     filtered_hard_case_train_count: int = 0,
+    filtered_stale_hard_case_count: int = 0,
     max_hard_case_ratio: float | None = None,
     hard_case_selection_strategy: str = DEFAULT_HARD_CASE_SELECTION_STRATEGY,
     hard_case_variant_floor_applied: bool = False,
@@ -318,6 +319,8 @@ def _build_data_profile(
         warnings.append("hard_case_dominant_train_split")
     if filtered_hard_case_train_count:
         warnings.append("hard_case_train_capped")
+    if filtered_stale_hard_case_count:
+        warnings.append("stale_hard_cases_filtered")
     if hard_case_variant_floor_applied:
         warnings.append("hard_case_variant_floor_applied")
     hard_case_variant_counts = {
@@ -365,6 +368,7 @@ def _build_data_profile(
         "unique_hard_case_variant_counts": unique_hard_case_variant_counts,
         "hard_case_train_ratio": hard_case_train_ratio,
         "filtered_hard_case_train_count": filtered_hard_case_train_count,
+        "filtered_stale_hard_case_count": filtered_stale_hard_case_count,
         "max_hard_case_ratio": max_hard_case_ratio,
         "hard_case_selection_strategy": hard_case_selection_strategy,
         "hard_case_variant_floor_applied": hard_case_variant_floor_applied,
@@ -608,6 +612,34 @@ def _limit_hard_case_train_entries(
     )
 
 
+def _filter_current_hard_case_entries(
+    field_crop_entries: list[dict[str, Any]],
+    hard_case_entries: list[dict[str, Any]],
+    *,
+    include_rejected_crops: bool,
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    current_train_base_crops = {
+        str(entry.get("crop_path"))
+        for entry in field_crop_entries
+        if entry.get("split") == "train"
+        and (
+            include_rejected_crops
+            or entry.get("quality", {}).get("accepted", True)
+        )
+    }
+    filtered_entries = [
+        entry
+        for entry in hard_case_entries
+        if str(entry.get("base_crop_path") or "") in current_train_base_crops
+    ]
+    filtered_counts = Counter(
+        str(entry.get("field_group") or "unknown")
+        for entry in hard_case_entries
+        if str(entry.get("base_crop_path") or "") not in current_train_base_crops
+    )
+    return filtered_entries, dict(sorted(filtered_counts.items()))
+
+
 def prepare_recognizer_datasets(
     field_crops_root: Path,
     output_root: Path,
@@ -624,9 +656,17 @@ def prepare_recognizer_datasets(
             raise ValueError("labeled_root is required when ensure_crops is True")
         ensure_field_crops(field_crops_root, labeled_root)
 
-    entries = load_field_crop_manifest(field_crops_root)
+    field_crop_entries = load_field_crop_manifest(field_crops_root)
+    filtered_stale_hard_case_counts: dict[str, int] = {}
+    entries = list(field_crop_entries)
     if include_hard_cases and hard_cases_root is not None:
-        entries.extend(load_hard_case_manifest(hard_cases_root))
+        hard_case_entries = load_hard_case_manifest(hard_cases_root)
+        hard_case_entries, filtered_stale_hard_case_counts = _filter_current_hard_case_entries(
+            field_crop_entries,
+            hard_case_entries,
+            include_rejected_crops=include_rejected_crops,
+        )
+        entries.extend(hard_case_entries)
     grouped_entries: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(
         lambda: defaultdict(list)
     )
@@ -675,6 +715,7 @@ def prepare_recognizer_datasets(
             train_entries,
             val_entries,
             filtered_hard_case_train_count=filtered_hard_case_train_count,
+            filtered_stale_hard_case_count=filtered_stale_hard_case_counts.get(field_group, 0),
             max_hard_case_ratio=max_hard_case_ratio,
             hard_case_selection_strategy=hard_case_selection.selection_strategy,
             hard_case_variant_floor_applied=hard_case_selection.variant_floor_applied,
