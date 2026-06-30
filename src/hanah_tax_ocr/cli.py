@@ -6,6 +6,7 @@ from pathlib import Path
 
 from hanah_tax_ocr.evaluation import (
     build_field_error_report,
+    compare_field_error_report_files,
     evaluate_run_result,
     load_harness_run_result,
 )
@@ -61,6 +62,13 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip missing expected cases and report only cases that exist in the actual dir.",
     )
+
+    compare_eval_reports = subparsers.add_parser(
+        "compare-eval-reports",
+        help="Compare baseline and candidate eval-report JSON outputs.",
+    )
+    compare_eval_reports.add_argument("--baseline", type=Path, required=True)
+    compare_eval_reports.add_argument("--candidate", type=Path, required=True)
 
     return parser
 
@@ -145,6 +153,12 @@ def eval_report_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def compare_eval_reports_command(args: argparse.Namespace) -> int:
+    comparison = compare_field_error_report_files(args.baseline, args.candidate)
+    print(json.dumps(comparison.model_dump(mode="json"), ensure_ascii=False))
+    return 0
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
@@ -155,5 +169,7 @@ def main() -> int:
         return eval_case_command(args)
     if args.command == "eval-report":
         return eval_report_command(args)
+    if args.command == "compare-eval-reports":
+        return compare_eval_reports_command(args)
 
     raise ValueError(f"Unsupported command: {args.command}")

@@ -12,3 +12,5 @@
 - `evals/`에는 가능하면 비식별 또는 합성 데이터만 둔다.
 - 운영용 실문서는 `data/labeled/`에서 관리하고, `evals/`에는 평가에 필요한 최소 샘플만 복사한다.
 - `python -m scripts.synthesize.build_regression_suite --per-document 20` 로 문서별 회귀 케이스를 확장할 수 있다.
+- `hanah-tax-ocr eval-report` 로 baseline/candidate JSON을 각각 만들고,
+  `hanah-tax-ocr compare-eval-reports --baseline ... --candidate ...` 로 필드별 정확도 증감을 비교한다.
