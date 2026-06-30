@@ -80,6 +80,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Merge hard-case augmented crops into the training split.",
     )
+    parser.add_argument(
+        "--include-rejected-crops",
+        action="store_true",
+        help="Include crops that failed field-crop quality checks.",
+    )
     return parser.parse_args()
 
 
@@ -180,6 +185,7 @@ def prepare_recognizer_datasets(
     ensure_crops: bool = False,
     hard_cases_root: Path | None = None,
     include_hard_cases: bool = False,
+    include_rejected_crops: bool = False,
 ) -> dict[str, Any]:
     if ensure_crops:
         if labeled_root is None:
@@ -193,6 +199,9 @@ def prepare_recognizer_datasets(
         lambda: defaultdict(list)
     )
     for entry in entries:
+        quality = entry.get("quality", {})
+        if quality and not include_rejected_crops and not quality.get("accepted", True):
+            continue
         grouped_entries[entry["field_group"]][entry["split"]].append(entry)
 
     summary_groups: dict[str, Any] = {}
@@ -255,6 +264,7 @@ def prepare_recognizer_datasets(
         "output_root": str(output_root),
         "hard_cases_root": None if hard_cases_root is None else str(hard_cases_root),
         "include_hard_cases": include_hard_cases,
+        "include_rejected_crops": include_rejected_crops,
         "groups": dict(sorted(summary_groups.items())),
     }
     output_root.mkdir(parents=True, exist_ok=True)
@@ -327,6 +337,7 @@ def main() -> None:
         ensure_crops=args.ensure_field_crops,
         hard_cases_root=args.hard_cases_root,
         include_hard_cases=args.include_hard_cases,
+        include_rejected_crops=args.include_rejected_crops,
     )
     print(json.dumps(summary, ensure_ascii=False))
 

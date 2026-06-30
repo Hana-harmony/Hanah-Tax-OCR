@@ -26,6 +26,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
             "text": "MARIA L CHEN",
             "split": "train",
             "crop_path": str(image_root / "name_001.png"),
+            "quality": {"accepted": True},
         },
         {
             "case_id": "case_002",
@@ -34,6 +35,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
             "text": "CHONG U CHOI",
             "split": "val",
             "crop_path": str(image_root / "name_002.png"),
+            "quality": {"accepted": True},
         },
         {
             "case_id": "case_003",
@@ -42,6 +44,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
             "text": "987-65-4321",
             "split": "train",
             "crop_path": str(image_root / "tin_001.png"),
+            "quality": {"accepted": True},
         },
     ]
     (field_crops_root / "manifest.jsonl").write_text(
@@ -88,6 +91,45 @@ def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
     assert "python /tmp/PaddleOCR/tools/train.py" in command
     assert "Global.character_dict_path=" in command
     assert "Train.dataset.label_file_list=[" in command
+
+
+def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: Path) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    accepted = image_root / "accepted.png"
+    rejected = image_root / "rejected.png"
+    accepted.write_bytes(b"accepted")
+    rejected.write_bytes(b"rejected")
+    entries = [
+        {
+            "case_id": "case_accepted",
+            "field_group": "english_name_org",
+            "field_name": "taxpayer_name",
+            "text": "MARIA",
+            "split": "train",
+            "crop_path": str(accepted),
+            "quality": {"accepted": True},
+        },
+        {
+            "case_id": "case_rejected",
+            "field_group": "english_name_org",
+            "field_name": "signed_by",
+            "text": "CHOI",
+            "split": "train",
+            "crop_path": str(rejected),
+            "quality": {"accepted": False},
+        },
+    ]
+    (field_crops_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in entries) + "\n",
+        encoding="utf-8",
+    )
+
+    summary = prepare_recognizer_datasets(field_crops_root, tmp_path / "recognizer")
+
+    assert summary["groups"]["english_name_org"]["train_count"] == 1
 
 
 def test_run_training_plans_can_execute_against_fake_paddleocr_home(tmp_path: Path) -> None:
