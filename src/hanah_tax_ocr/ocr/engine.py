@@ -22,6 +22,18 @@ REGION_FALLBACK_LEFT_OFFSETS: dict[str, tuple[float, ...]] = {
     "address": (-0.04, -0.06, -0.08),
 }
 
+REGION_FALLBACK_BOX_EXPANSIONS: dict[str, tuple[tuple[float, float, float, float], ...]] = {
+    "applicant_name": (
+        (-0.01, -0.01, 0.02, 0.01),
+    ),
+}
+
+REGION_SEARCH_ALL_FALLBACKS = {"applicant_name"}
+
+REGION_ALTERNATE_OVERRIDES: dict[str, tuple[dict[str, Any], ...]] = {
+    "applicant_name": ({"lang": "en"},),
+}
+
 MONTH_NAME_PATTERN = (
     r"\b(January|February|March|April|May|June|July|August|"
     r"September|October|November|December)\b"
@@ -200,11 +212,11 @@ class PaddleOCREngine:
 
         regions: dict[str, OCRPage] = {}
         for region_spec in region_specs:
-            region_engine = self._load(self._region_overrides.get(region_spec.name))
+            region_engines = self._region_engines_for(region_spec.name)
             pages = self._run_region_with_fallbacks(
                 image,
                 region_spec,
-                region_engine,
+                region_engines,
             )
             if pages:
                 regions[region_spec.name] = pages[0]
@@ -214,7 +226,7 @@ class PaddleOCREngine:
         self,
         image: Image.Image,
         region_spec: OCRRegionSpec,
-        region_engine: Any,
+        region_engines: list[Any],
     ) -> list[OCRPage]:
         region_boxes = [region_spec]
         for vertical_offset in REGION_FALLBACK_VERTICAL_OFFSETS.get(region_spec.name, ()):
@@ -244,7 +256,29 @@ class PaddleOCREngine:
                     region_spec.bottom,
                 )
             )
+        for left_delta, top_delta, right_delta, bottom_delta in REGION_FALLBACK_BOX_EXPANSIONS.get(
+            region_spec.name,
+            (),
+        ):
+            shifted_left = max(0.0, region_spec.left + left_delta)
+            shifted_top = max(0.0, region_spec.top + top_delta)
+            shifted_right = min(1.0, region_spec.right + right_delta)
+            shifted_bottom = min(1.0, region_spec.bottom + bottom_delta)
+            if shifted_right <= shifted_left or shifted_bottom <= shifted_top:
+                continue
+            region_boxes.append(
+                OCRRegionSpec(
+                    region_spec.name,
+                    shifted_left,
+                    shifted_top,
+                    shifted_right,
+                    shifted_bottom,
+                )
+            )
 
+        search_all_fallbacks = region_spec.name in REGION_SEARCH_ALL_FALLBACKS
+        best_pages: list[OCRPage] = []
+        best_score = (0, 0, 0)
         for candidate_region in region_boxes:
             crop = image.crop(
                 (
@@ -254,21 +288,34 @@ class PaddleOCREngine:
                     int(image.height * candidate_region.bottom),
                 )
             )
-            best_pages: list[OCRPage] = []
-            best_score = (0, 0, 0)
             for variant in self._region_variants(region_spec.name, crop):
-                raw_result = region_engine.ocr(
-                    np.array(variant),
-                    cls=self._kwargs.get("use_angle_cls", True),
-                )
-                pages = self._build_pages(raw_result)
-                score = self._score_region_pages(region_spec.name, pages)
-                if score > best_score:
-                    best_pages = pages
-                    best_score = score
-            if best_pages:
+                for region_engine in region_engines:
+                    raw_result = region_engine.ocr(
+                        np.array(variant),
+                        cls=self._kwargs.get("use_angle_cls", True),
+                    )
+                    pages = self._build_pages(raw_result)
+                    score = self._score_region_pages(region_spec.name, pages)
+                    if score > best_score:
+                        best_pages = pages
+                        best_score = score
+            if best_pages and not search_all_fallbacks:
                 return best_pages
-        return []
+        return best_pages
+
+    def _region_overrides_for(self, region_name: str) -> dict[str, Any] | None:
+        override = self._region_overrides.get(region_name, {})
+        return dict(override) or None
+
+    def _region_engines_for(self, region_name: str) -> list[Any]:
+        user_override = self._region_overrides_for(region_name)
+        if user_override is not None:
+            return [self._load(user_override)]
+
+        engines = [self._load(None)]
+        for override in REGION_ALTERNATE_OVERRIDES.get(region_name, ()):
+            engines.append(self._load(override))
+        return engines
 
     def _region_variants(self, region_name: str, crop: Image.Image) -> list[Image.Image]:
         variants = [crop.convert("RGB")]
@@ -408,26 +455,32 @@ class PaddleOCREngine:
         if region_name == "applicant_name":
             lines = [line.strip() for line in text.splitlines() if line.strip()]
             tokens = re.findall(r"[A-Za-z0-9'.-]+", normalized)
-            alpha_tokens = [
+            name_like_tokens = [
                 token
                 for token in tokens
                 if re.search(r"[A-Za-z]", token)
             ]
-            clean_tokens = [
-                token
-                for token in alpha_tokens
-                if re.fullmatch(r"[A-Za-z0-9'.-]+", token)
-            ]
-            score = 1
-            if len(clean_tokens) >= 2:
+            digit_only_tokens = [token for token in tokens if token.isdigit()]
+            score = 0
+            if 2 <= len(name_like_tokens) <= 3:
+                score += 3
+            elif len(name_like_tokens) > 3:
                 score += 1
-            if len(clean_tokens) >= 3:
-                score += 2
+            if len(tokens) == len(name_like_tokens):
+                score += 1
+            else:
+                score -= len(tokens) - len(name_like_tokens)
             if len(lines) >= 2:
                 score += 1
-            if any(token.upper() == "USER" for token in clean_tokens):
+            if any(token.upper() == "USER" for token in name_like_tokens):
                 score += 1
-            return (score, len(clean_tokens), -len(normalized))
+            if any(len(token.strip(".")) == 1 and token.strip(".").isalpha() for token in name_like_tokens):
+                score += 1
+            if any(len(token) >= 3 for token in digit_only_tokens):
+                score -= 2
+            if re.search(r"\b(name|last|first|middle)\b", normalized.lower()):
+                score -= 2
+            return (score, len(name_like_tokens), -len(tokens))
 
         if region_name == "middle_name":
             tokens = re.findall(r"[A-Za-z0-9]+", normalized)

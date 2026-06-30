@@ -578,6 +578,27 @@ def test_withholding_parser_strips_leading_user_noise_from_full_text_address() -
     )
 
 
+def test_withholding_parser_repairs_missing_space_after_leading_street_number() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[OCRPage(page_number=1, raw_text="207-27-2007")],
+            regions={
+                "address": OCRPage(
+                    page_number=1,
+                    raw_text="7Main Street Suite 7 New York NY 10001 United States of America",
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert (
+        parsed.fields["address"]
+        == "7 Main Street Suite 7 New York NY 10001 United States of America"
+    )
+
+
 def test_withholding_parser_preserves_digits_and_rebuilds_applicant_name() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(
@@ -666,6 +687,37 @@ def test_withholding_parser_normalizes_ocr_ambiguous_digit_suffix_in_first_name(
 
     assert parsed.fields["first_name"] == "SAMPLE20"
     assert parsed.fields["applicant_name"] == "SAMPLE20 T USER"
+
+
+def test_withholding_parser_does_not_prefer_numeric_applicant_first_name_noise() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "987-65-4321",
+                            "2026-01-12",
+                            "MARIA L CHEN",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "first_name": OCRPage(page_number=1, raw_text="MARIA"),
+                "middle_name": OCRPage(page_number=1, raw_text="L"),
+                "last_name": OCRPage(page_number=1, raw_text="CHEN"),
+                "applicant_name": OCRPage(page_number=1, raw_text="202 I CHEN"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["first_name"] == "MARIA"
+    assert parsed.fields["middle_name"] == "L"
+    assert parsed.fields["applicant_name"] == "MARIA L. CHEN"
 
 
 def test_withholding_parser_normalizes_zero_middle_initial_and_rebuilds_applicant_name() -> None:

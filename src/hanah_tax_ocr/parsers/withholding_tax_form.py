@@ -199,7 +199,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if region_address and full_text_address:
             sanitized_full_text_address = self._sanitize_full_text_address(full_text_address)
             full_text_street_number = self._leading_street_number(full_text_address)
-            repaired_region_address = region_address
+            repaired_region_address = self._repair_address_spacing(region_address) or region_address
             if full_text_street_number and not self._leading_street_number(region_address):
                 repaired_region_address = f"{full_text_street_number} {region_address}"
             if self._contains_leading_name_noise(full_text_address):
@@ -219,7 +219,11 @@ class WithholdingTaxFormParser(BaseDocumentParser):
                     return sanitized_full_text_address
                 return repaired_region_address
             return sanitized_full_text_address or full_text_address
-        return self._sanitize_full_text_address(full_text_address) or region_address
+        return (
+            self._sanitize_full_text_address(full_text_address)
+            or self._repair_address_spacing(region_address)
+            or region_address
+        )
 
     def _leading_street_number(self, value: str | None) -> str | None:
         if not value:
@@ -239,7 +243,13 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             return None
         sanitized = re.sub(r"^\d{1,5}\s+USER\b\s+", "", value, flags=re.IGNORECASE)
         sanitized = normalize_address(sanitized)
-        return sanitized or None
+        return self._repair_address_spacing(sanitized)
+
+    def _repair_address_spacing(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        repaired = re.sub(r"^(\d{1,5})([A-Za-z])", r"\1 \2", value)
+        return repaired or None
 
     def _clean_name_value(self, value: str | None) -> str | None:
         if not value:
@@ -338,6 +348,8 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if middle_name and derived_middle_name and middle_name != derived_middle_name:
             return normalized_first_name
         if canonicalize_name(normalized_derived_first_name) == canonicalize_name(normalized_first_name):
+            return normalized_first_name
+        if not re.search(r"[A-Za-z]", normalized_derived_first_name or ""):
             return normalized_first_name
         if self._digit_count(normalized_derived_first_name) > self._digit_count(normalized_first_name):
             return normalized_derived_first_name
