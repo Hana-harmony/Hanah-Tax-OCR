@@ -61,6 +61,8 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
     summary = prepare_recognizer_datasets(field_crops_root, output_root)
 
     assert sorted(summary["groups"]) == ["english_name_org", "numeric_tin_code"]
+    assert summary["ensure_hard_cases_manifest"] is False
+    assert summary["hard_cases_sync"] is None
     english_group = output_root / "english_name_org"
     assert (english_group / "train.txt").exists()
     assert (english_group / "val.txt").exists()
@@ -520,3 +522,123 @@ def test_prepare_recognizer_datasets_filters_stale_hard_cases_from_non_train_bas
     }
     assert profile["filtered_stale_hard_case_count"] == 1
     assert "stale_hard_cases_filtered" in profile["warnings"]
+
+
+def test_prepare_recognizer_datasets_can_generate_missing_hard_cases_when_requested(
+    tmp_path: Path,
+) -> None:
+    from PIL import Image
+
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_path = tmp_path / "base.png"
+    Image.new("RGB", (120, 40), "white").save(image_path)
+    field_entry = {
+        "case_id": "case_001",
+        "document_type": "withholding_tax_form",
+        "field_group": "numeric_tin_code",
+        "field_name": "tin",
+        "text": "987-65-4321",
+        "split": "train",
+        "crop_path": str(image_path),
+        "quality": {"accepted": True},
+    }
+    (field_crops_root / "manifest.jsonl").write_text(
+        json.dumps(field_entry) + "\n",
+        encoding="utf-8",
+    )
+
+    hard_cases_root = tmp_path / "hard_cases"
+    summary = prepare_recognizer_datasets(
+        field_crops_root,
+        tmp_path / "recognizer",
+        hard_cases_root=hard_cases_root,
+        include_hard_cases=True,
+        ensure_hard_cases_manifest=True,
+    )
+
+    assert summary["ensure_hard_cases_manifest"] is True
+    assert summary["hard_cases_sync"] == {
+        "status": "generated",
+        "stale_entry_count": 0,
+        "total_augmented_crops": 4,
+    }
+    assert (hard_cases_root / "manifest.jsonl").exists()
+    assert summary["groups"]["numeric_tin_code"]["train_count"] == 3
+
+
+def test_prepare_recognizer_datasets_can_refresh_stale_hard_cases_when_requested(
+    tmp_path: Path,
+) -> None:
+    from PIL import Image
+
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    train_base = image_root / "train_base.png"
+    val_base = image_root / "val_base.png"
+    Image.new("RGB", (120, 40), "white").save(train_base)
+    Image.new("RGB", (120, 40), "white").save(val_base)
+    field_entries = [
+        {
+            "case_id": "case_train",
+            "document_type": "withholding_tax_form",
+            "field_group": "numeric_tin_code",
+            "field_name": "tin",
+            "text": "987-65-4321",
+            "split": "train",
+            "crop_path": str(train_base),
+            "quality": {"accepted": True},
+        },
+        {
+            "case_id": "case_val",
+            "document_type": "withholding_tax_form",
+            "field_group": "numeric_tin_code",
+            "field_name": "tin",
+            "text": "987-65-4321",
+            "split": "val",
+            "crop_path": str(val_base),
+            "quality": {"accepted": True},
+        },
+    ]
+    (field_crops_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in field_entries) + "\n",
+        encoding="utf-8",
+    )
+
+    hard_cases_root = tmp_path / "hard_cases"
+    hard_cases_root.mkdir()
+    stale_path = image_root / "val_base__rotate.png"
+    Image.new("RGB", (120, 40), "white").save(stale_path)
+    stale_entry = {
+        **field_entries[1],
+        "split": "train",
+        "augmentation_type": "rotate",
+        "base_crop_path": str(val_base),
+        "crop_path": str(stale_path),
+    }
+    (hard_cases_root / "manifest.jsonl").write_text(
+        json.dumps(stale_entry) + "\n",
+        encoding="utf-8",
+    )
+
+    summary = prepare_recognizer_datasets(
+        field_crops_root,
+        tmp_path / "recognizer",
+        hard_cases_root=hard_cases_root,
+        include_hard_cases=True,
+        ensure_hard_cases_manifest=True,
+    )
+
+    assert summary["hard_cases_sync"] == {
+        "status": "refreshed",
+        "stale_entry_count": 1,
+        "total_augmented_crops": 4,
+    }
+    refreshed_entries = [
+        json.loads(line)
+        for line in (hard_cases_root / "manifest.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert {entry["base_crop_path"] for entry in refreshed_entries} == {str(train_base)}
