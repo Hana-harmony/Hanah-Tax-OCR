@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from hanah_tax_ocr.training.field_crops import export_field_crops
+from hanah_tax_ocr.training.hard_cases import augment_hard_cases
 
 DEFAULT_FIELD_CROPS_ROOT = Path("data/training/field_crops")
 DEFAULT_RECOGNIZER_ROOT = Path("data/training/recognizer")
@@ -98,6 +99,11 @@ def parse_args() -> argparse.Namespace:
         "--include-hard-cases",
         action="store_true",
         help="Merge hard-case augmented crops into the training split.",
+    )
+    parser.add_argument(
+        "--ensure-hard-cases",
+        action="store_true",
+        help="Generate or refresh hard-case manifests from current field crops before loading.",
     )
     parser.add_argument(
         "--include-rejected-crops",
@@ -640,6 +646,44 @@ def _filter_current_hard_case_entries(
     return filtered_entries, dict(sorted(filtered_counts.items()))
 
 
+def ensure_hard_cases(
+    field_crops_root: Path,
+    hard_cases_root: Path,
+    *,
+    include_rejected_crops: bool,
+) -> dict[str, Any]:
+    field_crop_entries = load_field_crop_manifest(field_crops_root)
+    manifest_path = hard_cases_root / "manifest.jsonl"
+    if not manifest_path.exists():
+        generated = augment_hard_cases(field_crops_root, hard_cases_root)
+        return {
+            "status": "generated",
+            "stale_entry_count": 0,
+            "total_augmented_crops": generated.get("total_augmented_crops", 0),
+        }
+
+    hard_case_entries = load_hard_case_manifest(hard_cases_root)
+    _, stale_counts = _filter_current_hard_case_entries(
+        field_crop_entries,
+        hard_case_entries,
+        include_rejected_crops=include_rejected_crops,
+    )
+    stale_entry_count = sum(stale_counts.values())
+    if stale_entry_count > 0:
+        generated = augment_hard_cases(field_crops_root, hard_cases_root)
+        return {
+            "status": "refreshed",
+            "stale_entry_count": stale_entry_count,
+            "total_augmented_crops": generated.get("total_augmented_crops", 0),
+        }
+
+    return {
+        "status": "current",
+        "stale_entry_count": 0,
+        "total_augmented_crops": len(hard_case_entries),
+    }
+
+
 def prepare_recognizer_datasets(
     field_crops_root: Path,
     output_root: Path,
@@ -648,6 +692,7 @@ def prepare_recognizer_datasets(
     ensure_crops: bool = False,
     hard_cases_root: Path | None = None,
     include_hard_cases: bool = False,
+    ensure_hard_cases_manifest: bool = False,
     include_rejected_crops: bool = False,
     max_hard_case_ratio: float | None = 0.5,
 ) -> dict[str, Any]:
@@ -659,7 +704,14 @@ def prepare_recognizer_datasets(
     field_crop_entries = load_field_crop_manifest(field_crops_root)
     filtered_stale_hard_case_counts: dict[str, int] = {}
     entries = list(field_crop_entries)
+    hard_cases_sync: dict[str, Any] | None = None
     if include_hard_cases and hard_cases_root is not None:
+        if ensure_hard_cases_manifest:
+            hard_cases_sync = ensure_hard_cases(
+                field_crops_root,
+                hard_cases_root,
+                include_rejected_crops=include_rejected_crops,
+            )
         hard_case_entries = load_hard_case_manifest(hard_cases_root)
         hard_case_entries, filtered_stale_hard_case_counts = _filter_current_hard_case_entries(
             field_crop_entries,
@@ -760,6 +812,8 @@ def prepare_recognizer_datasets(
         "output_root": str(output_root),
         "hard_cases_root": None if hard_cases_root is None else str(hard_cases_root),
         "include_hard_cases": include_hard_cases,
+        "ensure_hard_cases_manifest": ensure_hard_cases_manifest,
+        "hard_cases_sync": hard_cases_sync,
         "include_rejected_crops": include_rejected_crops,
         "max_hard_case_ratio": max_hard_case_ratio,
         "groups": dict(sorted(summary_groups.items())),
@@ -856,6 +910,7 @@ def main() -> None:
         ensure_crops=args.ensure_field_crops,
         hard_cases_root=args.hard_cases_root,
         include_hard_cases=args.include_hard_cases,
+        ensure_hard_cases_manifest=args.ensure_hard_cases,
         include_rejected_crops=args.include_rejected_crops,
         max_hard_case_ratio=args.max_hard_case_ratio,
     )
