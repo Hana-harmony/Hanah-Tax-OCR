@@ -126,6 +126,47 @@ def test_residency_parser_prefers_full_text_taxpayer_when_region_bleeds_into_tin
     assert parsed.fields["taxpayer_name"] == "UNIVERSITY OF HAWAII"
 
 
+def test_residency_parser_salvages_taxpayer_and_partial_issue_date_from_neighbor_regions() -> None:
+    parser = ResidencyCertificateParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "DEPARTMENT OF THE TREASURY",
+                            "Date:",
+                            "82021",
+                            "Taxpayer:",
+                            "TIN:",
+                            "Tax Year:2021",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "taxpayer_name": OCRPage(
+                    page_number=1,
+                    raw_text="Taxpayer:\nTIN",
+                ),
+                "tin": OCRPage(
+                    page_number=1,
+                    raw_text="Taxpayer:F\nTIN\nTax Year:2021",
+                ),
+                "issue_date": OCRPage(
+                    page_number=1,
+                    raw_text="Date:\n8,2021",
+                ),
+            },
+        ),
+        "legacy_residency.png",
+    )
+
+    assert parsed.fields["taxpayer_name"] == "F"
+    assert parsed.fields["issue_date"] == "8, 2021"
+
+
 def test_apostille_parser_extracts_standard_items() -> None:
     parser = ApostilleParser()
     parsed = parser.parse(
@@ -239,20 +280,21 @@ def test_apostille_california_parser_prefers_full_text_over_misaligned_regions()
                     page_number=1,
                     raw_text="0.4\neal/Stamp:",
                 ),
-                "certificate_number": OCRPage(page_number=1, raw_text="9"),
+                "certificate_number": OCRPage(page_number=1, raw_text="8.No.4"),
             },
         ),
         "sample_data/아포스티유 샘플/미국 california 주.png",
     )
 
     assert parsed.fields["issuing_country"] == "United States of America"
+    assert parsed.fields["signed_by"] is None
     assert (
         parsed.fields["signer_capacity"]
         == "Deputy Registrar-Recorder/County Clerk, County of Los Angeles, State of California"
     )
     assert parsed.fields["seal_owner"] == "County of Los Angeles, State of California"
     assert parsed.fields["issued_at"] == "Los Angeles, California"
-    assert parsed.fields["certificate_number"] == "9"
+    assert parsed.fields["certificate_number"] == "4"
 
 
 def test_withholding_parser_extracts_sample_fields() -> None:

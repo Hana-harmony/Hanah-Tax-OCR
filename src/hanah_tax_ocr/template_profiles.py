@@ -105,7 +105,7 @@ APOSTILLE_CALIFORNIA = DocumentTemplateProfile(
         OCRRegionSpec("issued_at", 0.12, 0.66, 0.42, 0.72),
         OCRRegionSpec("issued_on", 0.12, 0.72, 0.36, 0.78),
         OCRRegionSpec("issuing_authority", 0.12, 0.77, 0.72, 0.83),
-        OCRRegionSpec("certificate_number", 0.12, 0.83, 0.28, 0.88),
+        OCRRegionSpec("certificate_number", 0.07, 0.655, 0.20, 0.695),
     ),
 )
 

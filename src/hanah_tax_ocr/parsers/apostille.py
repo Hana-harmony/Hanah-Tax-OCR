@@ -139,13 +139,6 @@ class ApostilleParser(BaseDocumentParser):
         text = ocr_result.combined_text()
         single_line = self._normalize_whitespace(text)
         item_8 = self._extract_item_block(single_line, 8, 9)
-        certificate_number_source = self._normalize_whitespace(
-            " ".join(
-                part
-                for part in [self._region_value(ocr_result, "certificate_number"), item_8]
-                if part
-            )
-        )
 
         fields = {
             "issuing_country": self._normalize_country_value(
@@ -155,10 +148,12 @@ class ApostilleParser(BaseDocumentParser):
                     stop_phrases=["This public document"],
                 )
             ),
-            "signed_by": self._clean_item_value(
-                self._find_first(r"has been signed by[:\s]*(.+?)(?=\s+3\.|$)", single_line)
-                or self._region_value(ocr_result, "signed_by"),
-                stop_phrases=["acting in the capacity"],
+            "signed_by": self._normalize_signed_by(
+                self._clean_item_value(
+                    self._find_first(r"has been signed by[:\s]*(.+?)(?=\s+3\.|$)", single_line)
+                    or self._region_value(ocr_result, "signed_by"),
+                    stop_phrases=["acting in the capacity"],
+                )
             ),
             "signer_capacity": self._normalize_capacity(
                 self._clean_item_value(
@@ -204,14 +199,9 @@ class ApostilleParser(BaseDocumentParser):
                     stop_phrases=["8.", "9.", "10."],
                 )
             ),
-            "certificate_number": self._clean_item_value(
-                self._extract_first_pattern(
-                    [
-                        r"(?:NO\.?|No\.?)\s*([A-Z0-9-]+)",
-                        r"(\d+)",
-                    ],
-                    certificate_number_source or item_8,
-                )
+            "certificate_number": self._extract_certificate_number(
+                self._region_value(ocr_result, "certificate_number"),
+                item_8,
             ),
         }
         quality_checks = {
@@ -260,6 +250,50 @@ class ApostilleParser(BaseDocumentParser):
             return None
         cleaned = re.sub(r"\s+\d+$", "", value).strip()
         return cleaned or None
+
+    def _normalize_signed_by(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        cleaned = value.strip()
+        if re.fullmatch(r"\d+\.?", cleaned):
+            return None
+        return cleaned or None
+
+    def _extract_certificate_number(
+        self,
+        region_value: str | None,
+        item_8_value: str | None,
+    ) -> str | None:
+        for source in [region_value, item_8_value]:
+            if not source:
+                continue
+            normalized = self._normalize_whitespace(source)
+            normalized = re.sub(
+                r"\b9\.?\s*Seal/Stamp.*$",
+                "",
+                normalized,
+                flags=re.IGNORECASE,
+            ).strip()
+            no_match = re.search(
+                r"(?:8\.?\s*)?No\.?\s*([A-Z0-9-]+)\b",
+                normalized,
+                re.IGNORECASE,
+            )
+            if no_match:
+                token = no_match.group(1).strip()
+                if token not in {"8", "9", "10"}:
+                    return token
+            if re.fullmatch(r"[A-Z0-9-]+", normalized, re.IGNORECASE):
+                if normalized not in {"8", "9", "10"}:
+                    return normalized
+            digits = [
+                token
+                for token in re.findall(r"\b\d+\b", normalized)
+                if token not in {"8", "9", "10"}
+            ]
+            if len(digits) == 1:
+                return digits[0]
+        return None
 
     def _normalize_country_value(self, value: str | None) -> str | None:
         if not value:

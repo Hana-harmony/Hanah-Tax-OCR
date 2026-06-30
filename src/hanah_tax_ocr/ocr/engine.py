@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import sys
 from collections.abc import Iterable
 from io import BytesIO
@@ -7,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter, ImageOps
 
 from hanah_tax_ocr.schemas import OCRPage, OCRResult, OCRWordBox
 from hanah_tax_ocr.template_profiles import OCRRegionSpec
@@ -15,6 +16,11 @@ from hanah_tax_ocr.template_profiles import OCRRegionSpec
 REGION_FALLBACK_VERTICAL_OFFSETS: dict[str, tuple[float, ...]] = {
     "issue_date": (-0.08, -0.06, -0.04, -0.02),
 }
+
+MONTH_NAME_PATTERN = (
+    r"\b(January|February|March|April|May|June|July|August|"
+    r"September|October|November|December)\b"
+)
 
 
 class _CheckpointRecognizer:
@@ -230,14 +236,87 @@ class PaddleOCREngine:
                     int(image.height * candidate_region.bottom),
                 )
             )
-            raw_result = region_engine.ocr(
-                np.array(crop),
-                cls=self._kwargs.get("use_angle_cls", True),
-            )
-            pages = self._build_pages(raw_result)
-            if any(page.raw_text.strip() for page in pages):
-                return pages
+            best_pages: list[OCRPage] = []
+            best_score = (0, 0, 0)
+            for variant in self._region_variants(region_spec.name, crop):
+                raw_result = region_engine.ocr(
+                    np.array(variant),
+                    cls=self._kwargs.get("use_angle_cls", True),
+                )
+                pages = self._build_pages(raw_result)
+                score = self._score_region_pages(region_spec.name, pages)
+                if score > best_score:
+                    best_pages = pages
+                    best_score = score
+            if best_pages:
+                return best_pages
         return []
+
+    def _region_variants(self, region_name: str, crop: Image.Image) -> list[Image.Image]:
+        variants = [crop.convert("RGB")]
+        if region_name == "issue_date":
+            variants.extend(
+                [
+                    crop.resize((crop.width * 2, crop.height * 2)).convert("RGB"),
+                    ImageOps.grayscale(crop)
+                    .point(lambda p: 255 if p > 180 else 0)
+                    .resize((crop.width * 4, crop.height * 4))
+                    .convert("RGB"),
+                ]
+            )
+        elif region_name == "certificate_number":
+            grayscale = ImageOps.grayscale(crop)
+            variants = [
+                grayscale.filter(ImageFilter.SHARPEN)
+                .resize((crop.width * 4, crop.height * 4))
+                .convert("RGB"),
+                grayscale.point(lambda p: 255 if p > 180 else 0)
+                .resize((crop.width * 4, crop.height * 4))
+                .convert("RGB"),
+                crop.resize((crop.width * 2, crop.height * 2)).convert("RGB"),
+                crop.convert("RGB"),
+            ]
+        return variants
+
+    def _score_region_pages(
+        self,
+        region_name: str,
+        pages: list[OCRPage],
+    ) -> tuple[int, int, int]:
+        text = "\n".join(page.raw_text for page in pages if page.raw_text).strip()
+        if not text:
+            return (0, 0, 0)
+        normalized = re.sub(r"\s+", " ", text).strip()
+
+        if region_name == "certificate_number":
+            for line in text.splitlines():
+                normalized_line = re.sub(r"\s+", " ", line).strip()
+                if "no" not in normalized_line.lower():
+                    continue
+                match = re.search(r"\bNo\.?\s*([A-Z0-9-]+)\b", normalized_line, re.IGNORECASE)
+                if match and match.group(1) not in {"8", "9", "10"}:
+                    return (4, len(match.group(1)), -len(normalized_line))
+                return (2, len(normalized_line), -len(normalized_line))
+
+            digits = [
+                token
+                for token in re.findall(r"\b\d+\b", normalized)
+                if token not in {"8", "9", "10"}
+            ]
+            if digits:
+                return (3, len(max(digits, key=len)), -len(normalized))
+            return (1, len(normalized), -len(normalized))
+
+        if region_name == "issue_date":
+            has_year = re.search(r"\b\d{4}\b", normalized) is not None
+            if re.search(MONTH_NAME_PATTERN, normalized, re.IGNORECASE) and has_year:
+                return (4, len(normalized), -len(normalized))
+            if "date" in normalized.lower() and has_year:
+                return (3, len(normalized), -len(normalized))
+            if has_year:
+                return (2, len(normalized), -len(normalized))
+
+        return (1, len(normalized), -len(normalized))
 
     def _build_pages(self, raw_result: Any) -> list[OCRPage]:
         pages: list[OCRPage] = []

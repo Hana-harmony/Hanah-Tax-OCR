@@ -14,11 +14,12 @@ class ResidencyCertificateParser(BaseDocumentParser):
     def parse(self, ocr_result: OCRResult, source_path: str | Path) -> ExtractedDocument:
         text = ocr_result.combined_text()
         single_line = self._normalize_whitespace(text)
+        tin_region_text = self._region_value(ocr_result, "tin")
         tin_source = self._normalize_whitespace(
             " ".join(
                 part
                 for part in [
-                    self._region_value(ocr_result, "tin"),
+                    tin_region_text,
                     single_line,
                 ]
                 if part
@@ -32,6 +33,11 @@ class ResidencyCertificateParser(BaseDocumentParser):
             self._find_first(
                 r"Taxpayer\s*[:;]?\s*(.+?)\s+(?:TIN|Tax Year|Date)\b",
                 single_line,
+            )
+        ) or self._clean_taxpayer_value(
+            self._find_first(
+                r"Taxpayer\s*[:;]?\s*(.+?)\s+TIN\b",
+                self._normalize_whitespace(tin_region_text or ""),
             )
         )
         taxpayer_name = self._normalize_name(
@@ -63,11 +69,16 @@ class ResidencyCertificateParser(BaseDocumentParser):
                 single_line,
             )
         )
-        issue_date = (
-            region_issue_date
-            if self._is_valid_english_date(region_issue_date)
-            else fallback_issue_date
-        )
+        issue_date = None
+        if self._is_valid_english_date(region_issue_date):
+            issue_date = region_issue_date
+        elif self._is_valid_english_date(fallback_issue_date):
+            issue_date = fallback_issue_date
+        else:
+            issue_date = self._normalize_partial_issue_date(
+                region_issue_date,
+                fallback_issue_date,
+            )
         residency_country = normalize_country(
             "United States of America"
             if self._contains_any(
@@ -145,3 +156,18 @@ class ResidencyCertificateParser(BaseDocumentParser):
         ):
             return fallback_value
         return region_value
+
+    def _normalize_partial_issue_date(self, *values: str | None) -> str | None:
+        for value in values:
+            if not value:
+                continue
+            cleaned = self._normalize_whitespace(value)
+            cleaned = re.sub(r"^Date\s*[:;]?\s*", "", cleaned, flags=re.IGNORECASE)
+            cleaned = cleaned.strip(" ,.;:")
+            month_year_match = re.search(r"(\d{1,2})\s*,?\s*(\d{4})", cleaned)
+            if month_year_match:
+                month_or_day, year = month_year_match.groups()
+                return f"{month_or_day}, {year}"
+            if re.search(r"\b\d{4}\b", cleaned):
+                return cleaned
+        return None
