@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from hanah_tax_ocr.harness import HarnessRunResult
 from hanah_tax_ocr.schemas import DocumentType
+from hanah_tax_ocr.training.field_crops import field_group_for
 
 
 class EvaluationResult(BaseModel):
@@ -73,6 +74,13 @@ class FieldErrorReportComparison(BaseModel):
     added_documents: list[str] = Field(default_factory=list)
     removed_documents: list[str] = Field(default_factory=list)
     document_deltas: dict[str, FieldMetricDelta] = Field(default_factory=dict)
+    improved_field_groups: list[str] = Field(default_factory=list)
+    regressed_field_groups: list[str] = Field(default_factory=list)
+    mixed_field_groups: list[str] = Field(default_factory=list)
+    unchanged_field_groups: list[str] = Field(default_factory=list)
+    added_field_groups: list[str] = Field(default_factory=list)
+    removed_field_groups: list[str] = Field(default_factory=list)
+    field_group_deltas: dict[str, FieldMetricDelta] = Field(default_factory=dict)
     overall_delta: FieldMetricDelta | None = None
 
 
@@ -375,6 +383,15 @@ def _document_type_for_field_key(field_key: str) -> str:
     return document_type or field_key
 
 
+def _field_name_for_field_key(field_key: str) -> str:
+    _, _, field_name = field_key.partition(".")
+    return field_name or field_key
+
+
+def _field_group_for_field_key(field_key: str) -> str:
+    return field_group_for(_field_name_for_field_key(field_key))
+
+
 def compare_field_error_reports(
     baseline_report: FieldErrorReport,
     candidate_report: FieldErrorReport,
@@ -391,6 +408,16 @@ def compare_field_error_reports(
         _aggregate_metric_summaries(
             candidate_report.field_metrics,
             _document_type_for_field_key,
+        ),
+    )
+    field_group_comparison = _compare_metric_summary_maps(
+        _aggregate_metric_summaries(
+            baseline_report.field_metrics,
+            _field_group_for_field_key,
+        ),
+        _aggregate_metric_summaries(
+            candidate_report.field_metrics,
+            _field_group_for_field_key,
         ),
     )
     overall_comparison = _compare_metric_summary_maps(
@@ -442,6 +469,13 @@ def compare_field_error_reports(
         added_documents=document_comparison["added_keys"],
         removed_documents=document_comparison["removed_keys"],
         document_deltas=document_comparison["metric_deltas"],
+        improved_field_groups=field_group_comparison["improved_keys"],
+        regressed_field_groups=field_group_comparison["regressed_keys"],
+        mixed_field_groups=field_group_comparison["mixed_keys"],
+        unchanged_field_groups=field_group_comparison["unchanged_keys"],
+        added_field_groups=field_group_comparison["added_keys"],
+        removed_field_groups=field_group_comparison["removed_keys"],
+        field_group_deltas=field_group_comparison["metric_deltas"],
         overall_delta=overall_comparison["metric_deltas"].get("overall"),
     )
 

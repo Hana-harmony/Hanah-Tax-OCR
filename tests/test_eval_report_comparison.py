@@ -139,6 +139,8 @@ def test_compare_field_error_reports_classifies_metric_changes() -> None:
     assert address_delta.status == "mixed"
     assert comparison.regressed_documents == ["withholding_tax_form"]
     assert comparison.document_deltas["withholding_tax_form"].status == "regressed"
+    assert comparison.regressed_field_groups == ["english_name_org"]
+    assert comparison.field_group_deltas["english_name_org"].status == "regressed"
     assert comparison.overall_delta is not None
     assert comparison.overall_delta.status == "regressed"
 
@@ -192,6 +194,7 @@ def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> Non
     comparison = compare_field_error_report_files(baseline_path, candidate_path)
     assert comparison.improved_fields == ["residency_certificate.taxpayer_name"]
     assert comparison.improved_documents == ["residency_certificate"]
+    assert comparison.improved_field_groups == ["english_name_org"]
     assert comparison.overall_delta is not None
     assert comparison.overall_delta.status == "improved"
 
@@ -213,6 +216,7 @@ def test_compare_field_error_report_files_and_cli(tmp_path: Path, capsys) -> Non
     payload = json.loads(capsys.readouterr().out)
     assert payload["improved_fields"] == ["residency_certificate.taxpayer_name"]
     assert payload["improved_documents"] == ["residency_certificate"]
+    assert payload["improved_field_groups"] == ["english_name_org"]
     assert payload["overall_delta"]["status"] == "improved"
 
 
@@ -270,6 +274,11 @@ def test_compare_field_error_reports_rolls_up_document_level_metrics() -> None:
     assert comparison.improved_documents == ["residency_certificate"]
     assert comparison.regressed_documents == ["apostille"]
     assert comparison.added_documents == ["withholding_tax_form"]
+    assert comparison.improved_field_groups == ["english_name_org"]
+    assert comparison.regressed_field_groups == []
+    assert comparison.added_field_groups == ["numeric_tin_code"]
+    assert comparison.field_group_deltas["english_name_org"].status == "improved"
+    assert comparison.field_group_deltas["numeric_tin_code"].status == "added"
     assert comparison.document_deltas["residency_certificate"].status == "improved"
     assert comparison.document_deltas["apostille"].status == "regressed"
     assert comparison.document_deltas["withholding_tax_form"].status == "added"
