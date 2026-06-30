@@ -15,5 +15,6 @@ Promotion flow:
 
 - queue output is written under `data/review_queue/index/`
 - `python -m scripts.review_queue.report_label_priorities` ranks queued cases using the latest data gap report
+- `python -m scripts.review_queue.promote_to_labeled --priority-report ... --limit N` promotes only the top-ranked cases
 - `python -m scripts.review_queue.promote_to_labeled` copies queue JSON into `data/labeled/pending_review/`
 - promoted labels are marked for human verification before they enter the reviewed dataset
