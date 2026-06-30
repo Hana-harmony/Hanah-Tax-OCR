@@ -98,7 +98,8 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         )
         country_code = normalize_country_code(
             self._region_value(ocr_result, "residency_country_code")
-            or self._find_first(r"거주지국코드\s*([A-Z]{2})", single_line)
+        ) or normalize_country_code(
+            self._find_first(r"거주지국코드\s*([A-Z]{2})", single_line)
             or self._find_first(r"Country Code\s*[:;]?\s*([A-Z]{2})", single_line)
             or country
             or address
@@ -116,9 +117,9 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             )
         )
         signature_date = self._normalize_iso_date(
-            self._find_first(r"(\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)", single_line)
+            self._region_value(ocr_result, "signature_date")
+            or self._find_first(r"(\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)", single_line)
             or self._find_first(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2})", single_line)
-            or self._region_value(ocr_result, "signature_date")
         )
         middle_name = self._derive_middle_name(
             middle_name,
