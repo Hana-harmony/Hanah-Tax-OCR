@@ -70,6 +70,7 @@ def test_prepare_recognizer_datasets_writes_group_manifests_and_plan(tmp_path: P
         "residency_certificate": 1
     }
     assert plan["data_profile"]["counts_by_document_type"]["val"] == {"apostille": 1}
+    assert plan["data_profile"]["unique_source_counts"] == {"train": 1, "val": 1}
 
 
 def test_render_training_command_uses_plan_paths(tmp_path: Path) -> None:
@@ -145,6 +146,10 @@ def test_prepare_recognizer_datasets_skips_rejected_crops_by_default(tmp_path: P
         "val": {},
     }
     assert "no_val_samples" in summary["groups"]["english_name_org"]["data_profile"]["warnings"]
+    assert (
+        summary["groups"]["english_name_org"]["data_profile"]["unique_source_counts"]["train"]
+        == 1
+    )
 
 
 def test_run_training_plans_can_execute_against_fake_paddleocr_home(tmp_path: Path) -> None:

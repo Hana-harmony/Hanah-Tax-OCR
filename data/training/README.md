@@ -11,7 +11,7 @@ Typical contents:
   and train/val split assignment keeps document-type validation coverage when possible
 - `recognizer/`: PaddleOCR recognizer train/val label files, per-group dictionaries, and plan files
   each plan/summary includes document-type coverage, source-type counts, hard-case ratio warnings,
-  any capped hard-case counts applied during train split balancing,
+  source-diversity counts and warnings, any capped hard-case counts applied during train split balancing,
   and the preserved base document mix for selected hard cases
 - `hard_cases/`: left-clip, rotation, low-res, and overlay-based hard-case augmentations
 - `reports/`: field-level OCR error maps such as CER, WER, exact-match summaries,

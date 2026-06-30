@@ -20,6 +20,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
             "field_name": "taxpayer_name",
             "document_type": "apostille",
             "split": "train",
+            "source_path": "sample_data/apostille_train.png",
             "quality": {"accepted": True},
         },
         {
@@ -27,6 +28,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
             "field_name": "taxpayer_name",
             "document_type": "apostille",
             "split": "val",
+            "source_path": "sample_data/apostille_val.png",
             "quality": {"accepted": True},
         },
         {
@@ -34,6 +36,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
             "field_name": "taxpayer_name",
             "document_type": "withholding_tax_form",
             "split": "train",
+            "source_path": "sample_data/withholding_train.png",
             "quality": {"accepted": False},
         },
         {
@@ -41,6 +44,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
             "field_name": "tin",
             "document_type": "residency_certificate",
             "split": "train",
+            "source_path": "sample_data/residency_train.png",
             "quality": {"accepted": True},
         },
         {
@@ -48,6 +52,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
             "field_name": "tin",
             "document_type": "residency_certificate",
             "split": "train",
+            "source_path": "sample_data/residency_train.png",
             "quality": {"accepted": True},
         },
         {
@@ -55,6 +60,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
             "field_name": "tin",
             "document_type": "residency_certificate",
             "split": "val",
+            "source_path": "sample_data/residency_val.png",
             "quality": {"accepted": True},
         },
     ]
@@ -71,6 +77,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
                 "data_profile": {
                     "hard_case_train_ratio": 0.5,
                     "filtered_hard_case_train_count": 3,
+                    "unique_source_counts": {"train": 1, "val": 1},
                     "warnings": ["low_train_sample_count", "hard_case_train_capped"],
                 },
             },
@@ -80,6 +87,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
                 "data_profile": {
                     "hard_case_train_ratio": 0.0,
                     "filtered_hard_case_train_count": 0,
+                    "unique_source_counts": {"train": 1, "val": 1},
                     "warnings": [],
                 },
             },
@@ -132,10 +140,19 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
     english_group = report["priorities"][0]
     assert english_group["base_train_count"] == 1
     assert english_group["base_val_count"] == 1
+    assert english_group["base_train_source_count"] == 1
+    assert english_group["base_val_source_count"] == 1
     assert english_group["rejected_count"] == 1
     assert english_group["missing_document_types"]["train"] == ["residency_certificate"]
+    assert english_group["source_counts_by_document_type"]["train"] == {"apostille": 1}
     assert english_group["recognizer_profile"]["filtered_hard_case_train_count"] == 3
+    assert english_group["recognizer_profile"]["train_source_count"] == 1
+    assert english_group["recognizer_profile"]["val_source_count"] == 1
+    assert english_group["score_breakdown"]["train_source_gap"] == 5.0
+    assert english_group["score_breakdown"]["val_source_gap"] == 2.0
     assert "prioritize_low_accuracy_group" in english_group["recommendations"]
+    assert "collect_distinct_train_sources" in english_group["recommendations"]
+    assert "collect_distinct_val_sources" in english_group["recommendations"]
     assert "add_base_samples_before_more_hard_cases" in english_group["recommendations"]
 
     numeric_group = next(
@@ -158,6 +175,7 @@ def test_data_gap_report_writes_priority_report_with_missing_eval(tmp_path: Path
                 "field_name": "issue_date",
                 "document_type": "residency_certificate",
                 "split": "train",
+                "source_path": "sample_data/residency_train.png",
                 "quality": {"accepted": True},
             }
         )
@@ -177,4 +195,6 @@ def test_data_gap_report_writes_priority_report_with_missing_eval(tmp_path: Path
         "collect_base_train_samples",
         "collect_base_val_samples",
         "expand_val_document_coverage",
+        "collect_distinct_train_sources",
+        "collect_distinct_val_sources",
     ]

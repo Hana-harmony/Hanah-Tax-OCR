@@ -45,6 +45,16 @@ def parse_args() -> argparse.Namespace:
         default=3,
     )
     parser.add_argument(
+        "--min-train-source-count",
+        type=int,
+        default=3,
+    )
+    parser.add_argument(
+        "--min-val-source-count",
+        type=int,
+        default=2,
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=DEFAULT_OUTPUT_PATH,
@@ -76,6 +86,17 @@ def _counts_by(entries: list[dict[str, Any]], key: str) -> dict[str, int]:
 
 def _sum_counts(values: dict[str, int]) -> int:
     return sum(values.values())
+
+
+def _unique_source_counts_by(entries: list[dict[str, Any]], key: str) -> dict[str, int]:
+    grouped: dict[str, set[str]] = defaultdict(set)
+    for entry in entries:
+        group_key = str(entry.get(key) or "unknown")
+        source_path = str(entry.get("source_path") or "unknown")
+        grouped[group_key].add(source_path)
+    return dict(
+        sorted((group_key, len(source_paths)) for group_key, source_paths in grouped.items())
+    )
 
 
 def _aggregate_eval_metrics(eval_report_path: Path | None) -> dict[str, dict[str, float]]:
@@ -126,6 +147,8 @@ def build_data_gap_report(
     eval_report_path: Path | None = None,
     min_base_train_count: int = 12,
     min_base_val_count: int = 3,
+    min_train_source_count: int = 3,
+    min_val_source_count: int = 2,
 ) -> dict[str, Any]:
     field_crop_entries = load_jsonl(field_crops_root / "manifest.jsonl")
     recognizer_summary_path = recognizer_root / "summary.json"
@@ -172,8 +195,12 @@ def build_data_gap_report(
         train_counts_by_document = _counts_by(train_entries, "document_type")
         val_counts_by_document = _counts_by(val_entries, "document_type")
         rejected_counts_by_document = _counts_by(rejected_group_entries, "document_type")
+        train_source_counts_by_document = _unique_source_counts_by(train_entries, "document_type")
+        val_source_counts_by_document = _unique_source_counts_by(val_entries, "document_type")
         base_train_count = _sum_counts(train_counts_by_document)
         base_val_count = _sum_counts(val_counts_by_document)
+        base_train_source_count = _sum_counts(train_source_counts_by_document)
+        base_val_source_count = _sum_counts(val_source_counts_by_document)
         rejected_count = len(rejected_group_entries)
 
         missing_train_document_types = [
@@ -193,6 +220,8 @@ def build_data_gap_report(
 
         train_gap = max(0, min_base_train_count - base_train_count)
         val_gap = max(0, min_base_val_count - base_val_count)
+        train_source_gap = max(0, min_train_source_count - base_train_source_count)
+        val_source_gap = max(0, min_val_source_count - base_val_source_count)
         document_gap = len(missing_train_document_types) + (0.5 * len(missing_val_document_types))
         rejected_gap = rejected_count * 0.25
         accuracy_gap = 0.0
@@ -206,6 +235,8 @@ def build_data_gap_report(
         priority_score = round(
             (train_gap * 3.0)
             + (val_gap * 2.0)
+            + (train_source_gap * 2.5)
+            + (val_source_gap * 2.0)
             + document_gap
             + rejected_gap
             + accuracy_gap,
@@ -221,6 +252,10 @@ def build_data_gap_report(
             recommendations.append("expand_train_document_coverage")
         if missing_val_document_types:
             recommendations.append("expand_val_document_coverage")
+        if train_source_gap > 0:
+            recommendations.append("collect_distinct_train_sources")
+        if val_source_gap > 0:
+            recommendations.append("collect_distinct_val_sources")
         if rejected_count > 0:
             recommendations.append("review_rejected_field_crops")
         if eval_metrics is not None and (
@@ -237,11 +272,17 @@ def build_data_gap_report(
                 "priority_score": priority_score,
                 "base_train_count": base_train_count,
                 "base_val_count": base_val_count,
+                "base_train_source_count": base_train_source_count,
+                "base_val_source_count": base_val_source_count,
                 "rejected_count": rejected_count,
                 "counts_by_document_type": {
                     "train": train_counts_by_document,
                     "val": val_counts_by_document,
                     "rejected": rejected_counts_by_document,
+                },
+                "source_counts_by_document_type": {
+                    "train": train_source_counts_by_document,
+                    "val": val_source_counts_by_document,
                 },
                 "missing_document_types": {
                     "train": missing_train_document_types,
@@ -250,6 +291,11 @@ def build_data_gap_report(
                 "recognizer_profile": {
                     "train_count": recognizer_group.get("train_count", 0),
                     "val_count": recognizer_group.get("val_count", 0),
+                    "train_source_count": data_profile.get("unique_source_counts", {}).get(
+                        "train",
+                        0,
+                    ),
+                    "val_source_count": data_profile.get("unique_source_counts", {}).get("val", 0),
                     "hard_case_train_ratio": data_profile.get("hard_case_train_ratio", 0.0),
                     "filtered_hard_case_train_count": data_profile.get(
                         "filtered_hard_case_train_count",
@@ -261,6 +307,8 @@ def build_data_gap_report(
                 "score_breakdown": {
                     "train_gap": round(train_gap * 3.0, 4),
                     "val_gap": round(val_gap * 2.0, 4),
+                    "train_source_gap": round(train_source_gap * 2.5, 4),
+                    "val_source_gap": round(val_source_gap * 2.0, 4),
                     "document_gap": round(document_gap, 4),
                     "rejected_gap": round(rejected_gap, 4),
                     "accuracy_gap": round(accuracy_gap, 4),
@@ -283,6 +331,8 @@ def build_data_gap_report(
         "eval_report_path": None if eval_report_path is None else str(eval_report_path),
         "min_base_train_count": min_base_train_count,
         "min_base_val_count": min_base_val_count,
+        "min_train_source_count": min_train_source_count,
+        "min_val_source_count": min_val_source_count,
         "document_types": document_types,
         "priority_order": [item["field_group"] for item in priorities],
         "priorities": priorities,
@@ -297,6 +347,8 @@ def main() -> None:
         eval_report_path=args.eval_report,
         min_base_train_count=args.min_base_train_count,
         min_base_val_count=args.min_base_val_count,
+        min_train_source_count=args.min_train_source_count,
+        min_val_source_count=args.min_val_source_count,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

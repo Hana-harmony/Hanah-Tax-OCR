@@ -187,12 +187,31 @@ def _source_type_for(entry: dict[str, Any]) -> str:
     return "hard_case" if entry.get("augmentation_type") else "base"
 
 
+def _source_key_for(entry: dict[str, Any]) -> str:
+    return str(
+        entry.get("source_path")
+        or entry.get("base_crop_path")
+        or entry.get("crop_path")
+        or "unknown"
+    )
+
+
 def _counts_by(entries: list[dict[str, Any]], key: str) -> dict[str, int]:
     counter = Counter()
     for entry in entries:
         value = entry.get(key) or "unknown"
         counter[str(value)] += 1
     return dict(sorted(counter.items()))
+
+
+def _unique_source_counts(entries: list[dict[str, Any]], key: str) -> dict[str, int]:
+    grouped: dict[str, set[str]] = defaultdict(set)
+    for entry in entries:
+        value = str(entry.get(key) or "unknown")
+        grouped[value].add(_source_key_for(entry))
+    return dict(
+        sorted((group_key, len(source_paths)) for group_key, source_paths in grouped.items())
+    )
 
 
 def _build_data_profile(
@@ -247,6 +266,8 @@ def _build_data_profile(
         warnings.append("hard_case_dominant_train_split")
     if filtered_hard_case_train_count:
         warnings.append("hard_case_train_capped")
+    if len({_source_key_for(entry) for entry in val_entries}) < 2:
+        warnings.append("low_val_source_diversity")
 
     return {
         "counts_by_document_type": {
@@ -262,6 +283,14 @@ def _build_data_profile(
                 "base": _counts_by(val_base_entries, "document_type"),
                 "hard_case": _counts_by(val_hard_case_entries, "document_type"),
             },
+        },
+        "unique_source_counts": {
+            "train": len({_source_key_for(entry) for entry in train_entries}),
+            "val": len({_source_key_for(entry) for entry in val_entries}),
+        },
+        "unique_source_counts_by_document_type": {
+            "train": _unique_source_counts(train_entries, "document_type"),
+            "val": _unique_source_counts(val_entries, "document_type"),
         },
         "counts_by_source_type": source_counts,
         "hard_case_train_ratio": hard_case_train_ratio,
