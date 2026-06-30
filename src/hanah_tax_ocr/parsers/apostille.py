@@ -139,6 +139,7 @@ class ApostilleParser(BaseDocumentParser):
                 )
                 or self._region_value(ocr_result, "issued_at"),
                 stop_phrases=["the", "by"],
+                normalize_commas=True,
             ),
             "issued_on": normalize_apostille_date(
                 self._clean_item_value(
@@ -189,6 +190,7 @@ class ApostilleParser(BaseDocumentParser):
         value: str | None,
         *,
         stop_phrases: list[str] | None = None,
+        normalize_commas: bool = False,
     ) -> str | None:
         cleaned = self._normalize_whitespace(value or "")
         if not cleaned:
@@ -200,6 +202,8 @@ class ApostilleParser(BaseDocumentParser):
             match = re.search(re.escape(phrase), cleaned, re.IGNORECASE)
             if match:
                 cleaned = cleaned[: match.start()].strip()
+        if normalize_commas:
+            cleaned = re.sub(r"\s*,\s*", ", ", cleaned)
         cleaned = cleaned.strip(" :;|\\/")
         if not any(character.isalnum() for character in cleaned):
             return None

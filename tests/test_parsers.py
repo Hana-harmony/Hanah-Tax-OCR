@@ -93,6 +93,7 @@ def test_apostille_parser_prefers_full_text_over_noisy_regions() -> None:
 
     assert parsed.fields["issuing_country"] == "UNITED STATES OF AMERICA"
     assert parsed.fields["signed_by"] == "CHONG U CHOI"
+    assert parsed.fields["issued_at"] == "Raleigh, North Carolina"
 
 
 def test_withholding_parser_extracts_sample_fields() -> None:
@@ -155,4 +156,62 @@ def test_withholding_parser_recovers_from_region_ocr_noise() -> None:
     assert parsed.fields["middle_name"] == "L"
     assert parsed.fields["last_name"] == "CHEN"
     assert parsed.fields["residency_country"] == "United States of America"
+    assert parsed.fields["residency_country_code"] == "US"
+
+
+def test_withholding_parser_prefers_region_signature_date_over_header_date() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "[2026.3.20.]",
+                            "2026-01-12",
+                            "신청인 MARIA L. CHEN",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "signature_date": OCRPage(
+                    page_number=1,
+                    raw_text="t.\n2026\n01\n12\nOL",
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["signature_date"] == "2026-01-12"
+
+
+def test_withholding_parser_falls_back_when_region_country_code_is_invalid() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "거주지국 United States of America",
+                            "거주지국코드 US",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "residency_country_code": OCRPage(page_number=1, raw_text="O0"),
+                "residency_country": OCRPage(
+                    page_number=1,
+                    raw_text="United States of America",
+                ),
+            },
+        ),
+        "withholding.png",
+    )
+
     assert parsed.fields["residency_country_code"] == "US"

@@ -12,6 +12,16 @@ from PIL import Image, ImageStat
 from hanah_tax_ocr.schemas import DocumentType
 from hanah_tax_ocr.template_profiles import classify_template
 
+MIN_BASE_TRAIN_COUNT = 12
+MIN_BASE_VAL_COUNT = 3
+MIN_TRAIN_SOURCE_COUNT = 3
+MIN_VAL_SOURCE_COUNT = 2
+TRAIN_COUNT_GAP_WEIGHT = 3.0
+VAL_COUNT_GAP_WEIGHT = 2.0
+TRAIN_SOURCE_GAP_WEIGHT = 2.5
+VAL_SOURCE_GAP_WEIGHT = 2.0
+EXACT_SOURCE_SPLIT_SEARCH_LIMIT = 14
+
 FIELD_GROUPS: dict[str, str] = {
     "taxpayer_name": "english_name_org",
     "first_name": "english_name_org",
@@ -95,6 +105,23 @@ def _ensure_split_coverage(
         group_assignments[unique_source_paths[-1]] = "train"
 
 
+def _field_count_by_group_for_case_document(item: dict[str, Any]) -> dict[str, int]:
+    raw_counts = item.get("field_counts_by_group")
+    if isinstance(raw_counts, dict):
+        counts: Counter[str] = Counter()
+        for field_group, count in raw_counts.items():
+            if not isinstance(field_group, str) or not field_group:
+                continue
+            if not isinstance(count, int) or count <= 0:
+                continue
+            counts[field_group] += count
+        if counts:
+            return dict(counts)
+
+    counts = Counter(_field_groups_for_case_document(item))
+    return dict(counts)
+
+
 def _field_groups_for_case_document(item: dict[str, Any]) -> list[str]:
     raw_groups = item.get("field_groups")
     if isinstance(raw_groups, str):
@@ -111,12 +138,12 @@ def _field_groups_for_case_document(item: dict[str, Any]) -> list[str]:
     return []
 
 
-def assign_case_splits(
+def _default_case_splits(
     case_documents: list[dict[str, Any]],
     *,
     val_ratio: float,
 ) -> dict[str, str]:
-    source_groups: dict[str, list[dict[str, str]]] = defaultdict(list)
+    source_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for item in case_documents:
         source_groups[item["source_path"]].append(item)
 
@@ -124,29 +151,178 @@ def assign_case_splits(
         source_path: split_for_group(source_path, val_ratio)
         for source_path in source_groups
     }
-    if not 0.0 < val_ratio < 1.0:
-        return {
-            str(item.get("split_key") or item["case_id"]): group_assignments[item["source_path"]]
-            for item in case_documents
-        }
+    if 0.0 < val_ratio < 1.0:
+        by_document_type: dict[str, list[str]] = defaultdict(list)
+        for item in case_documents:
+            by_document_type[item["document_type"]].append(item["source_path"])
 
-    by_document_type: dict[str, list[str]] = defaultdict(list)
-    for item in case_documents:
-        by_document_type[item["document_type"]].append(item["source_path"])
+        for source_paths in by_document_type.values():
+            _ensure_split_coverage(group_assignments, source_paths)
 
-    for source_paths in by_document_type.values():
-        _ensure_split_coverage(group_assignments, source_paths)
+        by_field_group: dict[str, list[str]] = defaultdict(list)
+        for item in case_documents:
+            for field_group in _field_groups_for_case_document(item):
+                by_field_group[field_group].append(item["source_path"])
 
-    by_field_group: dict[str, list[str]] = defaultdict(list)
-    for item in case_documents:
-        for field_group in _field_groups_for_case_document(item):
-            by_field_group[field_group].append(item["source_path"])
-
-    for source_paths in by_field_group.values():
-        _ensure_split_coverage(group_assignments, source_paths)
+        for source_paths in by_field_group.values():
+            _ensure_split_coverage(group_assignments, source_paths)
 
     return {
         str(item.get("split_key") or item["case_id"]): group_assignments[item["source_path"]]
+        for item in case_documents
+    }
+
+
+def _score_group_split_stats(
+    *,
+    train_count: int,
+    val_count: int,
+    train_source_count: int,
+    val_source_count: int,
+) -> float:
+    return (
+        max(0, MIN_BASE_TRAIN_COUNT - train_count) * TRAIN_COUNT_GAP_WEIGHT
+        + max(0, MIN_BASE_VAL_COUNT - val_count) * VAL_COUNT_GAP_WEIGHT
+        + max(0, MIN_TRAIN_SOURCE_COUNT - train_source_count) * TRAIN_SOURCE_GAP_WEIGHT
+        + max(0, MIN_VAL_SOURCE_COUNT - val_source_count) * VAL_SOURCE_GAP_WEIGHT
+    )
+
+
+def _assignment_distance(
+    left: dict[str, str],
+    right: dict[str, str],
+) -> int:
+    return sum(1 for source_path, split in left.items() if right.get(source_path) != split)
+
+
+def _score_source_split_assignment(
+    source_assignments: dict[str, str],
+    source_profiles: dict[str, dict[str, Any]],
+) -> float:
+    counts_by_group: dict[str, dict[str, Any]] = defaultdict(
+        lambda: {
+            "train_count": 0,
+            "val_count": 0,
+            "train_sources": set(),
+            "val_sources": set(),
+        }
+    )
+
+    for source_path, profile in source_profiles.items():
+        split = source_assignments[source_path]
+        for field_group, count in profile["field_counts_by_group"].items():
+            if split == "val":
+                counts_by_group[field_group]["val_count"] += count
+                counts_by_group[field_group]["val_sources"].add(source_path)
+            else:
+                counts_by_group[field_group]["train_count"] += count
+                counts_by_group[field_group]["train_sources"].add(source_path)
+
+    return round(
+        sum(
+            _score_group_split_stats(
+                train_count=stats["train_count"],
+                val_count=stats["val_count"],
+                train_source_count=len(stats["train_sources"]),
+                val_source_count=len(stats["val_sources"]),
+            )
+            for stats in counts_by_group.values()
+        ),
+        4,
+    )
+
+
+def _has_required_split_coverage(
+    source_assignments: dict[str, str],
+    required_sources_by_key: dict[str, set[str]],
+) -> bool:
+    for source_paths in required_sources_by_key.values():
+        if len(source_paths) < 2:
+            continue
+        if len({source_assignments[source_path] for source_path in source_paths}) < 2:
+            return False
+    return True
+
+
+def assign_case_splits(
+    case_documents: list[dict[str, Any]],
+    *,
+    val_ratio: float,
+) -> dict[str, str]:
+    if not 0.0 < val_ratio < 1.0:
+        return _default_case_splits(case_documents, val_ratio=val_ratio)
+
+    default_assignments = _default_case_splits(case_documents, val_ratio=val_ratio)
+    source_assignments = {
+        item["source_path"]: default_assignments[str(item.get("split_key") or item["case_id"])]
+        for item in case_documents
+    }
+    if len(source_assignments) > EXACT_SOURCE_SPLIT_SEARCH_LIMIT:
+        return default_assignments
+
+    source_profiles: dict[str, dict[str, Any]] = {}
+    sources_by_document_type: dict[str, set[str]] = defaultdict(set)
+    sources_by_field_group: dict[str, set[str]] = defaultdict(set)
+    for item in case_documents:
+        source_path = item["source_path"]
+        document_type = str(item["document_type"])
+        field_counts_by_group = _field_count_by_group_for_case_document(item)
+
+        profile = source_profiles.setdefault(
+            source_path,
+            {
+                "field_counts_by_group": Counter(),
+            },
+        )
+        profile["field_counts_by_group"].update(field_counts_by_group)
+        sources_by_document_type[document_type].add(source_path)
+        for field_group in field_counts_by_group:
+            sources_by_field_group[field_group].add(source_path)
+
+    required_sources_by_key = {
+        **{
+            f"document_type:{document_type}": source_paths
+            for document_type, source_paths in sources_by_document_type.items()
+        },
+        **{
+            f"field_group:{field_group}": source_paths
+            for field_group, source_paths in sources_by_field_group.items()
+        },
+    }
+    sorted_source_paths = sorted(source_profiles)
+    best_source_assignments = dict(source_assignments)
+    best_score = _score_source_split_assignment(best_source_assignments, source_profiles)
+    best_distance = 0
+
+    for mask in range(1 << len(sorted_source_paths)):
+        candidate_assignments = {
+            source_path: ("val" if (mask & (1 << index)) else "train")
+            for index, source_path in enumerate(sorted_source_paths)
+        }
+        if not _has_required_split_coverage(candidate_assignments, required_sources_by_key):
+            continue
+
+        candidate_score = _score_source_split_assignment(candidate_assignments, source_profiles)
+        candidate_distance = _assignment_distance(candidate_assignments, source_assignments)
+        if (
+            candidate_score < best_score
+            or (candidate_score == best_score and candidate_distance < best_distance)
+            or (
+                candidate_score == best_score
+                and candidate_distance == best_distance
+                and tuple(candidate_assignments[source_path] for source_path in sorted_source_paths)
+                < tuple(
+                    best_source_assignments[source_path]
+                    for source_path in sorted_source_paths
+                )
+            )
+        ):
+            best_source_assignments = candidate_assignments
+            best_score = candidate_score
+            best_distance = candidate_distance
+
+    return {
+        str(item.get("split_key") or item["case_id"]): best_source_assignments[item["source_path"]]
         for item in case_documents
     }
 
@@ -469,14 +645,13 @@ def export_field_crops(
 
         case_id = payload.get("case_id", label_path.parent.name)
         available_region_names = {region.name for region in profile.ocr_regions}
-        field_groups = sorted(
-            {
-                field_group_for(field_name)
-                for field_name, expected_value in expected_fields.items()
-                if expected_value not in {None, ""}
-                and field_name in available_region_names
-            }
+        field_counts_by_group = Counter(
+            field_group_for(field_name)
+            for field_name, expected_value in expected_fields.items()
+            if expected_value not in {None, ""}
+            and field_name in available_region_names
         )
+        field_groups = sorted(field_counts_by_group)
         prepared_cases.append(
             {
                 "split_key": f"{document_type.value}:{case_id}",
@@ -486,6 +661,7 @@ def export_field_crops(
                 "label_path": label_path,
                 "expected_fields": expected_fields,
                 "field_groups": field_groups,
+                "field_counts_by_group": dict(sorted(field_counts_by_group.items())),
                 "profile": profile,
                 "image": image,
             }
@@ -499,6 +675,7 @@ def export_field_crops(
                 "document_type": item["document_type"],
                 "source_path": str(item["source_path"]),
                 "field_groups": item["field_groups"],
+                "field_counts_by_group": item["field_counts_by_group"],
             }
             for item in prepared_cases
         ],

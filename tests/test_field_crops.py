@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 
 from hanah_tax_ocr.training.field_crops import (
+    _default_case_splits,
     _salvage_dense_edge_crop,
+    _score_source_split_assignment,
     assign_case_splits,
     compute_crop_quality,
     export_field_crops,
@@ -350,6 +352,93 @@ def test_assign_case_splits_keeps_field_groups_in_both_splits_when_possible() ->
     }
     assert date_splits == {"train", "val"}
     assert numeric_splits == {"train", "val"}
+
+
+def test_assign_case_splits_optimizes_source_balance_for_sparse_groups() -> None:
+    case_documents = [
+        {
+            "case_id": "residency_case_001",
+            "document_type": "residency_certificate",
+            "source_path": "residency",
+            "field_groups": ["date", "english_name_org", "numeric_tin_code"],
+            "field_counts_by_group": {
+                "date": 2,
+                "english_name_org": 6,
+                "numeric_tin_code": 5,
+            },
+        },
+        {
+            "case_id": "withholding_case_001",
+            "document_type": "withholding_tax_form",
+            "source_path": "withholding",
+            "field_groups": ["date", "english_name_org", "numeric_tin_code"],
+            "field_counts_by_group": {
+                "date": 2,
+                "english_name_org": 6,
+                "numeric_tin_code": 5,
+            },
+        },
+        {
+            "case_id": "apostille_california_001",
+            "document_type": "apostille",
+            "source_path": "apostille_california",
+            "field_groups": [
+                "date",
+                "english_name_org",
+                "korean_mixed_form",
+                "numeric_tin_code",
+            ],
+            "field_counts_by_group": {
+                "date": 1,
+                "english_name_org": 5,
+                "korean_mixed_form": 1,
+                "numeric_tin_code": 1,
+            },
+        },
+        {
+            "case_id": "apostille_michigan_001",
+            "document_type": "apostille",
+            "source_path": "apostille_michigan",
+            "field_groups": ["english_name_org", "korean_mixed_form"],
+            "field_counts_by_group": {
+                "english_name_org": 6,
+                "korean_mixed_form": 1,
+            },
+        },
+    ]
+
+    default_assignments = _default_case_splits(case_documents, val_ratio=0.2)
+    optimized_assignments = assign_case_splits(case_documents, val_ratio=0.2)
+
+    assert optimized_assignments == {
+        "residency_case_001": "train",
+        "withholding_case_001": "train",
+        "apostille_california_001": "val",
+        "apostille_michigan_001": "train",
+    }
+
+    source_profiles = {
+        item["source_path"]: {
+            "field_counts_by_group": item["field_counts_by_group"],
+        }
+        for item in case_documents
+    }
+    default_source_assignments = {
+        item["source_path"]: default_assignments[item["case_id"]]
+        for item in case_documents
+    }
+    optimized_source_assignments = {
+        item["source_path"]: optimized_assignments[item["case_id"]]
+        for item in case_documents
+    }
+
+    assert _score_source_split_assignment(
+        optimized_source_assignments,
+        source_profiles,
+    ) < _score_source_split_assignment(
+        default_source_assignments,
+        source_profiles,
+    )
 
 
 def test_export_field_crops_assigns_val_case_per_document_type_when_possible(

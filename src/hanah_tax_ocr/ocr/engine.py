@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import Iterable
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +11,114 @@ from PIL import Image
 
 from hanah_tax_ocr.schemas import OCRPage, OCRResult, OCRWordBox
 from hanah_tax_ocr.template_profiles import OCRRegionSpec
+
+
+class _CheckpointRecognizer:
+    def __init__(self, overrides: dict[str, Any]) -> None:
+        self._paddleocr_home = Path(str(overrides["paddleocr_home"])).resolve()
+        self._base_config = Path(str(overrides["base_config"])).resolve()
+        self._checkpoint_path = Path(str(overrides["checkpoint_path"])).resolve()
+        self._dict_path = Path(str(overrides["rec_char_dict_path"])).resolve()
+        self._image_shape = str(overrides.get("rec_image_shape") or "3,48,320")
+        self._max_text_length = int(overrides.get("max_text_length") or 32)
+        self._model: Any = None
+        self._ops: Any = None
+        self._post_process: Any = None
+        self._paddle: Any = None
+        self._load()
+
+    def _load(self) -> None:
+        if str(self._paddleocr_home) not in sys.path:
+            sys.path.insert(0, str(self._paddleocr_home))
+        for module_name in list(sys.modules):
+            if not (
+                module_name == "ppocr"
+                or module_name.startswith("ppocr.")
+                or module_name == "tools"
+                or module_name.startswith("tools.")
+                or module_name == "ppstructure"
+                or module_name.startswith("ppstructure.")
+            ):
+                continue
+            module = sys.modules[module_name]
+            module_file = getattr(module, "__file__", "") or ""
+            if not str(module_file).startswith(str(self._paddleocr_home)):
+                del sys.modules[module_name]
+
+        import paddle
+        from ppocr.data import create_operators, transform
+        from ppocr.modeling.architectures import build_model
+        from ppocr.postprocess import build_post_process
+        from ppocr.utils.save_load import load_model
+        from tools.program import load_config
+
+        paddle.set_device("cpu")
+        config = load_config(str(self._base_config))
+        config["Global"]["use_gpu"] = False
+        config["Global"]["pretrained_model"] = str(self._checkpoint_path)
+        config["Global"]["character_dict_path"] = str(self._dict_path)
+        config["Global"]["max_text_length"] = self._max_text_length
+        config["Global"]["infer_img"] = self._image_shape
+
+        post_process = build_post_process(config["PostProcess"], config["Global"])
+        char_num = len(getattr(post_process, "character", []))
+        if config["Architecture"]["Head"]["name"] == "MultiHead":
+            out_channels_list = {
+                "CTCLabelDecode": char_num,
+                "SARLabelDecode": char_num + 2,
+            }
+            config["Architecture"]["Head"]["out_channels_list"] = out_channels_list
+        elif char_num:
+            config["Architecture"]["Head"]["out_channels"] = char_num
+
+        model = build_model(config["Architecture"])
+        load_model(config, model)
+        model.eval()
+
+        transforms: list[dict[str, Any]] = []
+        for op in config["Eval"]["dataset"]["transforms"]:
+            op_name = list(op)[0]
+            if "Label" in op_name:
+                continue
+            if op_name == "RecResizeImg":
+                op[op_name]["infer_mode"] = True
+            elif op_name == "KeepKeys":
+                op[op_name]["keep_keys"] = ["image"]
+            transforms.append(op)
+
+        config["Global"]["infer_mode"] = True
+        self._ops = create_operators(transforms, config["Global"])
+        self._post_process = post_process
+        self._model = model
+        self._paddle = paddle
+        self._transform = transform
+
+    def ocr(self, image: str | Path | np.ndarray, cls: bool = True) -> list[list[object]]:
+        del cls
+        if isinstance(image, str | Path):
+            pil_image = Image.open(image).convert("RGB")
+        else:
+            pil_image = Image.fromarray(np.asarray(image).astype("uint8")).convert("RGB")
+
+        buffer = BytesIO()
+        pil_image.save(buffer, format="PNG")
+        batch = self._transform({"image": buffer.getvalue()}, self._ops)
+        images = np.expand_dims(batch[0], axis=0)
+        with self._paddle.no_grad():
+            preds = self._model(self._paddle.to_tensor(images))
+        post_result = self._post_process(preds)
+
+        text = ""
+        confidence = 0.0
+        if isinstance(post_result, list) and post_result:
+            payload = post_result[0]
+            if isinstance(payload, list | tuple) and len(payload) >= 2:
+                text = str(payload[0]).strip()
+                confidence = float(payload[1])
+
+        width, height = pil_image.size
+        box = [[0.0, 0.0], [float(width), 0.0], [float(width), float(height)], [0.0, float(height)]]
+        return [[[box, (text, confidence)]]]
 
 
 class PaddleOCREngine:
@@ -20,6 +130,7 @@ class PaddleOCREngine:
         lang: str = "en",
         use_angle_cls: bool = True,
         show_log: bool = False,
+        region_overrides: dict[str, dict[str, Any]] | None = None,
         **kwargs: Any,
     ) -> None:
         self._kwargs = {
@@ -28,19 +139,30 @@ class PaddleOCREngine:
             "show_log": show_log,
             **kwargs,
         }
-        self._engine = None
+        self._region_overrides = region_overrides or {}
+        self._engines: dict[tuple[tuple[str, str], ...], Any] = {}
 
-    def _load(self) -> Any:
-        if self._engine is None:
-            try:
-                from paddleocr import PaddleOCR
-            except ImportError as exc:
-                raise RuntimeError(
-                    "paddleocr is not installed. Install platform-specific paddlepaddle first, "
-                    "then install this project with the [ocr] extra."
-                ) from exc
-            self._engine = PaddleOCR(**self._kwargs)
-        return self._engine
+    def _cache_key(self, overrides: dict[str, Any] | None = None) -> tuple[tuple[str, str], ...]:
+        merged = {**self._kwargs, **(overrides or {})}
+        return tuple(sorted((key, str(value)) for key, value in merged.items()))
+
+    def _load(self, overrides: dict[str, Any] | None = None) -> Any:
+        cache_key = self._cache_key(overrides)
+        engine = self._engines.get(cache_key)
+        if engine is None:
+            if overrides and overrides.get("checkpoint_path"):
+                engine = _CheckpointRecognizer(overrides)
+            else:
+                try:
+                    from paddleocr import PaddleOCR
+                except ImportError as exc:
+                    raise RuntimeError(
+                        "paddleocr is not installed. Install platform-specific paddlepaddle first, "
+                        "then install this project with the [ocr] extra."
+                    ) from exc
+                engine = PaddleOCR(**{**self._kwargs, **(overrides or {})})
+            self._engines[cache_key] = engine
+        return engine
 
     def run(self, image_path: str | Path) -> OCRResult:
         engine = self._load()
@@ -61,9 +183,9 @@ class PaddleOCREngine:
         except OSError:
             return {}
 
-        engine = self._load()
         regions: dict[str, OCRPage] = {}
         for region_spec in region_specs:
+            region_engine = self._load(self._region_overrides.get(region_spec.name))
             crop = image.crop(
                 (
                     int(image.width * region_spec.left),
@@ -72,7 +194,7 @@ class PaddleOCREngine:
                     int(image.height * region_spec.bottom),
                 )
             )
-            raw_result = engine.ocr(
+            raw_result = region_engine.ocr(
                 np.array(crop),
                 cls=self._kwargs.get("use_angle_cls", True),
             )

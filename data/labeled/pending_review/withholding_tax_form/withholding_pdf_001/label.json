@@ -4,7 +4,7 @@
   "source_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
   "dataset_split": "pending_review",
   "promotion_status": "needs_human_verification",
-  "expected_status": null,
+  "expected_status": "reject",
   "expected_fields": {},
   "expected_quality_checks": {},
   "notes": [

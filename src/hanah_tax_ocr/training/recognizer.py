@@ -5,6 +5,7 @@ import json
 import os
 import shlex
 import subprocess
+import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,28 +19,28 @@ DEFAULT_RECOGNIZER_ROOT = Path("data/training/recognizer")
 
 RECOMMENDED_SETTINGS: dict[str, dict[str, Any]] = {
     "english_name_org": {
-        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml",
+        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
         "max_text_length": 64,
         "image_shape": "3,48,320",
         "batch_size": 32,
         "learning_rate": 0.0003,
     },
     "numeric_tin_code": {
-        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml",
+        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
         "max_text_length": 24,
         "image_shape": "3,48,160",
         "batch_size": 64,
         "learning_rate": 0.0005,
     },
     "date": {
-        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_rec.yml",
+        "base_config": "configs/rec/PP-OCRv3/en_PP-OCRv3_mobile_rec.yml",
         "max_text_length": 32,
         "image_shape": "3,48,192",
         "batch_size": 64,
         "learning_rate": 0.0004,
     },
     "korean_mixed_form": {
-        "base_config": "configs/rec/PP-OCRv3/korean_PP-OCRv3_rec.yml",
+        "base_config": "configs/rec/PP-OCRv3/multi_language/korean_PP-OCRv3_mobile_rec.yml",
         "max_text_length": 72,
         "image_shape": "3,48,320",
         "batch_size": 24,
@@ -208,6 +209,8 @@ def _recommended_settings(
         )
     )
     settings["max_text_length"] = max(settings["max_text_length"], max_text_length)
+    if sample_count > 0:
+        settings["batch_size"] = min(settings["batch_size"], sample_count)
     if sample_count < 20:
         settings["batch_size"] = max(8, settings["batch_size"] // 2)
     return settings
@@ -830,21 +833,35 @@ def render_training_command(plan_path: Path, paddleocr_home: Path) -> str:
     plan = json.loads(plan_path.read_text(encoding="utf-8"))
     settings = plan["settings"]
     plan_root = plan_path.parent
+    data_root = plan_root.resolve()
     train_txt = Path(settings["train_label_path"]).resolve()
     val_txt = Path(settings["val_label_path"]).resolve()
     dict_txt = Path(settings["dictionary_path"]).resolve()
     model_dir = (plan_root / "model_output").resolve()
     train_py = paddleocr_home / "tools" / "train.py"
-    base_config = settings["base_config"]
+    base_config = str((paddleocr_home / settings["base_config"]).resolve())
+    train_count = max(1, int(settings.get("train_count", 0) or 0))
+    val_count = max(1, int(settings.get("val_count", 0) or 0))
+    configured_batch_size = max(1, int(settings["batch_size"]))
+    train_batch_size = min(configured_batch_size, train_count)
+    eval_batch_size = min(configured_batch_size, val_count)
     return (
-        f"python {shlex.quote(str(train_py))} -c {shlex.quote(base_config)} "
-        f"-o Global.character_dict_path={shlex.quote(str(dict_txt))} "
+        f"{shlex.quote(sys.executable)} {shlex.quote(str(train_py))} "
+        f"-c {shlex.quote(base_config)} "
+        f"-o Global.use_gpu=False "
+        f"Global.character_dict_path={shlex.quote(str(dict_txt))} "
         f"Global.save_model_dir={shlex.quote(str(model_dir))} "
         f"Global.max_text_length={settings['max_text_length']} "
         f"Global.infer_img={settings['image_shape']} "
         f"Optimizer.lr.learning_rate={settings['learning_rate']} "
-        f"Train.loader.batch_size_per_card={settings['batch_size']} "
-        f"Eval.loader.batch_size_per_card={settings['batch_size']} "
+        f"Train.loader.batch_size_per_card={train_batch_size} "
+        f"Eval.loader.batch_size_per_card={eval_batch_size} "
+        f"Train.loader.drop_last=False "
+        f"Eval.loader.drop_last=False "
+        f"Train.loader.num_workers=0 "
+        f"Eval.loader.num_workers=0 "
+        f"Train.dataset.data_dir={shlex.quote(str(data_root))} "
+        f"Eval.dataset.data_dir={shlex.quote(str(data_root))} "
         f"Train.dataset.label_file_list=[{shlex.quote(str(train_txt))}] "
         f"Eval.dataset.label_file_list=[{shlex.quote(str(val_txt))}]"
     )
