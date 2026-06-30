@@ -422,22 +422,23 @@ def test_prepare_recognizer_datasets_preserves_two_variants_for_single_base_grou
     )
 
     profile = summary["groups"]["korean_mixed_form"]["data_profile"]
-    assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 2}
+    assert profile["counts_by_source_type"]["train"] == {"base": 1, "hard_case": 3}
     assert profile["hard_case_variant_counts"] == {
-        "train": {"left_clip": 1, "low_res": 1},
+        "train": {"left_clip": 1, "low_res": 1, "overlay_patch": 1},
         "val": {},
     }
-    assert profile["unique_hard_case_variant_counts"] == {"train": 2, "val": 0}
-    assert profile["filtered_hard_case_train_count"] == 1
-    assert profile["hard_case_train_ratio"] == 0.6667
+    assert profile["unique_hard_case_variant_counts"] == {"train": 3, "val": 0}
+    assert profile["filtered_hard_case_train_count"] == 0
+    assert profile["hard_case_train_ratio"] == 0.75
     assert (
         profile["hard_case_selection_strategy"]
-        == "base_document_balance_with_scarce_variant_floor"
+        == "base_document_balance_with_scarce_full_variant_floor"
     )
     assert profile["hard_case_variant_floor_applied"] is True
     assert "hard_case_variant_floor_applied" in profile["warnings"]
     assert "hard_case_dominant_train_split" in profile["warnings"]
     assert "low_hard_case_variant_diversity" not in profile["warnings"]
+    assert "hard_case_train_capped" not in profile["warnings"]
 
 
 def test_prepare_recognizer_datasets_filters_stale_hard_cases_from_non_train_bases(
@@ -564,7 +565,7 @@ def test_prepare_recognizer_datasets_can_generate_missing_hard_cases_when_reques
         "total_augmented_crops": 4,
     }
     assert (hard_cases_root / "manifest.jsonl").exists()
-    assert summary["groups"]["numeric_tin_code"]["train_count"] == 3
+    assert summary["groups"]["numeric_tin_code"]["train_count"] == 4
 
 
 def test_prepare_recognizer_datasets_can_refresh_stale_hard_cases_when_requested(
