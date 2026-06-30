@@ -15,6 +15,7 @@ Typical contents:
 - `hard_cases/`: left-clip, rotation, low-res, and overlay-based hard-case augmentations
 - `reports/`: field-level OCR error maps such as CER, WER, exact-match summaries,
   field-group data gap prioritization reports for manual labeling order,
+  rejected field-crop review reports,
   and sample-data coverage reports for uncovered fixtures
   coverage reports separate reviewed labels from `pending_review` scaffolds
 

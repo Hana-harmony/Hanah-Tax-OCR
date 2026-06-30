@@ -106,6 +106,13 @@ python -m scripts.training.report_data_gaps \
   --eval-report evals/current_report.json
 ```
 
+Report rejected field crops that should be reviewed before the next recognizer iteration:
+
+```bash
+python -m scripts.training.report_rejected_field_crops \
+  --data-gap-report data/training/reports/data_gap_report.json
+```
+
 Audit which `sample_data/` files are still missing reviewed labels or eval coverage:
 
 ```bash
