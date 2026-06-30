@@ -88,6 +88,8 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
                         "val": {},
                     },
                     "unique_hard_case_variant_counts": {"train": 1, "val": 0},
+                    "hard_case_selection_strategy": "base_document_balance",
+                    "hard_case_variant_floor_applied": False,
                     "warnings": ["low_train_sample_count", "hard_case_train_capped"],
                 },
                 "training_readiness": {
@@ -181,6 +183,11 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
         "train": 1,
         "val": 0,
     }
+    assert (
+        english_group["recognizer_profile"]["hard_case_selection_strategy"]
+        == "base_document_balance"
+    )
+    assert english_group["recognizer_profile"]["hard_case_variant_floor_applied"] is False
     assert english_group["recognizer_profile"]["training_readiness"]["status"] == "review_required"
     assert english_group["score_breakdown"]["train_source_gap"] == 5.0
     assert english_group["score_breakdown"]["val_source_gap"] == 2.0
