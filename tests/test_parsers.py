@@ -638,6 +638,36 @@ def test_withholding_parser_prefers_applicant_first_name_when_it_preserves_digit
     assert parsed.fields["applicant_name"] == "SAMPLE11 K USER"
 
 
+def test_withholding_parser_normalizes_zero_middle_initial_and_rebuilds_applicant_name() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "215-35-2015",
+                            "2026-01-16",
+                            "SAMPLE15 0 USER",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "first_name": OCRPage(page_number=1, raw_text="SAMPLE15"),
+                "middle_name": OCRPage(page_number=1, raw_text="0"),
+                "last_name": OCRPage(page_number=1, raw_text="USER"),
+                "applicant_name": OCRPage(page_number=1, raw_text="SAMPLE15\n0\nUSER"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["middle_name"] == "O"
+    assert parsed.fields["applicant_name"] == "SAMPLE15 O USER"
+
+
 def test_withholding_parser_recovers_from_region_ocr_noise() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

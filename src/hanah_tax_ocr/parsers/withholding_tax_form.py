@@ -278,16 +278,17 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         first_name: str | None,
         last_name: str | None,
     ) -> str | None:
-        if middle_name and len(middle_name.split()) == 1 and len(middle_name) <= 4:
-            return middle_name
+        normalized_middle_name = self._normalize_middle_initial(middle_name)
+        if normalized_middle_name and len(normalized_middle_name.split()) == 1 and len(normalized_middle_name) <= 4:
+            return normalized_middle_name
         if not applicant_name or not first_name or not last_name:
-            return middle_name
+            return normalized_middle_name
         tokens = [token.strip(".") for token in applicant_name.split()]
         if len(tokens) < 3:
-            return middle_name
+            return normalized_middle_name
         if tokens[0].lower() == first_name.lower() and tokens[-1].lower() == last_name.lower():
-            return tokens[1][:1].upper()
-        return middle_name
+            return self._normalize_middle_initial(tokens[1][:1].upper())
+        return normalized_middle_name
 
     def _rebuild_applicant_name(
         self,
@@ -349,6 +350,16 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         ):
             formatted_middle = f"{middle_name}."
         return " ".join(part for part in [first_name, formatted_middle, last_name] if part).strip()
+
+    def _normalize_middle_initial(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        normalized = value.strip().strip(".")
+        if len(normalized) != 1:
+            return value
+        if normalized == "0":
+            return "O"
+        return normalized.upper()
 
     def _digit_count(self, value: str | None) -> int:
         if not value:

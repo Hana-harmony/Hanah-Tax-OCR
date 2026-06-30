@@ -284,6 +284,60 @@ def test_paddle_ocr_engine_prefers_applicant_name_variant_with_three_clean_token
     assert regions["applicant_name"].raw_text == "SAMPLE2O\nT\nUSER"
 
 
+def test_paddle_ocr_engine_prefers_thresholded_middle_name_variant(
+    tmp_path: Path,
+) -> None:
+    image_path = tmp_path / "sample.png"
+    image = Image.new("RGB", (100, 100), "white")
+    for x in range(69, 73):
+        for y in range(17, 19):
+            image.putpixel((x, y), (0, 0, 0))
+    image.save(image_path)
+
+    class FakePaddleOCR:
+        def __init__(self, **kwargs: str) -> None:
+            self.kwargs = kwargs
+
+        def ocr(self, image_input: object, cls: bool = True) -> list[list[object]]:
+            assert cls is True
+            width = len(image_input[0])  # type: ignore[index]
+            unique_values = {
+                int(pixel[0])  # type: ignore[index]
+                for row in image_input  # type: ignore[assignment]
+                for pixel in row
+            }
+            if width >= 30 and len(unique_values) <= 2:
+                text = "L"
+            elif width >= 30:
+                text = "그"
+            else:
+                return [[]]
+            return [[
+                (
+                    [[0, 0], [width, 0], [width, 1], [0, 1]],
+                    (text, 0.99),
+                )
+            ]]
+
+    fake_module = types.ModuleType("paddleocr")
+    fake_module.PaddleOCR = FakePaddleOCR
+    original = sys.modules.get("paddleocr")
+    sys.modules["paddleocr"] = fake_module
+    try:
+        engine = PaddleOCREngine(lang="korean")
+        regions = engine.run_regions(
+            image_path,
+            [OCRRegionSpec("middle_name", 0.68, 0.16, 0.76, 0.20)],
+        )
+    finally:
+        if original is None:
+            del sys.modules["paddleocr"]
+        else:
+            sys.modules["paddleocr"] = original
+
+    assert regions["middle_name"].raw_text == "L"
+
+
 def test_paddle_ocr_engine_prefers_preprocessed_certificate_number_crop(tmp_path: Path) -> None:
     image_path = tmp_path / "sample.png"
     image = Image.new("RGB", (100, 100), "white")

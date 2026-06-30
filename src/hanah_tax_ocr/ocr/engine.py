@@ -304,6 +304,28 @@ class PaddleOCREngine:
                 .resize((crop.width * 4, crop.height * 4))
                 .convert("RGB"),
             ]
+        elif region_name == "middle_name":
+            grayscale = ImageOps.grayscale(crop)
+            variants = [
+                crop.convert("RGB"),
+                crop.resize((crop.width * 2, crop.height * 2)).convert("RGB"),
+                grayscale.resize((crop.width * 4, crop.height * 4)).convert("RGB"),
+                grayscale.point(lambda p: 255 if p > 180 else 0)
+                .resize(
+                    (crop.width * 4, crop.height * 4),
+                    resample=Image.Resampling.NEAREST,
+                )
+                .convert("RGB"),
+                grayscale.point(lambda p: 255 if p > 200 else 0)
+                .resize(
+                    (crop.width * 4, crop.height * 4),
+                    resample=Image.Resampling.NEAREST,
+                )
+                .convert("RGB"),
+                crop.filter(ImageFilter.SHARPEN)
+                .resize((crop.width * 4, crop.height * 4))
+                .convert("RGB"),
+            ]
         return variants
 
     def _score_region_pages(
@@ -406,6 +428,20 @@ class PaddleOCREngine:
             if any(token.upper() == "USER" for token in clean_tokens):
                 score += 1
             return (score, len(clean_tokens), -len(normalized))
+
+        if region_name == "middle_name":
+            tokens = re.findall(r"[A-Za-z0-9]+", normalized)
+            if not tokens:
+                return (0, 0, 0)
+            token = max(tokens, key=len)
+            score = 1
+            if len(token) == 1:
+                score += 2
+            if token.isalpha():
+                score += 2
+            elif token.isdigit():
+                score += 1
+            return (score, int(token.isalpha()), -len(normalized))
 
         return (1, len(normalized), -len(normalized))
 
