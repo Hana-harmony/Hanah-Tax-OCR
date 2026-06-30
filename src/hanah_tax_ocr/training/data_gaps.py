@@ -302,6 +302,7 @@ def build_data_gap_report(
                         0,
                     ),
                     "warnings": data_profile.get("warnings", []),
+                    "training_readiness": recognizer_group.get("training_readiness", {}),
                 },
                 "eval_metrics": eval_metrics,
                 "score_breakdown": {

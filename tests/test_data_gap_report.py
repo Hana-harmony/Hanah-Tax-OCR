@@ -80,6 +80,15 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
                     "unique_source_counts": {"train": 1, "val": 1},
                     "warnings": ["low_train_sample_count", "hard_case_train_capped"],
                 },
+                "training_readiness": {
+                    "status": "review_required",
+                    "ready_for_execution": True,
+                    "blocking_warnings": [],
+                    "advisory_warnings": [
+                        "low_train_sample_count",
+                        "hard_case_train_capped",
+                    ],
+                },
             },
             "numeric_tin_code": {
                 "train_count": 3,
@@ -89,6 +98,12 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
                     "filtered_hard_case_train_count": 0,
                     "unique_source_counts": {"train": 1, "val": 1},
                     "warnings": [],
+                },
+                "training_readiness": {
+                    "status": "ready",
+                    "ready_for_execution": True,
+                    "blocking_warnings": [],
+                    "advisory_warnings": [],
                 },
             },
         }
@@ -148,6 +163,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
     assert english_group["recognizer_profile"]["filtered_hard_case_train_count"] == 3
     assert english_group["recognizer_profile"]["train_source_count"] == 1
     assert english_group["recognizer_profile"]["val_source_count"] == 1
+    assert english_group["recognizer_profile"]["training_readiness"]["status"] == "review_required"
     assert english_group["score_breakdown"]["train_source_gap"] == 5.0
     assert english_group["score_breakdown"]["val_source_gap"] == 2.0
     assert "prioritize_low_accuracy_group" in english_group["recommendations"]
@@ -198,3 +214,4 @@ def test_data_gap_report_writes_priority_report_with_missing_eval(tmp_path: Path
         "collect_distinct_train_sources",
         "collect_distinct_val_sources",
     ]
+    assert report["priorities"][0]["recognizer_profile"]["training_readiness"] == {}

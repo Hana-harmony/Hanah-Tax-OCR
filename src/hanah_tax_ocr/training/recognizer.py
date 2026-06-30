@@ -45,6 +45,11 @@ RECOMMENDED_SETTINGS: dict[str, dict[str, Any]] = {
     },
 }
 
+BLOCKING_READINESS_WARNINGS = {
+    "no_train_samples",
+    "no_val_samples",
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -117,6 +122,11 @@ def parse_run_args() -> argparse.Namespace:
         "--execute",
         action="store_true",
         help="Execute the generated training commands instead of printing them.",
+    )
+    parser.add_argument(
+        "--allow-unready",
+        action="store_true",
+        help="Allow execution even when a plan is blocked by readiness checks.",
     )
     return parser.parse_args()
 
@@ -299,6 +309,61 @@ def _build_data_profile(
         "hard_case_selection_strategy": "base_document_balance",
         "warnings": warnings,
     }
+
+
+def _build_training_readiness(
+    warnings: list[str],
+    *,
+    train_count: int,
+    val_count: int,
+    character_count: int,
+) -> dict[str, Any]:
+    normalized_warnings = list(dict.fromkeys(warnings))
+    blocking_warnings = [
+        warning
+        for warning in normalized_warnings
+        if warning in BLOCKING_READINESS_WARNINGS
+    ]
+    if train_count <= 0 and "no_train_samples" not in blocking_warnings:
+        blocking_warnings.append("no_train_samples")
+    if val_count <= 0 and "no_val_samples" not in blocking_warnings:
+        blocking_warnings.append("no_val_samples")
+    if character_count <= 0 and "no_train_samples" not in blocking_warnings:
+        blocking_warnings.append("no_train_samples")
+
+    advisory_warnings = [
+        warning
+        for warning in normalized_warnings
+        if warning not in BLOCKING_READINESS_WARNINGS
+    ]
+    if blocking_warnings:
+        status = "blocked"
+    elif advisory_warnings:
+        status = "review_required"
+    else:
+        status = "ready"
+
+    return {
+        "status": status,
+        "ready_for_execution": not blocking_warnings,
+        "blocking_warnings": blocking_warnings,
+        "advisory_warnings": advisory_warnings,
+    }
+
+
+def _load_training_readiness(plan: dict[str, Any]) -> dict[str, Any]:
+    training_readiness = plan.get("training_readiness")
+    if isinstance(training_readiness, dict):
+        return training_readiness
+
+    settings = plan.get("settings", {})
+    data_profile = plan.get("data_profile", {})
+    return _build_training_readiness(
+        list(data_profile.get("warnings", [])),
+        train_count=int(settings.get("train_count", 0) or 0),
+        val_count=int(settings.get("val_count", 0) or 0),
+        character_count=int(settings.get("character_count", 0) or 0),
+    )
 
 
 def _entry_variant(entry: dict[str, Any]) -> str:
@@ -536,6 +601,12 @@ def prepare_recognizer_datasets(
         settings["train_count"] = len(train_entries)
         settings["val_count"] = len(val_entries)
         settings["character_count"] = len(unique_chars)
+        training_readiness = _build_training_readiness(
+            data_profile["warnings"],
+            train_count=settings["train_count"],
+            val_count=settings["val_count"],
+            character_count=settings["character_count"],
+        )
 
         plan = {
             "field_group": field_group,
@@ -544,6 +615,7 @@ def prepare_recognizer_datasets(
                 {entry["field_name"] for entry in train_entries + val_entries}
             ),
             "data_profile": data_profile,
+            "training_readiness": training_readiness,
         }
         plan_path = group_root / "plan.json"
         plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -554,6 +626,7 @@ def prepare_recognizer_datasets(
             "character_count": len(unique_chars),
             "plan_path": str(plan_path),
             "data_profile": data_profile,
+            "training_readiness": training_readiness,
         }
 
     summary = {
@@ -603,8 +676,10 @@ def run_training_plans(
     *,
     field_groups: list[str] | None = None,
     execute: bool = False,
+    allow_unready: bool = False,
 ) -> dict[str, str]:
     commands: dict[str, str] = {}
+    blocked_groups: dict[str, list[str]] = {}
     candidate_groups = field_groups or [
         path.name
         for path in sorted(plan_root.iterdir())
@@ -614,14 +689,34 @@ def run_training_plans(
         plan_path = plan_root / field_group / "plan.json"
         if not plan_path.exists():
             continue
+        plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        training_readiness = _load_training_readiness(plan)
         command = render_training_command(plan_path, paddleocr_home)
         commands[field_group] = command
-        if execute:
-            train_py = paddleocr_home / "tools" / "train.py"
-            if not train_py.exists():
-                raise FileNotFoundError(
-                    f"Missing PaddleOCR training entrypoint: {train_py}"
-                )
+        if execute and not allow_unready and not training_readiness["ready_for_execution"]:
+            blocked_groups[field_group] = list(training_readiness["blocking_warnings"])
+
+    if execute and blocked_groups:
+        blocked_summary = ", ".join(
+            f"{field_group}({', '.join(warnings)})"
+            for field_group, warnings in sorted(blocked_groups.items())
+        )
+        raise ValueError(
+            "Refusing to execute unready recognizer training plans: "
+            f"{blocked_summary}. Regenerate labels or rerun with --allow-unready "
+            "only for manual inspection."
+        )
+
+    if execute:
+        train_py = paddleocr_home / "tools" / "train.py"
+        if not train_py.exists():
+            raise FileNotFoundError(
+                f"Missing PaddleOCR training entrypoint: {train_py}"
+            )
+        for field_group in candidate_groups:
+            command = commands.get(field_group)
+            if command is None:
+                continue
             subprocess.run(command, shell=True, check=True)
     return commands
 
@@ -648,6 +743,7 @@ def run_main() -> None:
         args.paddleocr_home,
         field_groups=args.field_group or None,
         execute=args.execute,
+        allow_unready=args.allow_unready,
     )
     print(json.dumps(commands, ensure_ascii=False, indent=2))
 
