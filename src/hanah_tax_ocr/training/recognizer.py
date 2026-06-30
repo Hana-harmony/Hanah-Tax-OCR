@@ -85,6 +85,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Include crops that failed field-crop quality checks.",
     )
+    parser.add_argument(
+        "--max-hard-case-ratio",
+        type=float,
+        default=0.5,
+        help="Maximum hard-case share within each train split. Use 1.0 to disable the cap.",
+    )
     return parser.parse_args()
 
 
@@ -192,6 +198,9 @@ def _counts_by(entries: list[dict[str, Any]], key: str) -> dict[str, int]:
 def _build_data_profile(
     train_entries: list[dict[str, Any]],
     val_entries: list[dict[str, Any]],
+    *,
+    filtered_hard_case_train_count: int = 0,
+    max_hard_case_ratio: float | None = None,
 ) -> dict[str, Any]:
     source_counts = {
         "train": _counts_by(
@@ -224,6 +233,8 @@ def _build_data_profile(
         warnings.append("no_val_samples")
     if hard_case_train_ratio > 0.5:
         warnings.append("hard_case_dominant_train_split")
+    if filtered_hard_case_train_count:
+        warnings.append("hard_case_train_capped")
 
     return {
         "counts_by_document_type": {
@@ -232,8 +243,77 @@ def _build_data_profile(
         },
         "counts_by_source_type": source_counts,
         "hard_case_train_ratio": hard_case_train_ratio,
+        "filtered_hard_case_train_count": filtered_hard_case_train_count,
+        "max_hard_case_ratio": max_hard_case_ratio,
         "warnings": warnings,
     }
+
+
+def _select_hard_case_entries(
+    hard_case_entries: list[dict[str, Any]],
+    limit: int,
+) -> list[dict[str, Any]]:
+    if limit <= 0:
+        return []
+
+    buckets: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for entry in hard_case_entries:
+        buckets[str(entry.get("augmentation_type") or "unknown")].append(entry)
+
+    selected: list[dict[str, Any]] = []
+    variants = sorted(buckets)
+    while len(selected) < limit:
+        progressed = False
+        for variant in variants:
+            entries = buckets[variant]
+            if not entries:
+                continue
+            selected.append(entries.pop(0))
+            progressed = True
+            if len(selected) >= limit:
+                break
+        if not progressed:
+            break
+    return selected
+
+
+def _limit_hard_case_train_entries(
+    train_entries: list[dict[str, Any]],
+    *,
+    max_hard_case_ratio: float | None,
+) -> tuple[list[dict[str, Any]], int]:
+    if max_hard_case_ratio is None or max_hard_case_ratio >= 1.0:
+        return train_entries, 0
+    if max_hard_case_ratio < 0.0:
+        raise ValueError("max_hard_case_ratio must be greater than or equal to 0")
+
+    base_entries = [entry for entry in train_entries if _source_type_for(entry) == "base"]
+    hard_case_entries = [
+        entry for entry in train_entries if _source_type_for(entry) == "hard_case"
+    ]
+    if not hard_case_entries:
+        return train_entries, 0
+
+    if not base_entries or max_hard_case_ratio == 0.0:
+        allowed_hard_case_count = 0
+    else:
+        allowed_hard_case_count = int(
+            len(base_entries) * max_hard_case_ratio / (1.0 - max_hard_case_ratio)
+        )
+    if len(hard_case_entries) <= allowed_hard_case_count:
+        return train_entries, 0
+
+    selected_hard_case_entries = _select_hard_case_entries(
+        hard_case_entries,
+        allowed_hard_case_count,
+    )
+    selected_ids = {id(entry) for entry in selected_hard_case_entries}
+    retained_entries = [
+        entry
+        for entry in train_entries
+        if _source_type_for(entry) == "base" or id(entry) in selected_ids
+    ]
+    return retained_entries, len(hard_case_entries) - len(selected_hard_case_entries)
 
 
 def prepare_recognizer_datasets(
@@ -245,6 +325,7 @@ def prepare_recognizer_datasets(
     hard_cases_root: Path | None = None,
     include_hard_cases: bool = False,
     include_rejected_crops: bool = False,
+    max_hard_case_ratio: float | None = 0.5,
 ) -> dict[str, Any]:
     if ensure_crops:
         if labeled_root is None:
@@ -268,7 +349,10 @@ def prepare_recognizer_datasets(
         group_root = output_root / field_group
         group_root.mkdir(parents=True, exist_ok=True)
 
-        train_entries = splits.get("train", [])
+        train_entries, filtered_hard_case_train_count = _limit_hard_case_train_entries(
+            splits.get("train", []),
+            max_hard_case_ratio=max_hard_case_ratio,
+        )
         val_entries = splits.get("val", [])
         train_file = group_root / "train.txt"
         val_file = group_root / "val.txt"
@@ -293,7 +377,12 @@ def prepare_recognizer_datasets(
             default=0,
         )
         settings = _recommended_settings(field_group, len(train_entries), max_text_length)
-        data_profile = _build_data_profile(train_entries, val_entries)
+        data_profile = _build_data_profile(
+            train_entries,
+            val_entries,
+            filtered_hard_case_train_count=filtered_hard_case_train_count,
+            max_hard_case_ratio=max_hard_case_ratio,
+        )
         settings["dictionary_path"] = str(dict_path)
         settings["train_label_path"] = str(train_file)
         settings["val_label_path"] = str(val_file)
@@ -327,6 +416,7 @@ def prepare_recognizer_datasets(
         "hard_cases_root": None if hard_cases_root is None else str(hard_cases_root),
         "include_hard_cases": include_hard_cases,
         "include_rejected_crops": include_rejected_crops,
+        "max_hard_case_ratio": max_hard_case_ratio,
         "groups": dict(sorted(summary_groups.items())),
     }
     output_root.mkdir(parents=True, exist_ok=True)
@@ -400,6 +490,7 @@ def main() -> None:
         hard_cases_root=args.hard_cases_root,
         include_hard_cases=args.include_hard_cases,
         include_rejected_crops=args.include_rejected_crops,
+        max_hard_case_ratio=args.max_hard_case_ratio,
     )
     print(json.dumps(summary, ensure_ascii=False))
 
