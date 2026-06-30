@@ -59,6 +59,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--min-height", type=int, default=16)
     parser.add_argument("--min-dark-ratio", type=float, default=0.01)
     parser.add_argument("--min-contrast", type=float, default=8.0)
+    parser.add_argument("--max-foreground-bbox-ratio", type=float, default=0.85)
+    parser.add_argument("--dense-edge-dark-ratio", type=float, default=0.45)
     return parser.parse_args()
 
 
@@ -144,6 +146,8 @@ def compute_crop_quality(
     min_height: int,
     min_dark_ratio: float,
     min_contrast: float,
+    max_foreground_bbox_ratio: float,
+    dense_edge_dark_ratio: float,
 ) -> dict[str, Any]:
     grayscale = crop.convert("L")
     histogram = grayscale.histogram()
@@ -152,6 +156,70 @@ def compute_crop_quality(
     dark_ratio = dark_pixels / total_pixels
     stat = ImageStat.Stat(grayscale)
     contrast = float(stat.stddev[0]) if stat.stddev else 0.0
+    foreground_points = [
+        (x, y)
+        for y in range(crop.height)
+        for x in range(crop.width)
+        if grayscale.getpixel((x, y)) < 200
+    ]
+    if foreground_points:
+        x_values = [point[0] for point in foreground_points]
+        y_values = [point[1] for point in foreground_points]
+        foreground_bbox = {
+            "left": min(x_values),
+            "top": min(y_values),
+            "right": max(x_values),
+            "bottom": max(y_values),
+        }
+        foreground_bbox_ratio = (
+            (foreground_bbox["right"] - foreground_bbox["left"] + 1)
+            * (foreground_bbox["bottom"] - foreground_bbox["top"] + 1)
+        ) / total_pixels
+        touched_edges = [
+            edge_name
+            for edge_name, touched in {
+                "left": foreground_bbox["left"] == 0,
+                "right": foreground_bbox["right"] == crop.width - 1,
+                "top": foreground_bbox["top"] == 0,
+                "bottom": foreground_bbox["bottom"] == crop.height - 1,
+            }.items()
+            if touched
+        ]
+    else:
+        foreground_bbox = None
+        foreground_bbox_ratio = 0.0
+        touched_edges = []
+
+    border_band = max(1, min(crop.width, crop.height) // 12)
+
+    def edge_dark_ratio(coords: list[tuple[int, int]]) -> float:
+        return (
+            sum(1 for x, y in coords if grayscale.getpixel((x, y)) < 200)
+            / max(1, len(coords))
+        )
+
+    edge_dark_ratios = {
+        "left": edge_dark_ratio(
+            [(x, y) for x in range(border_band) for y in range(crop.height)]
+        ),
+        "right": edge_dark_ratio(
+            [
+                (x, y)
+                for x in range(crop.width - border_band, crop.width)
+                for y in range(crop.height)
+            ]
+        ),
+        "top": edge_dark_ratio(
+            [(x, y) for x in range(crop.width) for y in range(border_band)]
+        ),
+        "bottom": edge_dark_ratio(
+            [
+                (x, y)
+                for x in range(crop.width)
+                for y in range(crop.height - border_band, crop.height)
+            ]
+        ),
+    }
     quality_flags: list[str] = []
     if crop.width < min_width:
         quality_flags.append("too_narrow")
@@ -161,6 +229,15 @@ def compute_crop_quality(
         quality_flags.append("low_dark_ratio")
     if contrast < min_contrast:
         quality_flags.append("low_contrast")
+    dense_edge_names = [
+        edge_name
+        for edge_name, ratio in edge_dark_ratios.items()
+        if ratio >= dense_edge_dark_ratio
+    ]
+    if foreground_bbox_ratio > max_foreground_bbox_ratio and dark_ratio >= 0.35:
+        quality_flags.append("foreground_fills_crop")
+    if len(dense_edge_names) >= 3:
+        quality_flags.append("dense_edge_content")
 
     return {
         "width": crop.width,
@@ -168,6 +245,13 @@ def compute_crop_quality(
         "aspect_ratio": round(crop.width / max(1, crop.height), 4),
         "dark_ratio": round(dark_ratio, 6),
         "contrast": round(contrast, 4),
+        "foreground_bbox_ratio": round(foreground_bbox_ratio, 6),
+        "foreground_bbox": foreground_bbox,
+        "touched_edges": touched_edges,
+        "edge_dark_ratios": {
+            edge_name: round(ratio, 6)
+            for edge_name, ratio in edge_dark_ratios.items()
+        },
         "quality_flags": quality_flags,
         "accepted": not quality_flags,
     }
@@ -182,6 +266,8 @@ def export_field_crops(
     min_height: int = 16,
     min_dark_ratio: float = 0.01,
     min_contrast: float = 8.0,
+    max_foreground_bbox_ratio: float = 0.85,
+    dense_edge_dark_ratio: float = 0.45,
 ) -> dict[str, Any]:
     manifest_entries: list[dict[str, Any]] = []
     prepared_cases: list[dict[str, Any]] = []
@@ -294,6 +380,8 @@ def export_field_crops(
                 min_height=min_height,
                 min_dark_ratio=min_dark_ratio,
                 min_contrast=min_contrast,
+                max_foreground_bbox_ratio=max_foreground_bbox_ratio,
+                dense_edge_dark_ratio=dense_edge_dark_ratio,
             )
 
             manifest_entry = {
@@ -374,6 +462,8 @@ def main() -> None:
         min_height=args.min_height,
         min_dark_ratio=args.min_dark_ratio,
         min_contrast=args.min_contrast,
+        max_foreground_bbox_ratio=args.max_foreground_bbox_ratio,
+        dense_edge_dark_ratio=args.dense_edge_dark_ratio,
     )
     print(json.dumps(summary, ensure_ascii=False))
 
