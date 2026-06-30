@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from hanah_tax_ocr.training.recognizer import (
+    _select_hard_case_entries,
     prepare_recognizer_datasets,
     render_training_command,
     run_training_plans,
@@ -189,3 +190,25 @@ def test_run_training_plans_can_execute_against_fake_paddleocr_home(tmp_path: Pa
 
     assert "numeric_tin_code" in commands
     assert marker.read_text(encoding="utf-8") == "ran"
+
+
+def test_select_hard_case_entries_spreads_across_base_crops_and_variants() -> None:
+    entries = []
+    for base_name in ("base_a.png", "base_b.png", "base_c.png"):
+        for variant in ("left_clip", "rotate", "low_res"):
+            entries.append(
+                {
+                    "document_type": "withholding_tax_form",
+                    "case_id": base_name.removesuffix(".png"),
+                    "field_name": "tin",
+                    "augmentation_type": variant,
+                    "base_crop_path": base_name,
+                    "crop_path": f"{base_name.removesuffix('.png')}__{variant}.png",
+                }
+            )
+
+    selected = _select_hard_case_entries(entries, 4)
+
+    assert len(selected) == 4
+    assert len({entry["base_crop_path"] for entry in selected}) >= 3
+    assert len({entry["augmentation_type"] for entry in selected}) >= 2

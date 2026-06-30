@@ -202,6 +202,18 @@ def _build_data_profile(
     filtered_hard_case_train_count: int = 0,
     max_hard_case_ratio: float | None = None,
 ) -> dict[str, Any]:
+    train_base_entries = [
+        entry for entry in train_entries if _source_type_for(entry) == "base"
+    ]
+    train_hard_case_entries = [
+        entry for entry in train_entries if _source_type_for(entry) == "hard_case"
+    ]
+    val_base_entries = [
+        entry for entry in val_entries if _source_type_for(entry) == "base"
+    ]
+    val_hard_case_entries = [
+        entry for entry in val_entries if _source_type_for(entry) == "hard_case"
+    ]
     source_counts = {
         "train": _counts_by(
             [
@@ -241,12 +253,42 @@ def _build_data_profile(
             "train": _counts_by(train_entries, "document_type"),
             "val": _counts_by(val_entries, "document_type"),
         },
+        "counts_by_document_type_and_source": {
+            "train": {
+                "base": _counts_by(train_base_entries, "document_type"),
+                "hard_case": _counts_by(train_hard_case_entries, "document_type"),
+            },
+            "val": {
+                "base": _counts_by(val_base_entries, "document_type"),
+                "hard_case": _counts_by(val_hard_case_entries, "document_type"),
+            },
+        },
         "counts_by_source_type": source_counts,
         "hard_case_train_ratio": hard_case_train_ratio,
         "filtered_hard_case_train_count": filtered_hard_case_train_count,
         "max_hard_case_ratio": max_hard_case_ratio,
+        "hard_case_selection_strategy": "base_document_balance",
         "warnings": warnings,
     }
+
+
+def _entry_variant(entry: dict[str, Any]) -> str:
+    return str(entry.get("augmentation_type") or "unknown")
+
+
+def _entry_base_key(entry: dict[str, Any]) -> str:
+    base_path = entry.get("base_crop_path") or entry.get("crop_path")
+    return str(base_path or entry.get("case_id") or "unknown")
+
+
+def _entry_sort_key(entry: dict[str, Any]) -> tuple[str, str, str, str, str]:
+    return (
+        str(entry.get("document_type") or "unknown"),
+        _entry_variant(entry),
+        _entry_base_key(entry),
+        str(entry.get("field_name") or "unknown"),
+        str(entry.get("crop_path") or "unknown"),
+    )
 
 
 def _select_hard_case_entries(
@@ -256,25 +298,89 @@ def _select_hard_case_entries(
     if limit <= 0:
         return []
 
-    buckets: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for entry in hard_case_entries:
-        buckets[str(entry.get("augmentation_type") or "unknown")].append(entry)
+    buckets: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
+    for entry in sorted(hard_case_entries, key=_entry_sort_key):
+        buckets[_entry_variant(entry)][_entry_base_key(entry)].append(entry)
 
     selected: list[dict[str, Any]] = []
+    base_usage = Counter()
     variants = sorted(buckets)
     while len(selected) < limit:
         progressed = False
         for variant in variants:
-            entries = buckets[variant]
-            if not entries:
+            entries_by_base = buckets[variant]
+            candidate_base_keys = [
+                base_key
+                for base_key, entries in entries_by_base.items()
+                if entries
+            ]
+            if not candidate_base_keys:
                 continue
-            selected.append(entries.pop(0))
+            candidate_base_keys.sort(key=lambda base_key: (base_usage[base_key], base_key))
+            base_key = candidate_base_keys[0]
+            selected.append(entries_by_base[base_key].pop(0))
+            base_usage[base_key] += 1
             progressed = True
             if len(selected) >= limit:
                 break
         if not progressed:
             break
     return selected
+
+
+def _allocate_hard_case_document_quotas(
+    base_entries: list[dict[str, Any]],
+    hard_case_entries: list[dict[str, Any]],
+    allowed_hard_case_count: int,
+) -> dict[str, int]:
+    if allowed_hard_case_count <= 0:
+        return {}
+
+    base_counts = Counter(str(entry.get("document_type") or "unknown") for entry in base_entries)
+    available_counts = Counter(
+        str(entry.get("document_type") or "unknown") for entry in hard_case_entries
+    )
+    total_base_count = sum(base_counts.values())
+    if total_base_count <= 0:
+        quotas: dict[str, int] = {}
+        for document_type, available_count in sorted(available_counts.items()):
+            if allowed_hard_case_count <= 0:
+                break
+            selected_count = min(available_count, allowed_hard_case_count)
+            quotas[document_type] = selected_count
+            allowed_hard_case_count -= selected_count
+        return quotas
+
+    quotas = {
+        document_type: min(
+            available_counts.get(document_type, 0),
+            int(allowed_hard_case_count * count / total_base_count),
+        )
+        for document_type, count in base_counts.items()
+    }
+    remaining = allowed_hard_case_count - sum(quotas.values())
+
+    while remaining > 0:
+        candidates = [
+            document_type
+            for document_type, available_count in available_counts.items()
+            if quotas.get(document_type, 0) < available_count
+        ]
+        if not candidates:
+            break
+        candidates.sort(
+            key=lambda document_type: (
+                -(
+                    allowed_hard_case_count * base_counts.get(document_type, 0) / total_base_count
+                    - quotas.get(document_type, 0)
+                ),
+                -base_counts.get(document_type, 0),
+                document_type,
+            )
+        )
+        quotas[candidates[0]] = quotas.get(candidates[0], 0) + 1
+        remaining -= 1
+    return quotas
 
 
 def _limit_hard_case_train_entries(
@@ -303,10 +409,21 @@ def _limit_hard_case_train_entries(
     if len(hard_case_entries) <= allowed_hard_case_count:
         return train_entries, 0
 
-    selected_hard_case_entries = _select_hard_case_entries(
+    quotas = _allocate_hard_case_document_quotas(
+        base_entries,
         hard_case_entries,
         allowed_hard_case_count,
     )
+    selected_hard_case_entries: list[dict[str, Any]] = []
+    for document_type, quota in sorted(quotas.items()):
+        document_entries = [
+            entry
+            for entry in hard_case_entries
+            if str(entry.get("document_type") or "unknown") == document_type
+        ]
+        selected_hard_case_entries.extend(
+            _select_hard_case_entries(document_entries, quota)
+        )
     selected_ids = {id(entry) for entry in selected_hard_case_entries}
     retained_entries = [
         entry
