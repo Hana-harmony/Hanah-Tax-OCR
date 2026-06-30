@@ -306,6 +306,10 @@ def build_data_gap_report(
                         "filtered_hard_case_train_count",
                         0,
                     ),
+                    "filtered_stale_hard_case_count": data_profile.get(
+                        "filtered_stale_hard_case_count",
+                        0,
+                    ),
                     "hard_case_variant_counts": data_profile.get(
                         "hard_case_variant_counts",
                         {},

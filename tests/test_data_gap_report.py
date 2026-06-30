@@ -77,6 +77,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
                 "data_profile": {
                     "hard_case_train_ratio": 0.5,
                     "filtered_hard_case_train_count": 3,
+                    "filtered_stale_hard_case_count": 2,
                     "unique_source_counts": {"train": 1, "val": 1},
                     "counts_by_source_type": {"train": {"hard_case": 3}, "val": {}},
                     "hard_case_variant_counts": {
@@ -173,6 +174,7 @@ def test_build_data_gap_report_prioritizes_low_coverage_and_low_accuracy_groups(
     assert english_group["missing_document_types"]["train"] == ["residency_certificate"]
     assert english_group["source_counts_by_document_type"]["train"] == {"apostille": 1}
     assert english_group["recognizer_profile"]["filtered_hard_case_train_count"] == 3
+    assert english_group["recognizer_profile"]["filtered_stale_hard_case_count"] == 2
     assert english_group["recognizer_profile"]["train_source_count"] == 1
     assert english_group["recognizer_profile"]["val_source_count"] == 1
     assert english_group["recognizer_profile"]["hard_case_variant_counts"] == {
