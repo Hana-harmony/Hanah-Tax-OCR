@@ -148,6 +148,50 @@ def test_export_field_crops_rejects_dense_edge_content_crop(tmp_path: Path) -> N
     ]
 
 
+def test_export_field_crops_salvages_blank_issue_date_with_upward_shift(
+    tmp_path: Path,
+) -> None:
+    sample_dir = tmp_path / "sample_data" / "거주자증명서"
+    sample_dir.mkdir(parents=True)
+    image_path = sample_dir / "미국 TREASURY주.png"
+
+    image = Image.new("RGB", (400, 300), "white")
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((250, 45, 330, 56), fill="black")
+    image.save(image_path)
+
+    label_root = tmp_path / "data" / "labeled" / "residency_certificate" / "case_issue_date"
+    label_root.mkdir(parents=True)
+    (label_root / "label.json").write_text(
+        json.dumps(
+            {
+                "case_id": "residency_case_issue_date",
+                "document_type": "residency_certificate",
+                "source_path": str(image_path),
+                "expected_fields": {"issue_date": "April 5, 2021"},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    output_root = tmp_path / "field_crops"
+    summary = export_field_crops(tmp_path / "data" / "labeled", output_root, val_ratio=0.0)
+    manifest_entry = json.loads(
+        (output_root / "manifest.jsonl").read_text(encoding="utf-8").splitlines()[0]
+    )
+
+    assert summary["accepted_crops"] == 1
+    assert summary["salvaged_crops"] == 1
+    assert manifest_entry["quality"]["accepted"] is True
+    assert manifest_entry["quality"]["salvage_applied"] is True
+    assert manifest_entry["quality"]["salvage_strategy"] == "shift_issue_date_up"
+    assert manifest_entry["quality"]["vertical_offset"] < 0
+    assert manifest_entry["box"]["top"] < manifest_entry["original_box"]["top"]
+    assert manifest_entry["box"]["bottom"] < manifest_entry["original_box"]["bottom"]
+
+
 def test_salvage_dense_edge_crop_trims_border_noise_and_accepts_crop() -> None:
     crop = Image.new("RGB", (100, 40), "white")
     draw = ImageDraw.Draw(crop)

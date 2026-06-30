@@ -45,6 +45,8 @@ FIELD_GROUPS: dict[str, str] = {
     "issued_on": "date",
 }
 
+ISSUE_DATE_VERTICAL_FALLBACK_OFFSETS = (-0.08, -0.06, -0.04, -0.02)
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -582,6 +584,70 @@ def _salvage_dense_edge_crop(
     return candidate_crop, candidate_quality, cumulative_trim
 
 
+def _salvage_low_signal_issue_date_crop(
+    image: Image.Image,
+    region_box: tuple[int, int, int, int],
+    *,
+    region_name: str,
+    min_width: int,
+    min_height: int,
+    min_dark_ratio: float,
+    min_contrast: float,
+    max_foreground_bbox_ratio: float,
+    dense_edge_dark_ratio: float,
+) -> tuple[Image.Image, dict[str, Any], tuple[int, int, int, int] | None]:
+    crop = image.crop(region_box)
+    quality = compute_crop_quality(
+        crop,
+        min_width=min_width,
+        min_height=min_height,
+        min_dark_ratio=min_dark_ratio,
+        min_contrast=min_contrast,
+        max_foreground_bbox_ratio=max_foreground_bbox_ratio,
+        dense_edge_dark_ratio=dense_edge_dark_ratio,
+    )
+    if (
+        region_name != "issue_date"
+        or quality["accepted"]
+        or not {"low_dark_ratio", "low_contrast"} & set(quality["quality_flags"])
+    ):
+        return crop, quality, None
+
+    image_height = image.height
+    top = region_box[1] / max(1, image_height)
+    bottom = region_box[3] / max(1, image_height)
+
+    for vertical_offset in ISSUE_DATE_VERTICAL_FALLBACK_OFFSETS:
+        shifted_top = max(0.0, top + vertical_offset)
+        shifted_bottom = min(1.0, bottom + vertical_offset)
+        if shifted_bottom <= shifted_top:
+            continue
+        candidate_box = (
+            region_box[0],
+            int(image_height * shifted_top),
+            region_box[2],
+            int(image_height * shifted_bottom),
+        )
+        candidate_crop = image.crop(candidate_box)
+        candidate_quality = compute_crop_quality(
+            candidate_crop,
+            min_width=min_width,
+            min_height=min_height,
+            min_dark_ratio=min_dark_ratio,
+            min_contrast=min_contrast,
+            max_foreground_bbox_ratio=max_foreground_bbox_ratio,
+            dense_edge_dark_ratio=dense_edge_dark_ratio,
+        )
+        if candidate_quality["accepted"]:
+            candidate_quality["salvage_applied"] = True
+            candidate_quality["original_quality_flags"] = list(quality["quality_flags"])
+            candidate_quality["salvage_strategy"] = "shift_issue_date_up"
+            candidate_quality["vertical_offset"] = vertical_offset
+            return candidate_crop, candidate_quality, candidate_box
+
+    return crop, quality, None
+
+
 def export_field_crops(
     labeled_root: Path,
     output_root: Path,
@@ -726,6 +792,20 @@ def export_field_crops(
                 dense_edge_dark_ratio=dense_edge_dark_ratio,
             )
             original_box = box
+            crop, quality, shifted_box = _salvage_low_signal_issue_date_crop(
+                image,
+                box,
+                region_name=region.name,
+                min_width=min_width,
+                min_height=min_height,
+                min_dark_ratio=min_dark_ratio,
+                min_contrast=min_contrast,
+                max_foreground_bbox_ratio=max_foreground_bbox_ratio,
+                dense_edge_dark_ratio=dense_edge_dark_ratio,
+            )
+            if shifted_box is not None:
+                box = shifted_box
+                salvaged_count += 1
             crop, quality, trim = _salvage_dense_edge_crop(
                 crop,
                 quality,
@@ -766,7 +846,7 @@ def export_field_crops(
                 },
                 "quality": quality,
             }
-            if trim is not None:
+            if box != original_box:
                 manifest_entry["original_box"] = {
                     "left": original_box[0],
                     "top": original_box[1],
