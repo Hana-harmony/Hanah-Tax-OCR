@@ -68,13 +68,13 @@ def field_group_for(field_name: str) -> str:
     return FIELD_GROUPS.get(field_name, "korean_mixed_form")
 
 
-def split_score_for_case(case_id: str) -> float:
-    digest = hashlib.sha1(case_id.encode("utf-8")).hexdigest()
+def split_score_for_text(value: str) -> float:
+    digest = hashlib.sha1(value.encode("utf-8")).hexdigest()
     return int(digest[:8], 16) / 0xFFFFFFFF
 
 
-def split_for_case(case_id: str, val_ratio: float) -> str:
-    return "val" if split_score_for_case(case_id) < val_ratio else "train"
+def split_for_group(group_key: str, val_ratio: float) -> str:
+    return "val" if split_score_for_text(group_key) < val_ratio else "train"
 
 
 def assign_case_splits(
@@ -82,31 +82,43 @@ def assign_case_splits(
     *,
     val_ratio: float,
 ) -> dict[str, str]:
-    assignments = {
-        item["case_id"]: split_for_case(item["case_id"], val_ratio)
-        for item in case_documents
+    source_groups: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for item in case_documents:
+        source_groups[item["source_path"]].append(item)
+
+    group_assignments = {
+        source_path: split_for_group(source_path, val_ratio)
+        for source_path in source_groups
     }
     if not 0.0 < val_ratio < 1.0:
-        return assignments
+        return {
+            item["case_id"]: group_assignments[item["source_path"]]
+            for item in case_documents
+        }
 
     by_document_type: dict[str, list[str]] = defaultdict(list)
     for item in case_documents:
-        by_document_type[item["document_type"]].append(item["case_id"])
+        by_document_type[item["document_type"]].append(item["source_path"])
 
-    for case_ids in by_document_type.values():
-        unique_case_ids = sorted(
-            set(case_ids),
-            key=lambda case_id: (split_score_for_case(case_id), case_id),
+    for source_paths in by_document_type.values():
+        unique_source_paths = sorted(
+            set(source_paths),
+            key=lambda source_path: (split_score_for_text(source_path), source_path),
         )
-        if len(unique_case_ids) < 2:
+        if len(unique_source_paths) < 2:
             continue
 
-        if not any(assignments[case_id] == "val" for case_id in unique_case_ids):
-            assignments[unique_case_ids[0]] = "val"
-        if not any(assignments[case_id] == "train" for case_id in unique_case_ids):
-            assignments[unique_case_ids[-1]] = "train"
+        if not any(group_assignments[source_path] == "val" for source_path in unique_source_paths):
+            group_assignments[unique_source_paths[0]] = "val"
+        if not any(
+            group_assignments[source_path] == "train" for source_path in unique_source_paths
+        ):
+            group_assignments[unique_source_paths[-1]] = "train"
 
-    return assignments
+    return {
+        item["case_id"]: group_assignments[item["source_path"]]
+        for item in case_documents
+    }
 
 
 def discover_label_paths(labeled_root: Path) -> list[Path]:
@@ -334,6 +346,7 @@ def export_field_crops(
             {
                 "case_id": item["case_id"],
                 "document_type": item["document_type"],
+                "source_path": str(item["source_path"]),
             }
             for item in prepared_cases
         ],
@@ -439,6 +452,7 @@ def export_field_crops(
         "total_crops": len(manifest_entries),
         "accepted_crops": accepted_count,
         "rejected_crops": rejected_count,
+        "unique_source_count": len({str(item["source_path"]) for item in prepared_cases}),
         "counts_by_group": dict(sorted(counts_by_group.items())),
         "counts_by_split": dict(sorted(counts_by_split.items())),
         "counts_by_document_type": dict(sorted(counts_by_document.items())),
