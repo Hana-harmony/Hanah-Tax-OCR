@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -40,9 +41,41 @@ class FieldErrorReport(BaseModel):
     field_metrics: dict[str, FieldMetricSummary] = Field(default_factory=dict)
 
 
+class FieldMetricDelta(BaseModel):
+    field_key: str
+    status: Literal["added", "removed", "improved", "regressed", "mixed", "unchanged"]
+    baseline: FieldMetricSummary | None = None
+    candidate: FieldMetricSummary | None = None
+    comparison_delta: int | None = None
+    exact_match_rate_delta: float | None = None
+    average_character_error_rate_delta: float | None = None
+    average_word_error_rate_delta: float | None = None
+
+
+class FieldErrorReportComparison(BaseModel):
+    baseline_compared_cases: int
+    candidate_compared_cases: int
+    baseline_missing_cases: list[str] = Field(default_factory=list)
+    candidate_missing_cases: list[str] = Field(default_factory=list)
+    resolved_missing_cases: list[str] = Field(default_factory=list)
+    new_missing_cases: list[str] = Field(default_factory=list)
+    improved_fields: list[str] = Field(default_factory=list)
+    regressed_fields: list[str] = Field(default_factory=list)
+    mixed_fields: list[str] = Field(default_factory=list)
+    unchanged_fields: list[str] = Field(default_factory=list)
+    added_fields: list[str] = Field(default_factory=list)
+    removed_fields: list[str] = Field(default_factory=list)
+    field_deltas: dict[str, FieldMetricDelta] = Field(default_factory=dict)
+
+
 def load_harness_run_result(path: str | Path) -> HarnessRunResult:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     return HarnessRunResult.model_validate(payload)
+
+
+def load_field_error_report(path: str | Path) -> FieldErrorReport:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    return FieldErrorReport.model_validate(payload)
 
 
 def load_harness_run_results_from_dir(path: str | Path) -> dict[str, HarnessRunResult]:
@@ -169,6 +202,136 @@ def build_field_error_report(
         comparisons=comparisons,
         field_metrics=dict(sorted(metrics.items())),
     )
+
+
+def _classify_metric_delta(
+    baseline: FieldMetricSummary,
+    candidate: FieldMetricSummary,
+    *,
+    tolerance: float = 1e-9,
+) -> str:
+    improvement_signals: list[str] = []
+    regression_signals: list[str] = []
+
+    exact_match_rate_delta = candidate.exact_match_rate - baseline.exact_match_rate
+    if exact_match_rate_delta > tolerance:
+        improvement_signals.append("exact_match_rate")
+    elif exact_match_rate_delta < -tolerance:
+        regression_signals.append("exact_match_rate")
+
+    character_error_rate_delta = (
+        candidate.average_character_error_rate - baseline.average_character_error_rate
+    )
+    if character_error_rate_delta < -tolerance:
+        improvement_signals.append("character_error_rate")
+    elif character_error_rate_delta > tolerance:
+        regression_signals.append("character_error_rate")
+
+    word_error_rate_delta = candidate.average_word_error_rate - baseline.average_word_error_rate
+    if word_error_rate_delta < -tolerance:
+        improvement_signals.append("word_error_rate")
+    elif word_error_rate_delta > tolerance:
+        regression_signals.append("word_error_rate")
+
+    if improvement_signals and regression_signals:
+        return "mixed"
+    if improvement_signals:
+        return "improved"
+    if regression_signals:
+        return "regressed"
+    return "unchanged"
+
+
+def compare_field_error_reports(
+    baseline_report: FieldErrorReport,
+    candidate_report: FieldErrorReport,
+) -> FieldErrorReportComparison:
+    field_deltas: dict[str, FieldMetricDelta] = {}
+    improved_fields: list[str] = []
+    regressed_fields: list[str] = []
+    mixed_fields: list[str] = []
+    unchanged_fields: list[str] = []
+    added_fields: list[str] = []
+    removed_fields: list[str] = []
+
+    all_field_keys = sorted(
+        set(baseline_report.field_metrics) | set(candidate_report.field_metrics)
+    )
+    for field_key in all_field_keys:
+        baseline_metric = baseline_report.field_metrics.get(field_key)
+        candidate_metric = candidate_report.field_metrics.get(field_key)
+
+        if baseline_metric is None:
+            added_fields.append(field_key)
+            field_deltas[field_key] = FieldMetricDelta(
+                field_key=field_key,
+                status="added",
+                candidate=candidate_metric,
+            )
+            continue
+
+        if candidate_metric is None:
+            removed_fields.append(field_key)
+            field_deltas[field_key] = FieldMetricDelta(
+                field_key=field_key,
+                status="removed",
+                baseline=baseline_metric,
+            )
+            continue
+
+        status = _classify_metric_delta(baseline_metric, candidate_metric)
+        if status == "improved":
+            improved_fields.append(field_key)
+        elif status == "regressed":
+            regressed_fields.append(field_key)
+        elif status == "mixed":
+            mixed_fields.append(field_key)
+        else:
+            unchanged_fields.append(field_key)
+
+        field_deltas[field_key] = FieldMetricDelta(
+            field_key=field_key,
+            status=status,
+            baseline=baseline_metric,
+            candidate=candidate_metric,
+            comparison_delta=candidate_metric.comparisons - baseline_metric.comparisons,
+            exact_match_rate_delta=candidate_metric.exact_match_rate
+            - baseline_metric.exact_match_rate,
+            average_character_error_rate_delta=candidate_metric.average_character_error_rate
+            - baseline_metric.average_character_error_rate,
+            average_word_error_rate_delta=candidate_metric.average_word_error_rate
+            - baseline_metric.average_word_error_rate,
+        )
+
+    baseline_missing_cases = sorted(baseline_report.missing_cases)
+    candidate_missing_cases = sorted(candidate_report.missing_cases)
+
+    return FieldErrorReportComparison(
+        baseline_compared_cases=baseline_report.compared_cases,
+        candidate_compared_cases=candidate_report.compared_cases,
+        baseline_missing_cases=baseline_missing_cases,
+        candidate_missing_cases=candidate_missing_cases,
+        resolved_missing_cases=sorted(
+            set(baseline_missing_cases) - set(candidate_missing_cases)
+        ),
+        new_missing_cases=sorted(set(candidate_missing_cases) - set(baseline_missing_cases)),
+        improved_fields=improved_fields,
+        regressed_fields=regressed_fields,
+        mixed_fields=mixed_fields,
+        unchanged_fields=unchanged_fields,
+        added_fields=added_fields,
+        removed_fields=removed_fields,
+        field_deltas=field_deltas,
+    )
+
+
+def compare_field_error_report_files(
+    baseline_path: str | Path,
+    candidate_path: str | Path,
+) -> FieldErrorReportComparison:
+    baseline_report = load_field_error_report(baseline_path)
+    candidate_report = load_field_error_report(candidate_path)
+    return compare_field_error_reports(baseline_report, candidate_report)
 
 
 def evaluate_run_result(

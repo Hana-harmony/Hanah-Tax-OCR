@@ -104,6 +104,14 @@ Build a field-level CER/WER report from run results:
 hanah-tax-ocr eval-report --expected-root evals/cases --actual-dir data/review_queue/index
 ```
 
+Compare baseline and candidate eval reports after a recognizer change:
+
+```bash
+hanah-tax-ocr compare-eval-reports \
+  --baseline evals/baseline-report.json \
+  --candidate evals/candidate-report.json
+```
+
 ## Review Workflow
 
 1. Run the harness on staged or sample documents.
