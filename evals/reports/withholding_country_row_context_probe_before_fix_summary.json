@@ -1,0 +1,56 @@
+{
+  "report_path": "evals/reports/withholding_country_row_context_probe_before_fix_report.json",
+  "compared_cases": 1,
+  "missing_cases": [],
+  "field_metric_count": 4,
+  "comparison_count": 4,
+  "exact_match_rate": 0.5,
+  "average_character_error_rate": 0.391304,
+  "average_word_error_rate": 0.403846,
+  "document_pass_rate": 0.0,
+  "passed_case_ids": [],
+  "failed_case_ids": [
+    "withholding_country_row_context_probe"
+  ],
+  "low_quality_subset": {
+    "case_ids": [
+      "apostille_california_001",
+      "residency_john_doe_001",
+      "residency_legacy_001",
+      "residency_university_hawaii_001"
+    ],
+    "comparison_count": 0,
+    "exact_match_rate": 0.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 0.0,
+    "passed_case_ids": [],
+    "failed_case_ids": []
+  },
+  "format_variation_subset": {
+    "case_ids": [
+      "apostille_california_001",
+      "residency_john_doe_001",
+      "residency_legacy_001",
+      "residency_pdf_001",
+      "residency_university_hawaii_001"
+    ],
+    "comparison_count": 0,
+    "exact_match_rate": 0.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 0.0,
+    "passed_case_ids": [],
+    "failed_case_ids": []
+  },
+  "mixed_language_subset": {
+    "case_ids": [],
+    "comparison_count": 0,
+    "exact_match_rate": 0.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 0.0,
+    "passed_case_ids": [],
+    "failed_case_ids": []
+  }
+}

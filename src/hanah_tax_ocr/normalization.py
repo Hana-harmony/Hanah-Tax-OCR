@@ -28,6 +28,8 @@ def normalize_address(value: str | None) -> str | None:
     normalized = re.sub(r"[^A-Za-z0-9#.' -]", " ", normalized)
     normalized = normalize_whitespace(normalized)
     normalized = _normalize_zip_like_tokens(normalized)
+    normalized = _normalize_common_address_ocr_noise(normalized)
+    normalized = _canonicalize_address_country_tail(normalized)
     return normalized or None
 
 
@@ -54,6 +56,23 @@ def _normalize_zip_like_tokens(value: str) -> str:
         return token
 
     return re.sub(r"\b[A-Za-z0-9]{5}\b", _replace, value)
+
+
+def _normalize_common_address_ocr_noise(value: str) -> str:
+    normalized = re.sub(r"\bAp[l1I]\b(?=\s+[0-9A-Za-z])", "Apt", value, flags=re.IGNORECASE)
+    normalized = re.sub(r"\bAm[o0]r[i1]ca\b", "America", normalized, flags=re.IGNORECASE)
+    return normalized
+
+
+def _canonicalize_address_country_tail(value: str) -> str:
+    country_match = re.search(r"\b(?:United\s+States|USA)\b", value, re.IGNORECASE)
+    if not country_match:
+        return value
+    prefix = value[: country_match.start()].rstrip()
+    normalized_country = normalize_country(value[country_match.start() :])
+    if normalized_country != "United States of America":
+        return value
+    return " ".join(part for part in [prefix, normalized_country] if part).strip()
 
 
 def normalize_country(value: str | None) -> str | None:

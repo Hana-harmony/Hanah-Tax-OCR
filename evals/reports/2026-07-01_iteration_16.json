@@ -1,0 +1,101 @@
+{
+  "iteration_id": "2026-07-01_iteration_16",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "withholding country-row hard case의 핵심 실패는 broad parser 교체가 아니라 address 누수에서 TIN을 회수하지 못하고 country tail을 정규화하지 못하는 데 있다.",
+    "address 전용 OCR noise cleanup과 address leak 전용 TIN rescue만 좁게 추가하면 focused probe를 복구하면서 official same-input replay 회귀를 피할 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "semi_real_probe_runner",
+      "status": "kept",
+      "files": [
+        "scripts/evals/run_semi_real_probe_eval.py",
+        "tests/test_run_semi_real_probe_eval.py",
+        "evals/semi_real_probes/manifest.json"
+      ],
+      "summary": "semi-real probe를 materialize, eval, report/summary/metadata 생성까지 한 번에 수행하는 runner를 추가하고, country-row confusion/context probe를 manifest에 연결했다."
+    },
+    {
+      "type": "withholding_country_row_rescue",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/normalization.py",
+        "src/hanah_tax_ocr/parsers/withholding_tax_form.py",
+        "tests/test_parsers.py"
+      ],
+      "summary": "Address normalization에 `Apl -> Apt`와 US country-tail canonicalization을 추가하고, withholding parser에 address leak 전용 TIN rescue를 넣어 country-row context probe의 `tin/address`를 복구했다."
+    }
+  ],
+  "probe_results": {
+    "withholding_country_row_context_probe": {
+      "before": {
+        "report_path": "evals/reports/withholding_country_row_context_probe_before_fix_report.json",
+        "summary_path": "evals/reports/withholding_country_row_context_probe_before_fix_summary.json",
+        "exact_match_rate": 0.5,
+        "average_character_error_rate": 0.391304,
+        "average_word_error_rate": 0.403846,
+        "document_pass_rate": 0.0
+      },
+      "after": {
+        "report_path": "evals/reports/withholding_country_row_context_probe_after_fix_report.json",
+        "summary_path": "evals/reports/withholding_country_row_context_probe_after_fix_summary.json",
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0,
+        "document_pass_rate": 1.0
+      },
+      "augmentation_effects_ledger_entry": "withholding_country_row_context_probe_2026_07_01"
+    }
+  },
+  "targeted_real_regression": {
+    "summary_path": "evals/reports/targeted_country_row_real_slice_after_fix_summary.json",
+    "exact_match_rate": 0.956522,
+    "average_character_error_rate": 0.043478,
+    "average_word_error_rate": 0.043478,
+    "document_pass_rate": 0.666667,
+    "failed_case_ids": [
+      "withholding_maria_chen_001"
+    ],
+    "observed_failure_fields": [
+      {
+        "case_id": "withholding_maria_chen_001",
+        "field_name": "middle_name",
+        "expected": "L",
+        "actual": "M"
+      }
+    ],
+    "note": "Focused rescue 대상이었던 `tin/address/signature_date`는 real 3-case slice에서 유지되었고, observed failure는 top-right middle initial OCR drift 한 건이다."
+  },
+  "baseline_comparison": {
+    "comparison_path": "evals/reports/current_official_v17_vs_country_row_rescue_v1.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "kept_candidate_exact_match_rate": 1.0,
+    "kept_candidate_average_character_error_rate": 0.0,
+    "kept_candidate_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "note": "Official same-input replay에서 regressed field가 없고, withholding 21건 재실행 후에도 baseline exact/CER/WER/doc pass를 유지했다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_vs_country_row_rescue_v1.json",
+      "evals/reports/targeted_country_row_real_slice_after_fix_report.json"
+    ],
+    "note": "Replay comparison에서 `withholding_tax_form.signature_date` delta가 0.0이고, real 3-case slice에서도 `withholding_maria_chen_001`의 signature_date는 `2026-01-12`로 유지됐다."
+  },
+  "kept_candidates": [
+    "withholding country-row tin/address rescue",
+    "semi-real probe eval runner"
+  ],
+  "discarded_candidates": [],
+  "next_priorities": [
+    "Real withholding 샘플에서 남아 있는 top-right `middle_name` drift를 region OCR 또는 decoding 관점으로 좁게 분리해 검증한다.",
+    "external holdout의 mixed-language withholding 공백을 채워 새로운 분포에서 이번 parser rescue가 유지되는지 확인한다."
+  ]
+}

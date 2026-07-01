@@ -257,6 +257,99 @@
         "Composite semi-real probe that combines the top border clip, localized top-right middle-name interference, and bottom applicant/signature overlap.",
         "Used to test coupled resilience when the upper identity row and lower signature block degrade differently in the same document."
       ]
+    },
+    {
+      "case_id": "withholding_country_row_confusion_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_pipeline": [
+        {
+          "augmentation_type": "jpeg_blocking"
+        },
+        {
+          "augmentation_type": "overlay_patch",
+          "augmentation_options": {
+            "width_ratio": 0.34,
+            "height_ratio": 0.1,
+            "x_ratio": 0.52,
+            "y_ratio": 0.245
+          }
+        },
+        {
+          "augmentation_type": "border_clip",
+          "augmentation_options": {
+            "anchor": "right",
+            "clip_width_ratio": 0.05
+          }
+        }
+      ],
+      "focus_fields": [
+        "tin",
+        "residency_country",
+        "residency_country_code",
+        "address"
+      ],
+      "failure_modes": [
+        "compression",
+        "low_dpi",
+        "label_bleed",
+        "mixed_korean_english_interference",
+        "border_clipping"
+      ],
+      "notes": [
+        "Composite semi-real probe that compresses the document, overlays the mixed-language country row, and clips the right edge near the country-code cell.",
+        "Used to stress whether parser priors can still recover TIN and country fields when Korean label fragments and right-edge truncation hit the same row."
+      ]
+    },
+    {
+      "case_id": "withholding_country_row_context_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_pipeline": [
+        {
+          "augmentation_type": "low_res"
+        },
+        {
+          "augmentation_type": "overlay_patch",
+          "augmentation_options": {
+            "width_ratio": 0.26,
+            "height_ratio": 0.08,
+            "x_ratio": 0.6,
+            "y_ratio": 0.245
+          }
+        },
+        {
+          "augmentation_type": "border_clip",
+          "augmentation_options": {
+            "anchor": "right",
+            "clip_width_ratio": 0.03
+          }
+        }
+      ],
+      "focus_fields": [
+        "tin",
+        "residency_country",
+        "residency_country_code",
+        "address"
+      ],
+      "expected_fields": {
+        "tin": "987-65-4321",
+        "address": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+        "residency_country": "United States of America",
+        "residency_country_code": "US"
+      },
+      "failure_modes": [
+        "low_dpi",
+        "label_bleed",
+        "mixed_korean_english_interference",
+        "border_clipping"
+      ],
+      "notes": [
+        "Refined semi-real probe that keeps the perturbation tighter around the mixed-language country row while avoiding a full-document JPEG collapse.",
+        "Used to separate country-row parser/context failures from broad full-page recognizer breakdown."
+      ]
     }
   ]
 }

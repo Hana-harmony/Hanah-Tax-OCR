@@ -706,6 +706,39 @@ def test_withholding_parser_normalizes_zip_letter_confusion_in_address() -> None
     )
 
 
+def test_withholding_parser_recovers_tin_from_leaked_address_noise() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[OCRPage(page_number=1, raw_text="withholding probe")],
+            regions={
+                "address": OCRPage(
+                    page_number=1,
+                    raw_text=(
+                        "1234 Sunset Blvd Apl 5B Los Angeles CA 90026 "
+                        "United States Amorica 4 5 987-65-4321 1985 -0615 United"
+                    ),
+                ),
+                "residency_country": OCRPage(
+                    page_number=1,
+                    raw_text="United States of America",
+                ),
+                "residency_country_code": OCRPage(
+                    page_number=1,
+                    raw_text="US",
+                ),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["tin"] == "987-65-4321"
+    assert (
+        parsed.fields["address"]
+        == "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America"
+    )
+
+
 def test_withholding_parser_preserves_digits_and_rebuilds_applicant_name() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

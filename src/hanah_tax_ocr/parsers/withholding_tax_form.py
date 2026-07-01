@@ -30,7 +30,8 @@ class WithholdingTaxFormParser(BaseDocumentParser):
     def parse(self, ocr_result: OCRResult, source_path: str | Path) -> ExtractedDocument:
         text = ocr_result.combined_text()
         single_line = self._normalize_whitespace(text)
-        region_address = self._sanitize_address_candidate(self._region_value(ocr_result, "address"))
+        region_address_raw = self._region_value(ocr_result, "address")
+        region_address = self._sanitize_address_candidate(region_address_raw)
         full_text_address_raw = (
             self._find_first(
                 r"(\d{1,5}\s+[A-Za-z0-9 ,.'#-]+?(?:United States of America|USA))",
@@ -107,6 +108,11 @@ class WithholdingTaxFormParser(BaseDocumentParser):
                 full_text_address=full_text_address,
                 raw_full_text_address=full_text_address_raw,
             )
+        )
+        tin = tin or self._extract_tin_from_address_noise(
+            region_address_raw,
+            full_text_address_raw,
+            address,
         )
         region_country = self._region_value(ocr_result, "residency_country")
         country_code = normalize_country_code(
@@ -294,6 +300,21 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             value,
             re.IGNORECASE,
         ) is not None
+
+    def _extract_tin_from_address_noise(self, *candidates: str | None) -> str | None:
+        for candidate in candidates:
+            if not candidate:
+                continue
+            tin = self._extract_first_pattern(
+                [
+                    r"\b(\d{3}-\d{2}-\d{4})\b",
+                    r"\b(\d{2}-\d{7})\b",
+                ],
+                candidate,
+            )
+            if tin:
+                return tin
+        return None
 
     def _select_signature_date_candidate(
         self,
