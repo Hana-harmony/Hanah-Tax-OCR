@@ -1,0 +1,93 @@
+{
+  "iteration_id": "2026-07-02_iteration_20",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "withholding country-row confusion probe의 남은 실패는 parser 구조가 아니라 `address` OCR noise normalization 부족에 가깝다.",
+    "점 제거, street-suffix 보정, unit-city 붙음 분리, city-state suffix 분리, `Los Angeles` rescue를 address normalization 레이어에만 추가하면 exact를 1.0까지 올리면서 official replay 회귀를 피할 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "address_noise_normalization",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/normalization.py",
+        "tests/test_normalization.py"
+      ],
+      "summary": "address normalization에 `Bivd -> Blvd`, period 제거, `5BLos` 같은 unit/city 붙음 분리, city-state suffix 분리, `Los Angeles` OCR rescue를 추가했다."
+    },
+    {
+      "type": "augmentation_effects_ledger",
+      "status": "kept",
+      "files": [
+        "evals/augmentation_effects/ledger.json"
+      ],
+      "summary": "semi-real `withholding_country_row_confusion_probe` 조합(`jpeg_blocking + overlay_patch + border_clip`)에서 address normalization이 `english_name_org(address)` exact를 1.0까지 복구한 효과를 ledger에 남겼다."
+    }
+  ],
+  "probe_results": {
+    "withholding_country_row_confusion_probe": {
+      "previous_summary_path": "evals/reports/withholding_country_row_confusion_probe_en_default_summary.json",
+      "current_summary_path": "evals/reports/withholding_country_row_confusion_probe_address_norm_summary.json",
+      "comparison_path": "evals/reports/withholding_country_row_confusion_probe_en_default_vs_address_norm.json",
+      "previous_exact_match_rate": 0.9,
+      "current_exact_match_rate": 1.0,
+      "previous_average_character_error_rate": 0.008696,
+      "current_average_character_error_rate": 0.0,
+      "previous_average_word_error_rate": 0.053846,
+      "current_average_word_error_rate": 0.0,
+      "previous_document_pass_rate": 0.0,
+      "current_document_pass_rate": 1.0
+    }
+  },
+  "targeted_real_regression": {
+    "summary_path": "evals/reports/targeted_address_norm_real_slice_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "failed_case_ids": [],
+    "note": "real 3-case slice(`apostille_north_carolina_001`, `residency_maria_chen_001`, `withholding_maria_chen_001`)는 unchanged였다."
+  },
+  "external_holdout": {
+    "summary_path": "evals/reports/external_holdout_address_norm_summary.json",
+    "comparison_path": "evals/reports/external_holdout_baseline_vs_address_norm.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "comparison_status": "unchanged",
+    "note": "현재 ready external holdout 5건과 low-quality subset은 unchanged였다."
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_address_norm_v1_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_address_norm_v1.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "official replay는 overall unchanged였고 regressed field가 없었다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/withholding_country_row_confusion_probe_en_default_vs_address_norm.json",
+      "evals/reports/current_official_v17_vs_address_norm_v1.json",
+      "evals/reports/targeted_address_norm_real_slice_report.json"
+    ],
+    "note": "probe, official replay, real slice 모두 `signature_date` unchanged였다."
+  },
+  "kept_candidates": [
+    "address OCR noise normalization for country-row confusion probe"
+  ],
+  "discarded_candidates": [],
+  "next_priorities": [
+    "actual front-side mixed-language withholding 원본을 external holdout ready case로 추가해 `mixed_language_subset` 0 comparison을 해소한다.",
+    "semi-real mixed-language withholding probe를 전체 manifest 기준으로 재실행해 남은 실패를 다시 1~2개로 좁힌다."
+  ]
+}

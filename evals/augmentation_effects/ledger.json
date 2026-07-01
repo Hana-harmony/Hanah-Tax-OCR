@@ -385,6 +385,73 @@
           "average_word_error_rate_delta": -0.5
         }
       ]
+    },
+    {
+      "experiment_id": "withholding_country_row_confusion_probe_address_norm_2026_07_02",
+      "baseline_report": "evals/reports/withholding_country_row_confusion_probe_en_default_report.json",
+      "candidate_report": "evals/reports/withholding_country_row_confusion_probe_address_norm_report.json",
+      "variants": [
+        "jpeg_blocking",
+        "overlay_patch",
+        "border_clip"
+      ],
+      "field_group_deltas": [
+        {
+          "field_group": "date",
+          "baseline": {
+            "comparisons": 1.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "candidate": {
+            "comparisons": 1.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.0,
+          "average_character_error_rate_delta": 0.0,
+          "average_word_error_rate_delta": 0.0
+        },
+        {
+          "field_group": "english_name_org",
+          "baseline": {
+            "comparisons": 6.0,
+            "exact_match_rate": 0.833333,
+            "average_character_error_rate": 0.014493,
+            "average_word_error_rate": 0.089744
+          },
+          "candidate": {
+            "comparisons": 6.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.166667,
+          "average_character_error_rate_delta": -0.014493,
+          "average_word_error_rate_delta": -0.089744
+        },
+        {
+          "field_group": "numeric_tin_code",
+          "baseline": {
+            "comparisons": 3.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "candidate": {
+            "comparisons": 3.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.0,
+          "average_character_error_rate_delta": 0.0,
+          "average_word_error_rate_delta": 0.0
+        }
+      ],
+      "notes": "country-row confusion 조합에서 address OCR noise normalization만 추가해 `english_name_org(address)` exact를 0.0에서 1.0으로 복구했고, date/numeric field group 회귀는 없었다."
     }
   ]
 }

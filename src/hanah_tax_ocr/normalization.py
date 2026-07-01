@@ -2,6 +2,11 @@ from __future__ import annotations
 
 import re
 
+US_STATE_CODE_PATTERN = (
+    r"AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|IA|ID|IL|IN|KS|KY|LA|MA|MD|ME|MI|MN|MO|MS|"
+    r"MT|NC|ND|NE|NH|NJ|NM|NV|NY|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VA|VT|WA|WI|WV|WY"
+)
+
 
 def normalize_whitespace(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
@@ -60,8 +65,22 @@ def _normalize_zip_like_tokens(value: str) -> str:
 
 def _normalize_common_address_ocr_noise(value: str) -> str:
     normalized = re.sub(r"\bAp[l1I]\b(?=\s+[0-9A-Za-z])", "Apt", value, flags=re.IGNORECASE)
+    normalized = normalized.replace(".", " ")
+    normalized = re.sub(r"\bB[i1l]vd\b", "Blvd", normalized, flags=re.IGNORECASE)
+    normalized = re.sub(r"\b(\d+[A-Za-z])(?=[A-Z][a-z]{2,}\b)", r"\1 ", normalized)
+    normalized = re.sub(
+        rf"\b([A-Za-z]{{3,}})(?=(?:{US_STATE_CODE_PATTERN})\b)",
+        r"\1 ",
+        normalized,
+    )
+    normalized = re.sub(
+        r"\bLos\s+A(?:r|n)(?:i|1|l)?geles\b",
+        "Los Angeles",
+        normalized,
+        flags=re.IGNORECASE,
+    )
     normalized = re.sub(r"\bAm[o0]r[i1]ca\b", "America", normalized, flags=re.IGNORECASE)
-    return normalized
+    return normalize_whitespace(normalized)
 
 
 def _canonicalize_address_country_tail(value: str) -> str:
