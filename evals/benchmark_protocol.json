@@ -4,6 +4,7 @@
   "internal_regression_root": "evals/cases",
   "external_holdout_root": "evals/external_holdout/cases",
   "external_holdout_manifest_path": "evals/external_holdout/manifest.json",
+  "external_holdout_eval_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_external_holdout_eval --expected-root evals/external_holdout/cases --labeled-root data/labeled --external-manifest evals/external_holdout/manifest.json --output-dir <tmp_holdout_dir> --report-output <report.json> --summary-output <summary.json> --metadata-output <metadata.json>",
   "summary_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.summarize_eval_report --report <report.json> --external-manifest evals/external_holdout/manifest.json --output <summary.json>",
   "latency_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.measure_latency --labeled-root data/labeled --case-id <case_id> --case-id <case_id> --output evals/benchmark_latency_observations.json",
   "hybrid_replay_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.replay_hybrid_eval --baseline-actual-dir <baseline_actual_dir> --expected-root evals/cases --output-dir <tmp_replay_dir> --report-output <report.json> --summary-output <summary.json> --baseline-report tmp/evals/current_official_v17_parser_report.json --comparison-output <comparison.json> --rerun-prefix <document_prefix>",
@@ -50,6 +51,10 @@
   },
   "report_artifacts": {
     "external_holdout_manifest": "evals/external_holdout/manifest.json",
+    "external_holdout_missing_distribution_targets": "evals/external_holdout/missing_distribution_targets.json",
+    "external_holdout_baseline_metadata": "evals/reports/external_holdout_baseline_metadata.json",
+    "external_holdout_baseline_report": "evals/reports/external_holdout_baseline_report.json",
+    "external_holdout_baseline_summary": "evals/reports/external_holdout_baseline_summary.json",
     "error_taxonomy_manifest": "evals/error_taxonomy/hard_case_manifest.json",
     "latency_observations": "evals/benchmark_latency_observations.json",
     "augmentation_effect_ledger": "evals/augmentation_effects/ledger.json",

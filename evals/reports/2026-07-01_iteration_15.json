@@ -1,0 +1,89 @@
+{
+  "iteration_id": "2026-07-01_iteration_15",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "External holdout은 manifest만 있는 상태보다 실제 실행/요약 경로와 baseline snapshot이 있어야 다음 후보를 새로운 분포 기준으로 비교할 수 있다.",
+    "현재 external holdout 공백은 low-quality 측정 부재보다 mixed-language withholding 비어 있음이 더 크므로, 운영 파일로 샘플 수집 목표를 명시해야 다음 데이터 확장이 오염 없이 진행된다."
+  ],
+  "changes": [
+    {
+      "type": "external_holdout_eval_runner",
+      "status": "kept",
+      "files": [
+        "scripts/evals/run_external_holdout_eval.py",
+        "scripts/evals/summarize_eval_report.py",
+        "tests/test_run_external_holdout_eval.py",
+        "tests/test_eval_report_summary.py"
+      ],
+      "summary": "External holdout expected 케이스를 run_eval_suite 기반으로 실행하고 report/summary/metadata를 한 번에 남기는 runner를 추가했다. Summary는 low_quality뿐 아니라 format_variation, mixed_language subset도 함께 집계하도록 확장했다."
+    },
+    {
+      "type": "holdout_gap_tracking",
+      "status": "kept",
+      "files": [
+        "evals/external_holdout/missing_distribution_targets.json",
+        "evals/benchmark_protocol.json",
+        "evals/sota_positioning/comparison_table_template.json"
+      ],
+      "summary": "현재 external holdout에 없는 mixed-language withholding 및 blur apostille 분포를 machine-readable target으로 기록하고, benchmark protocol 및 SOTA 비교 템플릿에 external holdout baseline artifact 경로를 연결했다."
+    }
+  ],
+  "external_holdout_baseline": {
+    "metadata_path": "evals/reports/external_holdout_baseline_metadata.json",
+    "report_path": "evals/reports/external_holdout_baseline_report.json",
+    "summary_path": "evals/reports/external_holdout_baseline_summary.json",
+    "result": {
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    },
+    "subsets": {
+      "low_quality_subset": {
+        "comparison_count": 22,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "format_variation_subset": {
+        "comparison_count": 28,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "mixed_language_subset": {
+        "comparison_count": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      }
+    },
+    "note": "External holdout baseline은 현재 internal baseline과 동일 코드에서 생성했으므로, 이후 후보는 이 report를 기준으로 새로운 분포 변화량을 비교하면 된다."
+  },
+  "baseline_comparison": {
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "kept_candidate_exact_match_rate": 1.0,
+    "kept_candidate_average_character_error_rate": 0.0,
+    "kept_candidate_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "이번 반복은 OCR/parser 후보 변경이 아니라 external holdout baseline 고정이다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": "evals/reports/current_official_v17_vs_region_parser_combo_v2.json",
+    "note": "이번 반복에서 OCR/parser 코드는 변경하지 않았고, 기존 promoted candidate의 date 계열 no-regression 상태를 유지한다."
+  },
+  "kept_candidates": [
+    "external holdout eval runner",
+    "external holdout baseline snapshot"
+  ],
+  "discarded_candidates": [],
+  "next_priorities": [
+    "withholding mixed-language non-overlap front-side 샘플을 확보해 external holdout mixed_language_subset을 0 comparison 상태에서 벗어나게 한다.",
+    "외부 홀드아웃 baseline report를 기준으로 다음 semi-real 또는 parser 후보의 새로운 분포 exact/CER/WER 변화량을 같이 비교한다."
+  ]
+}

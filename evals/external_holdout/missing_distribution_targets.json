@@ -1,0 +1,59 @@
+{
+  "version": "2026-07-01",
+  "baseline_manifest": "evals/external_holdout/manifest.json",
+  "targets": [
+    {
+      "target_id": "withholding_front_filled_nonoverlap_low_quality",
+      "document_type": "withholding_tax_form",
+      "required_tags": [
+        "low_quality",
+        "mixed_language"
+      ],
+      "status": "missing_source",
+      "priority": "highest",
+      "evidence": {
+        "candidate_case_count_in_manifest": 0,
+        "blocked_by_eval_overlap_case_ids": [
+          "withholding_maria_chen_001"
+        ],
+        "non_extractable_case_ids": [
+          "withholding_hana_payer_001",
+          "withholding_pdf_001"
+        ]
+      },
+      "needed_sample_description": "내부 eval과 다른 원본의 front-side 작성 완료 withholding 샘플 1건 이상. 저해상도 또는 blur가 있고, 한글 라벨과 영문 이름/주소가 함께 보여야 한다."
+    },
+    {
+      "target_id": "withholding_front_filled_nonoverlap_crop_or_skew",
+      "document_type": "withholding_tax_form",
+      "required_tags": [
+        "crop_miss"
+      ],
+      "status": "missing_source",
+      "priority": "high",
+      "evidence": {
+        "candidate_case_count_in_manifest": 0,
+        "blocked_by_eval_overlap_case_ids": [
+          "withholding_maria_chen_001"
+        ]
+      },
+      "needed_sample_description": "이름/주소/서명일 중 하나가 border clipping 또는 skew 영향을 받는 작성 완료 withholding 샘플 1건 이상."
+    },
+    {
+      "target_id": "apostille_blur_ready_case",
+      "document_type": "apostille",
+      "required_tags": [
+        "blur"
+      ],
+      "status": "missing_source",
+      "priority": "medium",
+      "evidence": {
+        "ready_apostille_case_ids": [],
+        "partial_apostille_case_ids": [
+          "apostille_california_001"
+        ]
+      },
+      "needed_sample_description": "서명자/발행일이 실제로 채워져 있고 blur가 있는 apostille 샘플 1건 이상."
+    }
+  ]
+}

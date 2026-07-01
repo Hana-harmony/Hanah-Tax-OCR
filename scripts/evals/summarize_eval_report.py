@@ -10,6 +10,11 @@ from hanah_tax_ocr.evaluation import load_field_error_report
 
 DEFAULT_OUTPUT_PATH = Path("evals/reports/latest_eval_summary.json")
 DEFAULT_EXTERNAL_MANIFEST_PATH = Path("evals/external_holdout/manifest.json")
+DEFAULT_SUBSET_TAGS: dict[str, set[str]] = {
+    "low_quality_subset": {"low_quality", "blur"},
+    "format_variation_subset": {"format_variation", "pdf_render"},
+    "mixed_language_subset": {"mixed_language"},
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -79,16 +84,22 @@ def summarize_eval_report(
     comparisons = [comparison.model_dump(mode="json") for comparison in report.comparisons]
     summary = _metrics_for_comparisons(comparisons)
     case_tags = _load_external_manifest_case_tags(external_manifest_path)
-    low_quality_case_ids = {
-        case_id
-        for case_id, tags in case_tags.items()
-        if {"low_quality", "blur"} & set(tags)
-    }
-    low_quality_comparisons = [
-        comparison
-        for comparison in comparisons
-        if str(comparison["case_id"]) in low_quality_case_ids
-    ]
+    subset_summaries = {}
+    for subset_name, subset_tags in DEFAULT_SUBSET_TAGS.items():
+        subset_case_ids = {
+            case_id
+            for case_id, tags in case_tags.items()
+            if subset_tags & set(tags)
+        }
+        subset_comparisons = [
+            comparison
+            for comparison in comparisons
+            if str(comparison["case_id"]) in subset_case_ids
+        ]
+        subset_summaries[subset_name] = {
+            "case_ids": sorted(subset_case_ids),
+            **_metrics_for_comparisons(subset_comparisons),
+        }
 
     return {
         "report_path": str(report_path),
@@ -96,10 +107,7 @@ def summarize_eval_report(
         "missing_cases": report.missing_cases,
         "field_metric_count": len(report.field_metrics),
         **summary,
-        "low_quality_subset": {
-            "case_ids": sorted(low_quality_case_ids),
-            **_metrics_for_comparisons(low_quality_comparisons),
-        },
+        **subset_summaries,
     }
 
 

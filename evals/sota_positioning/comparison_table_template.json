@@ -30,6 +30,20 @@
       "notes": "Populate from summarize_eval_report + benchmark_latency_observations."
     },
     {
+      "system_name": "hanah_tax_ocr_external_holdout_baseline",
+      "system_scope": "ocr+parser+normalization+review",
+      "dataset_split": "external_holdout",
+      "exact_match_rate": null,
+      "average_character_error_rate": null,
+      "average_word_error_rate": null,
+      "document_pass_rate": null,
+      "low_quality_exact_match_rate": null,
+      "low_quality_average_character_error_rate": null,
+      "low_quality_average_word_error_rate": null,
+      "cpu_latency_observation_seconds": null,
+      "notes": "Populate from external_holdout_baseline_summary + benchmark_latency_observations."
+    },
+    {
       "system_name": "candidate_managed_service",
       "system_scope": "managed_custom_extractor_or_query_system",
       "dataset_split": "same_protocol_only",

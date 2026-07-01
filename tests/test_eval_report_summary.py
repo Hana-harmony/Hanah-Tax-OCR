@@ -71,3 +71,7 @@ def test_summarize_eval_report_includes_low_quality_subset(tmp_path: Path) -> No
     assert summary["document_pass_rate"] == 0.5
     assert summary["low_quality_subset"]["comparison_count"] == 1
     assert summary["low_quality_subset"]["exact_match_rate"] == 1.0
+    assert summary["format_variation_subset"]["comparison_count"] == 1
+    assert summary["format_variation_subset"]["exact_match_rate"] == 0.0
+    assert summary["mixed_language_subset"]["comparison_count"] == 0
+    assert summary["mixed_language_subset"]["case_ids"] == []
