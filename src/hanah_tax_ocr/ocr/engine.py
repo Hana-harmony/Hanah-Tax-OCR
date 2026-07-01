@@ -295,7 +295,10 @@ class PaddleOCREngine:
                         np.array(variant),
                         cls=self._kwargs.get("use_angle_cls", True),
                     )
-                    pages = self._build_pages(raw_result)
+                    pages = self._normalize_region_pages(
+                        region_spec.name,
+                        self._build_pages(raw_result),
+                    )
                     score = self._score_region_pages(region_spec.name, pages)
                     if score > best_score:
                         best_pages = pages
@@ -526,6 +529,99 @@ class PaddleOCREngine:
             return (score, int(token.isalpha()), -len(normalized))
 
         return (1, len(normalized), -len(normalized))
+
+    def _normalize_region_pages(
+        self,
+        region_name: str,
+        pages: list[OCRPage],
+    ) -> list[OCRPage]:
+        if region_name != "applicant_name":
+            return pages
+        best_line = self._select_best_applicant_name_line(pages)
+        if best_line is None:
+            return pages
+        page_number, raw_text = best_line
+        normalized_pages: list[OCRPage] = []
+        for page in pages:
+            if page.page_number != page_number:
+                continue
+            normalized_pages.append(
+                OCRPage(
+                    page_number=page.page_number,
+                    words=page.words,
+                    raw_text=raw_text,
+                )
+            )
+        return normalized_pages or pages
+
+    def _select_best_applicant_name_line(
+        self,
+        pages: list[OCRPage],
+    ) -> tuple[int, str] | None:
+        best_candidate: tuple[tuple[int, int, int], int, str] | None = None
+        for page in pages:
+            for line in page.raw_text.splitlines():
+                normalized_line = re.sub(r"\s+", " ", line).strip()
+                if not normalized_line:
+                    continue
+                score = self._score_applicant_name_line(normalized_line)
+                if score is None:
+                    continue
+                candidate = (score, page.page_number, normalized_line)
+                if best_candidate is None or candidate > best_candidate:
+                    best_candidate = candidate
+        if best_candidate is None:
+            return None
+        score, page_number, normalized_line = best_candidate
+        if score[0] < 5 or score[1] < 2:
+            return None
+        return page_number, normalized_line
+
+    def _score_applicant_name_line(
+        self,
+        normalized_line: str,
+    ) -> tuple[int, int, int] | None:
+        tokens = re.findall(r"[A-Za-z0-9'.-]+", normalized_line)
+        if not tokens:
+            return None
+        alpha_tokens = [token for token in tokens if re.search(r"[A-Za-z]", token)]
+        if len(alpha_tokens) < 2 or len(alpha_tokens) > 3:
+            return None
+
+        digit_only_tokens = [token for token in tokens if token.isdigit()]
+        long_alpha_tokens = [
+            token
+            for token in alpha_tokens
+            if len(token.strip(".").replace("-", "")) >= 3
+        ]
+        middle_initial_count = sum(
+            1
+            for token in alpha_tokens
+            if len(token.strip(".")) == 1 and token.strip(".").isalpha()
+        )
+
+        score = 0
+        if len(alpha_tokens) == 3 and middle_initial_count >= 1 and len(long_alpha_tokens) >= 2:
+            score += 6
+        elif len(alpha_tokens) == 2 and len(long_alpha_tokens) >= 2:
+            score += 5
+        elif len(alpha_tokens) == 3 and len(long_alpha_tokens) >= 2:
+            score += 3
+        else:
+            score += 1
+
+        if len(tokens) == len(alpha_tokens):
+            score += 1
+        else:
+            score -= len(tokens) - len(alpha_tokens)
+        if any(token.upper() == "USER" for token in alpha_tokens):
+            score += 1
+        if any(len(token) >= 3 for token in digit_only_tokens):
+            score -= 2
+        if re.search(r"\b(name|last|first|middle)\b", normalized_line.lower()):
+            score -= 2
+
+        return (score, len(long_alpha_tokens), -len(tokens))
 
     def _build_pages(self, raw_result: Any) -> list[OCRPage]:
         pages: list[OCRPage] = []

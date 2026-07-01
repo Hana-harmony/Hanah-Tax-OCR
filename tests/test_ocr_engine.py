@@ -335,6 +335,49 @@ def test_paddle_ocr_engine_expands_applicant_name_region_and_uses_english_overri
     assert regions["applicant_name"].raw_text == "SAMPLE9 I USER"
 
 
+def test_paddle_ocr_engine_extracts_best_applicant_name_line_from_noisy_variant(
+    tmp_path: Path,
+) -> None:
+    image_path = tmp_path / "sample.png"
+    Image.new("RGB", (100, 100), "white").save(image_path)
+
+    class FakePaddleOCR:
+        def __init__(self, **kwargs: str) -> None:
+            self.kwargs = kwargs
+
+        def ocr(self, image_input: object, cls: bool = True) -> list[list[object]]:
+            assert cls is True
+            width = len(image_input[0])  # type: ignore[index]
+            if width >= 120:
+                text = "NOISE\nMARIA L. CHEN\n1234"
+            else:
+                text = "MARIA\nCHEN"
+            return [[
+                (
+                    [[0, 0], [width, 0], [width, 1], [0, 1]],
+                    (text, 0.99),
+                )
+            ]]
+
+    fake_module = types.ModuleType("paddleocr")
+    fake_module.PaddleOCR = FakePaddleOCR
+    original = sys.modules.get("paddleocr")
+    sys.modules["paddleocr"] = fake_module
+    try:
+        engine = PaddleOCREngine(lang="korean")
+        regions = engine.run_regions(
+            image_path,
+            [OCRRegionSpec("applicant_name", 0.40, 0.79, 0.72, 0.85)],
+        )
+    finally:
+        if original is None:
+            del sys.modules["paddleocr"]
+        else:
+            sys.modules["paddleocr"] = original
+
+    assert regions["applicant_name"].raw_text == "MARIA L. CHEN"
+
+
 def test_paddle_ocr_engine_prefers_thresholded_middle_name_variant(
     tmp_path: Path,
 ) -> None:

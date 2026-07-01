@@ -1,0 +1,87 @@
+{
+  "iteration_id": "2026-07-01-iteration-08",
+  "baseline": {
+    "report_path": "tmp/evals/current_official_v17_parser_report.json",
+    "summary_path": "evals/reports/current_official_v17_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0
+  },
+  "changes": [
+    "Added applicant-name line normalization to `src/hanah_tax_ocr/ocr/engine.py` so region OCR can rescue a strong single-line name from noisy multi-line applicant crops without changing unrelated document types.",
+    "Added `tests/test_ocr_engine.py` coverage for the new applicant-name line-selection fallback and kept the probe seed/materialization tests from the previous iteration green.",
+    "Validated the candidate against the bottom `edge_overlap` withholding probe, the existing 3-case real regression slice, and a hybrid official eval that reuses the exact `current_official_v17` synthetic inputs for non-withholding cases while rerunning only the affected withholding cases."
+  ],
+  "validation": {
+    "probe_before_summary_path": "evals/reports/withholding_edge_overlap_bottom_probe_before_candidate_summary.json",
+    "probe_after_summary_path": "evals/reports/withholding_edge_overlap_bottom_probe_after_line_selection_summary.json",
+    "probe_comparison_path": "evals/reports/withholding_edge_overlap_bottom_probe_line_selection_comparison.json",
+    "targeted_real_regression_summary_path": "evals/reports/targeted_real_regression_after_applicant_name_line_selection_summary.json",
+    "official_same_input_summary_path": "evals/reports/current_official_applicant_name_line_v2_same_inputs_summary.json",
+    "official_same_input_comparison_path": "evals/reports/current_official_v17_vs_applicant_name_line_v2_same_inputs.json",
+    "probe_before": {
+      "comparison_count": 10,
+      "exact_match_rate": 0.8,
+      "average_character_error_rate": 0.123077,
+      "average_word_error_rate": 0.133333,
+      "document_pass_rate": 0.0,
+      "failed_fields": [
+        "applicant_name",
+        "middle_name"
+      ],
+      "review_status": "pass"
+    },
+    "probe_after": {
+      "comparison_count": 10,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0,
+      "failed_fields": [],
+      "review_status": "pass"
+    },
+    "targeted_real_regression": {
+      "compared_cases": 3,
+      "comparison_count": 23,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    },
+    "official_same_input_delta": {
+      "comparison_count": 507,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0,
+      "document_pass_rate_delta": 0.0,
+      "promotion_status": "promote"
+    },
+    "date_regression_check": {
+      "probe_signature_date_before": "2026-01-12",
+      "probe_signature_date_after": "2026-01-12",
+      "targeted_real_date_metrics_unchanged": true,
+      "official_same_input_date_group_regressed": false
+    },
+    "invalid_rematerialized_full_eval_observation": {
+      "summary_path": "tmp/current_official_applicant_name_line_v2/summary.json",
+      "comparison_path": "tmp/current_official_applicant_name_line_v2/comparison.json",
+      "note": "A naive full rerun with newly materialized synthetic residency inputs showed `issue_date` regressions, but the same-input hybrid replay removed them completely; the hybrid replay is the authoritative comparison for this iteration."
+    }
+  },
+  "candidate_decisions": {
+    "kept": [
+      "applicant-name line-selection fallback in `PaddleOCREngine`",
+      "document-level `withholding_edge_overlap_bottom_probe` as a tracked applicant/middle-name regression probe",
+      "edge-overlap augmentation delta record showing english-name recovery without date regression"
+    ],
+    "discarded": [
+      "the earlier noisy applicant-name scoring candidate from iteration 07 that produced `To S. CHEN`",
+      "the rematerialized full-eval regression signal for residency synthetic dates as a decision input, because it used different generated inputs than the baseline `v17` run"
+    ]
+  },
+  "next_priorities": [
+    "Extend the same line-selection rescue idea to a dedicated `middle_name` strategy or crop expansion, since the top-table `middle_name` region is still effectively blank on the real withholding template.",
+    "Add one more semi-real withholding probe that perturbs the upper name row directly, so applicant-name rescue and middle-name rescue can be separated instead of being entangled in the bottom signature block."
+  ]
+}
