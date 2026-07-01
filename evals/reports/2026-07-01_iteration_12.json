@@ -1,0 +1,117 @@
+{
+  "iteration_id": "2026-07-01_iteration_12",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "A stronger composite semi-real probe should expose coupled top-name, top-right middle-name, and bottom signature failures that isolated probes miss.",
+    "A region-preference address parser candidate might recover the new probe, but it must be rejected immediately if official same-input replay regresses."
+  ],
+  "changes": [
+    {
+      "type": "semi_real_probe",
+      "status": "kept",
+      "files": [
+        "evals/semi_real_probes/manifest.json"
+      ],
+      "summary": "Added withholding_top_right_dual_confusion_probe combining top border clip, localized top-right overlay, and bottom overlap to stress coupled identity/date degradation."
+    }
+  ],
+  "discarded_candidates": [
+    {
+      "candidate": "withholding address region-preference and country-tail cleanup",
+      "status": "discarded",
+      "reason": "Although the candidate fixed the new semi-real probe and preserved the targeted 3-case real slice, official same-input replay regressed withholding address and name fields and therefore failed the promotion gate.",
+      "files_tested": [
+        "src/hanah_tax_ocr/parsers/withholding_tax_form.py",
+        "tests/test_parsers.py"
+      ],
+      "evidence": {
+        "probe_summary": "evals/reports/withholding_top_right_dual_confusion_probe_v3_summary.json",
+        "targeted_summary": "evals/reports/targeted_address_regression_after_tail_noise_fix_summary.json",
+        "official_summary": "evals/reports/current_official_address_tail_v1_same_inputs_summary.json",
+        "official_comparison": "evals/reports/current_official_v17_vs_address_tail_v1_same_inputs.json"
+      },
+      "official_replay_regressions": {
+        "exact_match_rate": 0.976331,
+        "average_character_error_rate": 0.011024,
+        "average_word_error_rate": 0.013655,
+        "document_pass_rate": 0.859375,
+        "failed_case_ids": [
+          "withholding_regression_001",
+          "withholding_regression_004",
+          "withholding_regression_006",
+          "withholding_regression_008",
+          "withholding_regression_010",
+          "withholding_regression_014",
+          "withholding_regression_015",
+          "withholding_regression_016",
+          "withholding_regression_018"
+        ]
+      },
+      "raw_ocr_drift_examples": [
+        {
+          "case_id": "withholding_regression_001",
+          "address_region_raw": "1 Main Street Suite 1 New York NY 10o01 United States of America",
+          "note": "Current OCR replay already emitted the wrong ZIP token 10o01, so the replay regression is not attributable only to the discarded parser candidate."
+        },
+        {
+          "case_id": "withholding_regression_010",
+          "address_region_raw": null,
+          "combined_text_excerpt": "USER SAMPLE10 USER 210-30-2010 United States of America US 15% 2026-01-11 SAMPLE10 J USER",
+          "note": "Current OCR replay lost the address region entirely and the full-page text no longer contains the street line, so parser-only promotion evidence is unreliable."
+        }
+      ]
+    }
+  ],
+  "probe_results": {
+    "withholding_top_right_dual_confusion_probe": {
+      "before": {
+        "summary_path": "tmp/manual_doc_probes/withholding_top_right_dual_confusion_probe_v2_summary.json",
+        "exact_match_rate": 0.9,
+        "average_character_error_rate": 0.002899,
+        "average_word_error_rate": 0.007692,
+        "document_pass_rate": 0.0
+      },
+      "candidate_after": {
+        "summary_path": "evals/reports/withholding_top_right_dual_confusion_probe_v3_summary.json",
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0,
+        "document_pass_rate": 1.0
+      },
+      "decision": "kept_as_probe_only",
+      "reason": "The new composite probe is valuable coverage even though the parser candidate used to solve it was discarded."
+    }
+  },
+  "targeted_real_regression": {
+    "summary_path": "evals/reports/targeted_address_regression_after_tail_noise_fix_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "decision": "insufficient_for_promotion_without_official_replay"
+  },
+  "baseline_comparison": {
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "kept_candidate_exact_match_rate": 1.0,
+    "kept_candidate_average_character_error_rate": 0.0,
+    "kept_candidate_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "No inference-time parser change was promoted in this iteration; the retained change is additional semi-real probe coverage only."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/targeted_address_regression_after_tail_noise_fix_summary.json",
+      "evals/reports/current_official_v17_vs_address_tail_v1_same_inputs.json"
+    ],
+    "note": "The failed official replay did not regress signature_date; the discard decision was driven by address and applicant-name regressions."
+  },
+  "next_priorities": [
+    "Design a parser candidate that rescues the new top-right dual-confusion probe without relying on broad region-address preference.",
+    "Stabilize official same-input replay evidence for withholding synthetic inputs by separating OCR drift from parser-level changes before the next promotion attempt."
+  ]
+}

@@ -206,6 +206,57 @@
         "Composite semi-real probe that clips the upper name band and simultaneously overlays the lower applicant/signature area.",
         "Used to stress whether the system can recover top-name and bottom signature fields together instead of only in isolated perturbations."
       ]
+    },
+    {
+      "case_id": "withholding_top_right_dual_confusion_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_pipeline": [
+        {
+          "augmentation_type": "border_clip",
+          "augmentation_options": {
+            "anchor": "top",
+            "clip_height_ratio": 0.18
+          }
+        },
+        {
+          "augmentation_type": "overlay_patch",
+          "augmentation_options": {
+            "anchor": "top_right",
+            "width_ratio": 0.13,
+            "height_ratio": 0.085,
+            "x_ratio": 0.655,
+            "y_ratio": 0.105
+          }
+        },
+        {
+          "augmentation_type": "edge_overlap",
+          "augmentation_options": {
+            "anchor": "bottom"
+          }
+        }
+      ],
+      "focus_fields": [
+        "first_name",
+        "middle_name",
+        "last_name",
+        "applicant_name",
+        "signature_date"
+      ],
+      "failure_modes": [
+        "crop_miss",
+        "border_clipping",
+        "label_bleed",
+        "stamp_interference",
+        "date_crop_miss",
+        "middle_name_segmentation_ambiguity",
+        "mixed_korean_english_interference"
+      ],
+      "notes": [
+        "Composite semi-real probe that combines the top border clip, localized top-right middle-name interference, and bottom applicant/signature overlap.",
+        "Used to test coupled resilience when the upper identity row and lower signature block degrade differently in the same document."
+      ]
     }
   ]
 }
