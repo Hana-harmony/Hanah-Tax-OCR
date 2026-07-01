@@ -1,6 +1,7 @@
 {
   "version": "2026-07-02",
   "baseline_manifest": "evals/external_holdout/manifest.json",
+  "audit_report_path": "evals/external_holdout/non_extractable_source_audit.json",
   "targets": [
     {
       "target_id": "withholding_front_filled_nonoverlap_low_quality",
@@ -26,6 +27,12 @@
             "source_path_mismatch": true,
             "label_case_ids": [
               "withholding_hana_payer_001"
+            ],
+            "audit_source_classification": "back_side_submission_only",
+            "audit_holdout_usable": false,
+            "audit_blocker_reason": "back_side_without_target_fields",
+            "audit_page_classifications": [
+              "back_side_payer_submission"
             ]
           },
           {
@@ -35,6 +42,13 @@
             "source_path_mismatch": false,
             "label_case_ids": [
               "withholding_pdf_001"
+            ],
+            "audit_source_classification": "blank_front_plus_back_side_only",
+            "audit_holdout_usable": false,
+            "audit_blocker_reason": "blank_form_without_filled_entities",
+            "audit_page_classifications": [
+              "front_blank_template",
+              "back_side_payer_submission"
             ]
           }
         ]
@@ -64,6 +78,12 @@
             "source_path_mismatch": true,
             "label_case_ids": [
               "withholding_hana_payer_001"
+            ],
+            "audit_source_classification": "back_side_submission_only",
+            "audit_holdout_usable": false,
+            "audit_blocker_reason": "back_side_without_target_fields",
+            "audit_page_classifications": [
+              "back_side_payer_submission"
             ]
           },
           {
@@ -73,6 +93,13 @@
             "source_path_mismatch": false,
             "label_case_ids": [
               "withholding_pdf_001"
+            ],
+            "audit_source_classification": "blank_front_plus_back_side_only",
+            "audit_holdout_usable": false,
+            "audit_blocker_reason": "blank_form_without_filled_entities",
+            "audit_page_classifications": [
+              "front_blank_template",
+              "back_side_payer_submission"
             ]
           }
         ]

@@ -1,0 +1,131 @@
+{
+  "iteration_id": "2026-07-02_iteration_21",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "external holdout의 mixed-language withholding 공백은 단순 샘플 부족이 아니라, 남아 있는 non-extractable 원본이 실제 front-side extraction 대상이 아닌 reverse-side 또는 blank template일 가능성이 높다.",
+    "non-extractable source audit를 자동화하고 gap report에 연결하면 다음 분포 확장 단계에서 어떤 샘플이 왜 막히는지 증거 기반으로 유지할 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "non_extractable_holdout_audit",
+      "status": "kept",
+      "files": [
+        "scripts/evals/audit_non_extractable_holdout_sources.py",
+        "evals/external_holdout/non_extractable_source_audit.json",
+        "tests/test_external_holdout_audit.py"
+      ],
+      "summary": "sample_data의 non-extractable withholding source를 OCR/PDF text 기반으로 audit해 reverse-side payer submission, blank front template, back-side instructions 여부를 machine-readable evidence로 남기도록 추가했다."
+    },
+    {
+      "type": "gap_report_audit_linkage",
+      "status": "kept",
+      "files": [
+        "scripts/evals/report_external_holdout_gaps.py",
+        "scripts/evals/build_external_holdout.py",
+        "evals/external_holdout/missing_distribution_targets.json",
+        "evals/external_holdout/schema.json"
+      ],
+      "summary": "external holdout gap report가 audit 결과를 읽어 blocker마다 `audit_source_classification`, `audit_holdout_usable`, `audit_blocker_reason`, `audit_page_classifications`를 남기도록 연결했다."
+    },
+    {
+      "type": "docs_ignore_alignment",
+      "status": "kept",
+      "files": [
+        "README.md",
+        ".gitignore"
+      ],
+      "summary": "README에 external holdout build/audit/report 명령을 추가하고, `.gitignore`에 regenerable local report와 local OCR artifact 정책 주석을 정리했다."
+    }
+  ],
+  "holdout_blockers": {
+    "audit_report_path": "evals/external_holdout/non_extractable_source_audit.json",
+    "gap_report_path": "evals/external_holdout/missing_distribution_targets.json",
+    "withholding_front_filled_nonoverlap_low_quality": {
+      "status": "missing_source",
+      "blocked_by_eval_overlap_case_ids": [
+        "withholding_maria_chen_001"
+      ],
+      "blocked_by_non_extractable_cases": [
+        {
+          "case_id": "withholding_hana_payer_001",
+          "audit_source_classification": "back_side_submission_only",
+          "audit_holdout_usable": false,
+          "audit_blocker_reason": "back_side_without_target_fields",
+          "audit_page_classifications": [
+            "back_side_payer_submission"
+          ]
+        },
+        {
+          "case_id": "withholding_pdf_001",
+          "audit_source_classification": "blank_front_plus_back_side_only",
+          "audit_holdout_usable": false,
+          "audit_blocker_reason": "blank_form_without_filled_entities",
+          "audit_page_classifications": [
+            "front_blank_template",
+            "back_side_payer_submission"
+          ]
+        }
+      ]
+    }
+  },
+  "heuristic_validation": {
+    "tests": [
+      "tests/test_external_holdout.py",
+      "tests/test_external_holdout_audit.py"
+    ],
+    "lint": [
+      "scripts/evals/audit_non_extractable_holdout_sources.py",
+      "scripts/evals/report_external_holdout_gaps.py",
+      "scripts/evals/build_external_holdout.py",
+      "tests/test_external_holdout_audit.py"
+    ],
+    "discarded_candidate": {
+      "summary": "초기 front-filled 판정은 blank template front page를 filled target page로 오분류했다.",
+      "evidence": "evals/external_holdout/non_extractable_source_audit.json"
+    }
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_address_norm_v1_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_address_norm_v1.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "이번 반복은 inference path를 바꾸지 않았고, 마지막 kept candidate의 official replay 수치를 baseline 비교 기준으로 유지했다."
+  },
+  "external_holdout": {
+    "summary_path": "evals/reports/external_holdout_address_norm_summary.json",
+    "comparison_path": "evals/reports/external_holdout_baseline_vs_address_norm.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "comparison_status": "unchanged",
+    "note": "ready external holdout 5건의 accuracy 수치는 unchanged이고, 이번 반복은 missing distribution blocker evidence만 강화했다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_vs_address_norm_v1.json",
+      "evals/reports/external_holdout_baseline_vs_address_norm.json"
+    ],
+    "note": "date 관련 OCR/parser 로직을 수정하지 않았다."
+  },
+  "kept_candidates": [
+    "non-extractable holdout source audit",
+    "gap report audit linkage"
+  ],
+  "discarded_candidates": [
+    "permissive front-filled holdout audit heuristic"
+  ],
+  "next_priorities": [
+    "실제 front-side mixed-language withholding 원본 1건 이상을 확보해 current missing_source 상태를 해소한다.",
+    "semi-real mixed-language withholding probe에서 남는 1~2개 실패 field를 다시 좁혀 region OCR 또는 parser rescue 후보를 검증한다."
+  ]
+}

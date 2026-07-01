@@ -52,14 +52,18 @@ data/training/**
 !data/training/**/
 !data/training/**/.gitkeep
 !data/training/**/README.md
+
+# Regenerable local analysis reports
 data/training/reports/*.json
 data/training/reports/**/*.json
 
+# Generated manifests
 data/**/*manifest*.jsonl
 data/**/manifests/**/*.jsonl
 !data/**/.gitkeep
 !data/**/README.md
 
+# Local OCR/runtime artifacts
 PaddleOCR/
 output/
 tmp/

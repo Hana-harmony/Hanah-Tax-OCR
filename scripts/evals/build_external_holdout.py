@@ -413,6 +413,7 @@ def write_external_holdout(manifest: dict[str, Any], output_root: Path) -> None:
         "manifest_path": "evals/external_holdout/manifest.json",
         "required_samples_path": "evals/external_holdout/required_samples.json",
         "gap_report_path": "evals/external_holdout/missing_distribution_targets.json",
+        "audit_report_path": "evals/external_holdout/non_extractable_source_audit.json",
         "case_expected_path_pattern": "evals/external_holdout/cases/<case_id>/expected.json",
         "status_values": ["ready", "partial_expected", "needs_annotation"],
         "subset_tags": [

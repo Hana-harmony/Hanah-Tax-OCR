@@ -1,0 +1,96 @@
+{
+  "version": "2026-07-02",
+  "sample_root": "sample_data",
+  "cases": [
+    {
+      "case_id": "withholding_hana_payer_001",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
+      "document_type": "withholding_tax_form",
+      "declared_page_role": "reverse_side_instructions",
+      "declared_exclusion_reason": "back_side_reference_page",
+      "page_count": 1,
+      "source_classification": "back_side_submission_only",
+      "holdout_usable": false,
+      "blocker_reason": "back_side_without_target_fields",
+      "usable_page_numbers": [],
+      "page_audits": [
+        {
+          "page_number": 1,
+          "classification": "back_side_payer_submission",
+          "holdout_usable": false,
+          "blocker_reason": "back_side_without_target_fields",
+          "confidence": "medium",
+          "reasons": [
+            "contains_payer_header_without_front_form_title"
+          ],
+          "markers": {
+            "has_title": false,
+            "has_name_labels": false,
+            "has_instruction_header": false,
+            "has_payer_header": true,
+            "has_us_address": false,
+            "has_tin": false,
+            "has_applicant_signature": false
+          },
+          "text_excerpt": "뒤쪽 '소득세법] 제156조의6제4항에 러] 비거주자의 제한세율 적용 신청서등을 제출합니다 원천징수 하나중권 대표자성명 강성묵 사업자주민등록번호 123-45-67890 의무자 02-123-- 4567 주소또는 소재지 서울특별시 건료을 의사당대로82 제 출 차 콘옥거울 2026년 뒷so 20일 하난 세무서장 위는 또는인 弓名뇨 옷 접수번호 접수일자는 원천징수의무자가 실질귀속자로부터 이 신청서를 제출받아 접수한 일자 적습니다 1:"
+        }
+      ]
+    },
+    {
+      "case_id": "withholding_pdf_001",
+      "source_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
+      "document_type": "withholding_tax_form",
+      "declared_page_role": "blank_form_template",
+      "declared_exclusion_reason": "blank_form_without_filled_entities",
+      "page_count": 2,
+      "source_classification": "blank_front_plus_back_side_only",
+      "holdout_usable": false,
+      "blocker_reason": "blank_form_without_filled_entities",
+      "usable_page_numbers": [],
+      "page_audits": [
+        {
+          "page_number": 1,
+          "classification": "front_blank_template",
+          "holdout_usable": false,
+          "blocker_reason": "blank_form_without_filled_entities",
+          "confidence": "high",
+          "reasons": [
+            "contains_front_form_title",
+            "missing_filled_target_signals"
+          ],
+          "markers": {
+            "has_title": true,
+            "has_name_labels": true,
+            "has_instruction_header": false,
+            "has_payer_header": false,
+            "has_us_address": false,
+            "has_tin": false,
+            "has_applicant_signature": true
+          },
+          "text_excerpt": "■ 소득세법 시행규칙 [별지 제29호의12서식] <개정 2018. 3. 21.> ※ 해당되는 [ ]에 √표를 합니다. (앞 쪽) 접수번호 접수일자 1. 신청인의 인적사항 ① 성명 (Last Name) (First Name) (Middle Name) ② 주소 (거주지국 주소) (국내 거소) ③ 납세자번호 ④ 생년월일 ⑤ 거주지국 ⑥ 거주지국코드 ⑦ 전화번호 (거주지 전화) (국내 전화) ⑧ 국내체재일 [ ]없음 (최근 1년간) "
+        },
+        {
+          "page_number": 2,
+          "classification": "back_side_payer_submission",
+          "holdout_usable": false,
+          "blocker_reason": "back_side_without_target_fields",
+          "confidence": "high",
+          "reasons": [
+            "contains_payer_header",
+            "contains_instruction_header"
+          ],
+          "markers": {
+            "has_title": false,
+            "has_name_labels": false,
+            "has_instruction_header": true,
+            "has_payer_header": true,
+            "has_us_address": false,
+            "has_tin": false,
+            "has_applicant_signature": false
+          },
+          "text_excerpt": "(뒤쪽) 작성방법 ※ 접수번호 및 접수일자는 원천징수의무자가 실질귀속자로부터 이 신청서를 제출받아 접수한 일자 및 일련번호를 적습니다. 1. 이 신청서는 비거주자가 지급받는 국내원천소득에 대하여 조세조약에 따른 제한세율을 적용받으려는 경우에 제출하며, 조세 조약에 따라 국내에서 원천징수가 면제되는 경우에는 이를 제출하지 않습니다. 이 신청서를 제출하여 해당 국내원천소득에 대하여 조세조약에 따른 제한세율을 적용받은 이후에 다시 "
+        }
+      ]
+    }
+  ]
+}

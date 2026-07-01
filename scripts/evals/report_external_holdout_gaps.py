@@ -7,6 +7,7 @@ from typing import Any
 
 DEFAULT_MANIFEST_PATH = Path("evals/external_holdout/manifest.json")
 DEFAULT_OUTPUT_PATH = Path("evals/external_holdout/missing_distribution_targets.json")
+DEFAULT_AUDIT_PATH = Path("evals/external_holdout/non_extractable_source_audit.json")
 
 TARGET_DEFINITIONS = (
     {
@@ -47,6 +48,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
+    parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT_PATH)
     return parser.parse_args()
 
 
@@ -66,11 +68,46 @@ def _matches_document_type(payload: dict[str, Any], document_type: str) -> bool:
     return payload.get("document_type") == document_type
 
 
-def build_external_holdout_gap_report(manifest_path: Path) -> dict[str, Any]:
+def _build_non_extractable_blocker(
+    case: dict[str, Any],
+    audit_case: dict[str, Any] | None,
+) -> dict[str, Any]:
+    blocker = {
+        "case_id": case.get("case_id"),
+        "page_role": case.get("page_role"),
+        "exclusion_reason": case.get("exclusion_reason"),
+        "source_path_mismatch": bool(case.get("source_path_mismatch")),
+        "label_case_ids": case.get("label_case_ids", []),
+    }
+    if not audit_case:
+        return blocker
+
+    blocker["audit_source_classification"] = audit_case.get("source_classification")
+    blocker["audit_holdout_usable"] = audit_case.get("holdout_usable")
+    blocker["audit_blocker_reason"] = audit_case.get("blocker_reason")
+    blocker["audit_page_classifications"] = [
+        page.get("classification")
+        for page in audit_case.get("page_audits", [])
+    ]
+    return blocker
+
+
+def build_external_holdout_gap_report(
+    manifest_path: Path,
+    audit_path: Path | None = None,
+) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     cases = list(manifest.get("cases", []))
     overlap_cases = list(manifest.get("excluded_eval_overlap_cases", []))
     non_extractable_cases = list(manifest.get("excluded_non_extractable_cases", []))
+    audit_cases = {}
+    if audit_path is not None and audit_path.exists():
+        audit_payload = json.loads(audit_path.read_text(encoding="utf-8"))
+        audit_cases = {
+            str(case.get("case_id")): case
+            for case in audit_payload.get("cases", [])
+            if case.get("case_id")
+        }
 
     targets: list[dict[str, Any]] = []
     for definition in TARGET_DEFINITIONS:
@@ -97,13 +134,10 @@ def build_external_holdout_gap_report(manifest_path: Path) -> dict[str, Any]:
             if _matches_document_type(case, definition["document_type"])
         ]
         blocked_non_extractable = [
-            {
-                "case_id": case.get("case_id"),
-                "page_role": case.get("page_role"),
-                "exclusion_reason": case.get("exclusion_reason"),
-                "source_path_mismatch": bool(case.get("source_path_mismatch")),
-                "label_case_ids": case.get("label_case_ids", []),
-            }
+            _build_non_extractable_blocker(
+                case,
+                audit_cases.get(str(case.get("case_id"))),
+            )
             for case in non_extractable_cases
             if _matches_document_type(case, definition["document_type"])
         ]
@@ -138,13 +172,14 @@ def build_external_holdout_gap_report(manifest_path: Path) -> dict[str, Any]:
     return {
         "version": "2026-07-02",
         "baseline_manifest": str(manifest_path),
+        "audit_report_path": None if audit_path is None else str(audit_path),
         "targets": targets,
     }
 
 
 def main() -> None:
     args = parse_args()
-    payload = build_external_holdout_gap_report(args.manifest)
+    payload = build_external_holdout_gap_report(args.manifest, audit_path=args.audit)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False))

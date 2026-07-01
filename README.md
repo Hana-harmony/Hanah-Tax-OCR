@@ -214,6 +214,20 @@ PYTHONPATH=src .venv/bin/python -m scripts.evals.summarize_eval_report \
   --output evals/reports/current_candidate_summary.json
 ```
 
+외부 비교용 holdout manifest, non-extractable blocker audit, distribution gap 보고 갱신:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m scripts.evals.build_external_holdout
+PYTHONPATH=src .venv/bin/python -m scripts.evals.audit_non_extractable_holdout_sources \
+  --output evals/external_holdout/non_extractable_source_audit.json
+PYTHONPATH=src .venv/bin/python -m scripts.evals.report_external_holdout_gaps \
+  --manifest evals/external_holdout/manifest.json \
+  --audit evals/external_holdout/non_extractable_source_audit.json \
+  --output evals/external_holdout/missing_distribution_targets.json
+```
+
+`missing_distribution_targets.json`은 overlap 여부뿐 아니라 `non_extractable_source_audit.json`을 참조해 reverse-side, blank template 같은 blocker 근거를 machine-readable 형태로 남깁니다.
+
 후보 승격 판단은 반드시 `evals/benchmark_protocol.json`의 exact match, CER, WER, field-level metrics, document pass rate, low-quality subset, CPU latency 관찰 규칙을 따릅니다.
 평가 harness는 mixed Korean-English 비중이 높은 `withholding_tax_form`에 대해 기본 OCR lang을 `en`으로 사용합니다.
 
