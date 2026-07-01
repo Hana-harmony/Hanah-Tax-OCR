@@ -1,0 +1,19 @@
+{
+  "version": "2026-07-01",
+  "manifest_path": "evals/external_holdout/manifest.json",
+  "required_samples_path": "evals/external_holdout/required_samples.json",
+  "case_expected_path_pattern": "evals/external_holdout/cases/<case_id>/expected.json",
+  "status_values": [
+    "ready",
+    "partial_expected",
+    "needs_annotation"
+  ],
+  "subset_tags": [
+    "blur",
+    "crop_miss",
+    "format_variation",
+    "low_quality",
+    "mixed_language",
+    "pdf_render"
+  ]
+}

@@ -38,6 +38,7 @@ MONTH_NAME_PATTERN = (
     r"\b(January|February|March|April|May|June|July|August|"
     r"September|October|November|December)\b"
 )
+DATE_LIKE_REGIONS = {"issue_date", "signature_date", "issued_on"}
 
 
 class _CheckpointRecognizer:
@@ -319,12 +320,16 @@ class PaddleOCREngine:
 
     def _region_variants(self, region_name: str, crop: Image.Image) -> list[Image.Image]:
         variants = [crop.convert("RGB")]
-        if region_name == "issue_date":
+        if region_name in DATE_LIKE_REGIONS:
+            grayscale = ImageOps.grayscale(crop)
             variants.extend(
                 [
                     crop.resize((crop.width * 2, crop.height * 2)).convert("RGB"),
-                    ImageOps.grayscale(crop)
-                    .point(lambda p: 255 if p > 180 else 0)
+                    grayscale.resize((crop.width * 4, crop.height * 4)).convert("RGB"),
+                    grayscale.point(lambda p: 255 if p > 180 else 0)
+                    .resize((crop.width * 4, crop.height * 4))
+                    .convert("RGB"),
+                    crop.filter(ImageFilter.SHARPEN)
                     .resize((crop.width * 4, crop.height * 4))
                     .convert("RGB"),
                 ]
@@ -413,6 +418,27 @@ class PaddleOCREngine:
             if has_year:
                 return (2, len(normalized), -len(normalized))
 
+        if region_name == "signature_date":
+            normalized_compact = re.sub(r"\s+", "", normalized)
+            if re.search(r"\b\d{4}-\d{2}-\d{2}\b", normalized):
+                return (5, len(normalized), -len(normalized))
+            if re.search(r"\b\d{4}\.\d{2}\.\d{2}\b", normalized):
+                return (4, len(normalized), -len(normalized))
+            if re.search(r"\b\d{4}년\d{1,2}월\d{1,2}일\b", normalized_compact):
+                return (4, len(normalized), -len(normalized))
+            if re.search(r"\b\d{4}\b", normalized):
+                return (2, len(normalized), -len(normalized))
+
+        if region_name == "issued_on":
+            has_year = re.search(r"\b\d{4}\b", normalized) is not None
+            normalized_upper = normalized.upper()
+            if has_year and re.search(r"\bDAY OF\b", normalized_upper):
+                return (5, len(normalized), -len(normalized))
+            if has_year and re.search(MONTH_NAME_PATTERN, normalized, re.IGNORECASE):
+                return (4, len(normalized), -len(normalized))
+            if has_year:
+                return (2, len(normalized), -len(normalized))
+
         if region_name == "signed_by":
             normalized_lower = normalized.lower()
             if re.fullmatch(r"\d+\.?", normalized):
@@ -474,7 +500,10 @@ class PaddleOCREngine:
                 score += 1
             if any(token.upper() == "USER" for token in name_like_tokens):
                 score += 1
-            if any(len(token.strip(".")) == 1 and token.strip(".").isalpha() for token in name_like_tokens):
+            if any(
+                len(token.strip(".")) == 1 and token.strip(".").isalpha()
+                for token in name_like_tokens
+            ):
                 score += 1
             if any(len(token) >= 3 for token in digit_only_tokens):
                 score -= 2

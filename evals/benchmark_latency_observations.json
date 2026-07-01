@@ -1,0 +1,53 @@
+{
+  "measured_at_utc": "2026-07-01T03:48:49.796664+00:00",
+  "environment": {
+    "python": "3.11.15",
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "cpu_mode": "local_cpu_observation"
+  },
+  "recognizer_root": null,
+  "cases": [
+    {
+      "case_id": "apostille_california_001",
+      "document_types": [
+        "apostille"
+      ],
+      "source_paths": [
+        "sample_data/아포스티유 샘플/미국 california 주.png"
+      ],
+      "elapsed_seconds": 6.6945,
+      "document_count": 1,
+      "review_status": "reject"
+    },
+    {
+      "case_id": "residency_john_doe_001",
+      "document_types": [
+        "residency_certificate"
+      ],
+      "source_paths": [
+        "sample_data/거주자증명서/5.jpg"
+      ],
+      "elapsed_seconds": 4.5112,
+      "document_count": 1,
+      "review_status": "pass"
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_types": [
+        "withholding_tax_form"
+      ],
+      "source_paths": [
+        "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png"
+      ],
+      "elapsed_seconds": 77.2408,
+      "document_count": 1,
+      "review_status": "pass"
+    }
+  ],
+  "summary": {
+    "case_count": 3,
+    "document_count": 3,
+    "average_case_seconds": 29.4822,
+    "average_document_seconds": 29.4822
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "apostille_california_001",
+  "document_type": "apostille",
+  "source_path": "sample_data/아포스티유 샘플/미국 california 주.png",
+  "expected_fields": {
+    "issuing_country": "United States of America",
+    "signer_capacity": "Deputy Registrar-Recorder/County Clerk, County of Los Angeles, State of California",
+    "seal_owner": "County of Los Angeles, State of California",
+    "issued_at": "Los Angeles, California",
+    "certificate_number": "4"
+  },
+  "holdout_status": "partial_expected",
+  "subset_tags": [
+    "format_variation",
+    "low_quality"
+  ]
+}

@@ -8,16 +8,57 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 DEFAULT_FIELD_CROPS_ROOT = Path("data/training/field_crops")
 DEFAULT_OUTPUT_ROOT = Path("data/training/hard_cases")
 
 HARD_CASE_PROFILES: dict[str, tuple[str, ...]] = {
-    "english_name_org": ("left_clip", "rotate", "low_res", "overlay_patch"),
-    "numeric_tin_code": ("left_clip", "rotate", "low_res", "edge_overlap"),
-    "date": ("rotate", "low_res"),
-    "korean_mixed_form": ("left_clip", "low_res", "overlay_patch"),
+    "english_name_org": (
+        "left_clip",
+        "rotate",
+        "low_res",
+        "gaussian_blur",
+        "jpeg_blocking",
+        "overlay_patch",
+        "stamp_shadow",
+    ),
+    "numeric_tin_code": (
+        "left_clip",
+        "rotate",
+        "low_res",
+        "gaussian_blur",
+        "jpeg_blocking",
+        "edge_overlap",
+        "border_clip",
+    ),
+    "date": (
+        "rotate",
+        "low_res",
+        "gaussian_blur",
+        "jpeg_blocking",
+        "border_clip",
+    ),
+    "korean_mixed_form": (
+        "left_clip",
+        "low_res",
+        "gaussian_blur",
+        "jpeg_blocking",
+        "overlay_patch",
+        "stamp_shadow",
+    ),
+}
+
+VARIANT_FAILURE_MODES: dict[str, tuple[str, ...]] = {
+    "border_clip": ("border_clipping", "crop_miss"),
+    "edge_overlap": ("border_clipping", "label_bleed"),
+    "gaussian_blur": ("blur",),
+    "jpeg_blocking": ("compression", "low_dpi"),
+    "left_clip": ("crop_miss",),
+    "low_res": ("low_dpi",),
+    "overlay_patch": ("label_bleed", "stamp_interference"),
+    "rotate": ("skew",),
+    "stamp_shadow": ("stamp_interference", "label_bleed"),
 }
 
 
@@ -80,6 +121,42 @@ def _apply_low_res(image: Image.Image) -> Image.Image:
     restored.save(buffer, format="JPEG", quality=35)
     buffer.seek(0)
     return Image.open(buffer).convert("RGB")
+
+
+def _apply_gaussian_blur(image: Image.Image) -> Image.Image:
+    return image.filter(ImageFilter.GaussianBlur(radius=1.1))
+
+
+def _apply_jpeg_blocking(image: Image.Image) -> Image.Image:
+    resized = image.resize(
+        (max(1, int(image.width * 0.72)), max(1, int(image.height * 0.72))),
+        resample=Image.Resampling.BILINEAR,
+    )
+    buffer = BytesIO()
+    resized.save(buffer, format="JPEG", quality=18)
+    buffer.seek(0)
+    restored = Image.open(buffer).convert("RGB")
+    return restored.resize(image.size, resample=Image.Resampling.BILINEAR)
+
+
+def _apply_border_clip(image: Image.Image, rng: random.Random) -> Image.Image:
+    clip_width = max(1, int(image.width * 0.08))
+    clip_height = max(1, int(image.height * 0.12))
+    canvas = Image.new("RGB", image.size, "white")
+    anchor = rng.choice(("left", "right", "top", "bottom"))
+    if anchor == "left":
+        cropped = image.crop((clip_width, 0, image.width, image.height))
+        canvas.paste(cropped.resize((image.width - clip_width, image.height)), (clip_width, 0))
+    elif anchor == "right":
+        cropped = image.crop((0, 0, image.width - clip_width, image.height))
+        canvas.paste(cropped.resize((image.width - clip_width, image.height)), (0, 0))
+    elif anchor == "top":
+        cropped = image.crop((0, clip_height, image.width, image.height))
+        canvas.paste(cropped.resize((image.width, image.height - clip_height)), (0, clip_height))
+    else:
+        cropped = image.crop((0, 0, image.width, image.height - clip_height))
+        canvas.paste(cropped.resize((image.width, image.height - clip_height)), (0, 0))
+    return canvas
 
 
 def _apply_overlay_patch(
@@ -167,6 +244,31 @@ def _apply_edge_overlap(
     return canvas.convert("RGB")
 
 
+def _apply_stamp_shadow(image: Image.Image, rng: random.Random) -> Image.Image:
+    canvas = image.copy().convert("RGBA")
+    overlay = Image.new("RGBA", image.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(overlay)
+    ellipse_width = max(12, image.width // 2)
+    ellipse_height = max(12, image.height // 2)
+    left = rng.randint(0, max(0, image.width - ellipse_width))
+    top = rng.randint(0, max(0, image.height - ellipse_height))
+    draw.ellipse(
+        (left, top, left + ellipse_width, top + ellipse_height),
+        outline=(176, 36, 36, 160),
+        width=max(2, min(image.width, image.height) // 18),
+    )
+    draw.line(
+        [
+            (left + ellipse_width // 6, top + ellipse_height // 3),
+            (left + (ellipse_width * 5) // 6, top + (ellipse_height * 2) // 3),
+        ],
+        fill=(176, 36, 36, 110),
+        width=max(1, min(image.width, image.height) // 22),
+    )
+    canvas.alpha_composite(overlay)
+    return canvas.convert("RGB")
+
+
 def augment_hard_cases(
     field_crops_root: Path,
     output_root: Path,
@@ -183,6 +285,7 @@ def augment_hard_cases(
     output_manifest: list[dict[str, Any]] = []
     counts_by_group = Counter()
     counts_by_variant = Counter()
+    counts_by_variant_by_group: dict[str, Counter[str]] = {}
 
     for entry in train_entries:
         source_image = _open_image(entry["crop_path"])
@@ -196,6 +299,10 @@ def augment_hard_cases(
                 augmented = _apply_rotate(source_image)
             elif variant == "low_res":
                 augmented = _apply_low_res(source_image)
+            elif variant == "gaussian_blur":
+                augmented = _apply_gaussian_blur(source_image)
+            elif variant == "jpeg_blocking":
+                augmented = _apply_jpeg_blocking(source_image)
             elif variant == "overlay_patch":
                 donor_entries = donors_by_group.get("korean_mixed_form", []) + donors_by_group.get(
                     field_group,
@@ -217,6 +324,10 @@ def augment_hard_cases(
                     donor_entries,
                     rng,
                 )
+            elif variant == "border_clip":
+                augmented = _apply_border_clip(source_image, rng)
+            elif variant == "stamp_shadow":
+                augmented = _apply_stamp_shadow(source_image, rng)
             else:
                 continue
 
@@ -231,10 +342,12 @@ def augment_hard_cases(
                 "augmentation_type": variant,
                 "base_crop_path": entry["crop_path"],
                 "crop_path": str(output_path),
+                "target_failure_modes": list(VARIANT_FAILURE_MODES.get(variant, ())),
             }
             output_manifest.append(output_entry)
             counts_by_group[field_group] += 1
             counts_by_variant[variant] += 1
+            counts_by_variant_by_group.setdefault(field_group, Counter())[variant] += 1
 
     output_root.mkdir(parents=True, exist_ok=True)
     manifest_path = output_root / "manifest.jsonl"
@@ -249,6 +362,14 @@ def augment_hard_cases(
         "total_augmented_crops": len(output_manifest),
         "counts_by_group": dict(sorted(counts_by_group.items())),
         "counts_by_variant": dict(sorted(counts_by_variant.items())),
+        "counts_by_variant_by_group": {
+            field_group: dict(sorted(counter.items()))
+            for field_group, counter in sorted(counts_by_variant_by_group.items())
+        },
+        "variant_failure_modes": {
+            variant: list(modes)
+            for variant, modes in sorted(VARIANT_FAILURE_MODES.items())
+        },
     }
     (output_root / "summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2),

@@ -139,10 +139,9 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             self._find_first(r"(\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)", single_line)
             or self._find_first(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2})", single_line)
         )
-        signature_date = (
-            region_signature_date
-            if self._is_valid_iso_date(region_signature_date)
-            else fallback_signature_date
+        signature_date = self._select_signature_date_candidate(
+            region_signature_date,
+            fallback_signature_date,
         )
         middle_name = self._derive_middle_name(
             middle_name,
@@ -251,6 +250,24 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         repaired = re.sub(r"^(\d{1,5})([A-Za-z])", r"\1 \2", value)
         return repaired or None
 
+    def _select_signature_date_candidate(
+        self,
+        region_signature_date: str | None,
+        fallback_signature_date: str | None,
+    ) -> str | None:
+        if not self._is_valid_iso_date(region_signature_date):
+            return fallback_signature_date
+        if not self._is_valid_iso_date(fallback_signature_date):
+            return region_signature_date
+
+        region_year = int(str(region_signature_date)[:4])
+        fallback_year = int(str(fallback_signature_date)[:4])
+        if region_year < 1900 or region_year > 2100:
+            return fallback_signature_date
+        if region_year != fallback_year:
+            return fallback_signature_date
+        return region_signature_date
+
     def _clean_name_value(self, value: str | None) -> str | None:
         if not value:
             return None
@@ -298,7 +315,11 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         last_name: str | None,
     ) -> str | None:
         normalized_middle_name = self._normalize_middle_initial(middle_name)
-        if normalized_middle_name and len(normalized_middle_name.split()) == 1 and len(normalized_middle_name) <= 4:
+        if (
+            normalized_middle_name
+            and len(normalized_middle_name.split()) == 1
+            and len(normalized_middle_name) <= 4
+        ):
             return normalized_middle_name
         if not applicant_name or not first_name or not last_name:
             return normalized_middle_name
@@ -347,11 +368,15 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             return normalized_first_name
         if middle_name and derived_middle_name and middle_name != derived_middle_name:
             return normalized_first_name
-        if canonicalize_name(normalized_derived_first_name) == canonicalize_name(normalized_first_name):
+        if canonicalize_name(normalized_derived_first_name) == canonicalize_name(
+            normalized_first_name
+        ):
             return normalized_first_name
         if not re.search(r"[A-Za-z]", normalized_derived_first_name or ""):
             return normalized_first_name
-        if self._digit_count(normalized_derived_first_name) > self._digit_count(normalized_first_name):
+        if self._digit_count(normalized_derived_first_name) > self._digit_count(
+            normalized_first_name
+        ):
             return normalized_derived_first_name
         return normalized_first_name
 

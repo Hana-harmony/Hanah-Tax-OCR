@@ -1,0 +1,50 @@
+{
+  "version": "2026-07-01",
+  "input_contract": {
+    "accepted_source_types": [
+      "single-page PNG/JPEG",
+      "PDF page rasterized to image when needed"
+    ],
+    "document_types": [
+      "residency_certificate",
+      "withholding_tax_form",
+      "apostille"
+    ],
+    "preprocessing_rule": "Use the same source image set and preserve per-case document-type labels for every compared system."
+  },
+  "output_contract": {
+    "required_normalized_fields": {
+      "residency_certificate": [
+        "taxpayer_name",
+        "tin",
+        "tax_year",
+        "issue_date",
+        "residency_country",
+        "residency_country_code"
+      ],
+      "withholding_tax_form": [
+        "first_name",
+        "last_name",
+        "middle_name",
+        "tin",
+        "address",
+        "residency_country",
+        "residency_country_code",
+        "dividend_tax_rate",
+        "signature_date",
+        "applicant_name"
+      ],
+      "apostille": [
+        "issuing_country",
+        "signed_by",
+        "signer_capacity",
+        "seal_owner",
+        "issued_at",
+        "issued_on",
+        "issuing_authority",
+        "certificate_number"
+      ]
+    },
+    "normalization_rule": "Convert each system output into this repository's normalized JSON schema before scoring."
+  }
+}

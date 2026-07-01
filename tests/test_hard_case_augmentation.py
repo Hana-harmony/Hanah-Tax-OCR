@@ -47,12 +47,17 @@ def test_augment_hard_cases_writes_variant_manifest(tmp_path: Path) -> None:
     )
     first_entry = json.loads(manifest_lines[0])
     assert first_entry["augmentation_type"] in {
+        "border_clip",
+        "gaussian_blur",
+        "jpeg_blocking",
         "left_clip",
         "rotate",
         "low_res",
         "overlay_patch",
         "edge_overlap",
+        "stamp_shadow",
     }
+    assert "target_failure_modes" in first_entry
     assert Path(first_entry["crop_path"]).exists()
 
 
@@ -100,6 +105,49 @@ def test_augment_hard_cases_adds_edge_overlap_variant_for_numeric_groups(tmp_pat
     )
     assert edge_overlap_entry["field_group"] == "numeric_tin_code"
     assert Path(edge_overlap_entry["crop_path"]).exists()
+
+
+def test_augment_hard_cases_records_variant_failure_modes_and_new_variants(
+    tmp_path: Path,
+) -> None:
+    field_crops_root = tmp_path / "field_crops"
+    field_crops_root.mkdir()
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+
+    entries = []
+    for name, field_group in (
+        ("date_001.png", "date"),
+        ("name_001.png", "english_name_org"),
+    ):
+        image_path = image_root / name
+        Image.new("RGB", (120, 40), "white").save(image_path)
+        entries.append(
+            {
+                "case_id": name,
+                "document_type": "residency_certificate",
+                "field_group": field_group,
+                "field_name": "issue_date" if field_group == "date" else "taxpayer_name",
+                "text": "January 12, 2026" if field_group == "date" else "SAMPLE USER",
+                "split": "train",
+                "crop_path": str(image_path),
+            }
+        )
+    (field_crops_root / "manifest.jsonl").write_text(
+        "\n".join(json.dumps(entry) for entry in entries) + "\n",
+        encoding="utf-8",
+    )
+
+    summary = augment_hard_cases(field_crops_root, tmp_path / "hard_cases", seed=7)
+
+    assert summary["counts_by_variant"]["border_clip"] == 1
+    assert summary["counts_by_variant"]["gaussian_blur"] == 2
+    assert summary["counts_by_variant"]["jpeg_blocking"] == 2
+    assert summary["counts_by_variant"]["stamp_shadow"] == 1
+    assert summary["variant_failure_modes"]["stamp_shadow"] == [
+        "stamp_interference",
+        "label_bleed",
+    ]
 
 
 def test_prepare_recognizer_datasets_can_include_hard_cases(tmp_path: Path) -> None:

@@ -1,0 +1,314 @@
+{
+  "version": "2026-07-01",
+  "catalog": {
+    "address_spacing_merge": {
+      "description": "Street number and address body collapsed without spacing.",
+      "field_groups": "english_name_org"
+    },
+    "cross_document_name_alignment_error": {
+      "description": "Cross-document name alignment failed even when per-document OCR looked plausible.",
+      "field_groups": "english_name_org"
+    },
+    "date_crop_miss": {
+      "description": "Region OCR or parser missed the date crop entirely.",
+      "field_groups": "date"
+    },
+    "date_spacing_loss": {
+      "description": "Date text lost required whitespace or punctuation during OCR.",
+      "field_groups": "date"
+    },
+    "label_bleed_name_header": {
+      "description": "Name crop included nearby labels such as First/Middle/Name headers.",
+      "field_groups": "english_name_org"
+    },
+    "low_quality_input": {
+      "description": "Low-resolution or blurry source likely reduced OCR stability.",
+      "field_groups": "shared"
+    },
+    "mixed_korean_english_interference": {
+      "description": "Korean and English text interfered within the same OCR crop.",
+      "field_groups": "korean_mixed_form"
+    },
+    "middle_name_segmentation_ambiguity": {
+      "description": "Middle-name crop absorbed adjacent first/last-name tokens.",
+      "field_groups": "english_name_org"
+    },
+    "rate_or_checkbox_region_miss": {
+      "description": "Dividend/rate area likely suffered checkbox bleed or region miss.",
+      "field_groups": "numeric_tin_code"
+    }
+  },
+  "summary": {
+    "case_count": 4,
+    "root_cause_counts": {
+      "cross_document_name_alignment_error": 1,
+      "date_crop_miss": 1,
+      "date_spacing_loss": 1,
+      "label_bleed_name_header": 1,
+      "middle_name_segmentation_ambiguity": 1,
+      "mixed_korean_english_interference": 1,
+      "rate_or_checkbox_region_miss": 1
+    }
+  },
+  "cases": [
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "review_status": "reject",
+      "root_causes": [
+        "date_spacing_loss"
+      ],
+      "auto_root_causes": [
+        "date_spacing_loss"
+      ],
+      "manual_root_causes": [
+        "date_spacing_loss"
+      ],
+      "manual_notes": "Historical review_queue output lost the space before the year in `issued_on`.",
+      "source_paths": [
+        "sample_data/아포스티유 샘플/미국 california 주2.jpg"
+      ],
+      "evidence": [
+        {
+          "document_type": "apostille",
+          "fields": {
+            "issuing_country": "UNITED STATES OF AMERICA",
+            "signed_by": "CHONG U CHOI",
+            "signer_capacity": "NOTARY PUBLIC COMMISSION EXPIRES 10/17/2016 4",
+            "seal_owner": "COUNTY OF MECKLENBURG,NORTH CAROLINA",
+            "issued_at": "Raleigh, North Carolina",
+            "issued_on": "10TH DAY OF APRIL2014",
+            "issuing_authority": "Secretary of State or Deputy Secretary of StateState of North Carolina",
+            "certificate_number": "5"
+          },
+          "quality_checks": {
+            "has_apostille_heading": true,
+            "filled_item_count": 8,
+            "seal_present": true,
+            "signature_present": true,
+            "file_type": ".jpg",
+            "width": 585,
+            "height": 740,
+            "blur_score": 4598.27490234375,
+            "blurry": false,
+            "average_ocr_confidence": 0.9370529443025589,
+            "low_ocr_confidence": false
+          },
+          "findings": [
+            {
+              "code": "required_apostille_date_invalid",
+              "message": "Apostille date is incomplete or invalid.",
+              "field_name": "issued_on"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "cross_check_maria_chen_001",
+      "document_type": "residency_certificate",
+      "review_status": "reject",
+      "root_causes": [
+        "cross_document_name_alignment_error",
+        "middle_name_segmentation_ambiguity",
+        "rate_or_checkbox_region_miss"
+      ],
+      "auto_root_causes": [
+        "cross_document_name_alignment_error",
+        "rate_or_checkbox_region_miss"
+      ],
+      "manual_root_causes": [
+        "cross_document_name_alignment_error",
+        "middle_name_segmentation_ambiguity",
+        "rate_or_checkbox_region_miss"
+      ],
+      "manual_notes": "Cross-check regression mixed applicant tokens into middle_name and missed dividend rate.",
+      "source_paths": [
+        "sample_data/거주자증명서/미국 TREASURY주.png",
+        "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png"
+      ],
+      "evidence": [
+        {
+          "document_type": "residency_certificate",
+          "fields": {
+            "taxpayer_name": "MARIA L. CHEN",
+            "tin": "987-65-4321",
+            "tax_year": "2026",
+            "issue_date": "January 12, 2026",
+            "residency_country": "United States of America",
+            "residency_country_code": "US"
+          },
+          "quality_checks": {
+            "has_certification_text": true,
+            "has_irs_heading": true,
+            "seal_present": true,
+            "signature_present": true,
+            "file_type": ".png",
+            "width": 860,
+            "height": 1125,
+            "blur_score": 558.46044921875,
+            "blurry": false,
+            "average_ocr_confidence": 0.9588336825370789,
+            "low_ocr_confidence": false
+          },
+          "findings": [
+            {
+              "code": "required_cross_check_mismatch",
+              "message": "Cross-check mismatch for taxpayer name.",
+              "field_name": "taxpayer_name"
+            }
+          ]
+        },
+        {
+          "document_type": "withholding_tax_form",
+          "fields": {
+            "first_name": "MARIA",
+            "last_name": "CHEN",
+            "middle_name": "CHEN MARIA",
+            "tin": "987-65-4321",
+            "address": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+            "residency_country": "United States of America",
+            "residency_country_code": "US",
+            "dividend_tax_rate": null,
+            "signature_date": "2026-01-12",
+            "applicant_name": "MARIA L CHEN"
+          },
+          "quality_checks": {
+            "contains_non_resident_heading": true,
+            "signature_present": true,
+            "checked_no_box_count": 7,
+            "all_no_boxes_checked": true,
+            "file_type": ".png",
+            "width": 1114,
+            "height": 1412,
+            "blur_score": 7403.2890625,
+            "blurry": false,
+            "average_ocr_confidence": 0.9247775574217639,
+            "low_ocr_confidence": false
+          },
+          "findings": [
+            {
+              "code": "required_dividend_rate_invalid",
+              "message": "Dividend tax rate must be 15%.",
+              "field_name": "dividend_tax_rate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "residency_maria_chen_001",
+      "document_type": "residency_certificate",
+      "review_status": "reject",
+      "root_causes": [
+        "date_crop_miss"
+      ],
+      "auto_root_causes": [
+        "date_crop_miss"
+      ],
+      "manual_root_causes": [
+        "date_crop_miss"
+      ],
+      "manual_notes": "Historical run missed issue_date on the residency sample that now serves as an internal regression case.",
+      "source_paths": [
+        "sample_data/거주자증명서/미국 TREASURY주.png"
+      ],
+      "evidence": [
+        {
+          "document_type": "residency_certificate",
+          "fields": {
+            "taxpayer_name": "MARIA L. CHEN",
+            "tin": "987-65-4321",
+            "tax_year": "2026",
+            "issue_date": null,
+            "residency_country": "United States of America",
+            "residency_country_code": "US"
+          },
+          "quality_checks": {
+            "has_certification_text": true,
+            "has_irs_heading": true,
+            "seal_present": true,
+            "signature_present": true,
+            "file_type": ".png",
+            "width": 860,
+            "height": 1125,
+            "blur_score": 558.46044921875,
+            "blurry": false,
+            "average_ocr_confidence": 0.9588336825370789,
+            "low_ocr_confidence": false
+          },
+          "findings": [
+            {
+              "code": "required_issue_date_missing",
+              "message": "Issue date is missing.",
+              "field_name": "issue_date"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "review_status": "reject",
+      "root_causes": [
+        "label_bleed_name_header",
+        "mixed_korean_english_interference"
+      ],
+      "auto_root_causes": [
+        "mixed_korean_english_interference"
+      ],
+      "manual_root_causes": [
+        "label_bleed_name_header",
+        "mixed_korean_english_interference"
+      ],
+      "manual_notes": "Historical withholding output captured header fragments in names and mixed Korean text into residency_country.",
+      "source_paths": [
+        "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png"
+      ],
+      "evidence": [
+        {
+          "document_type": "withholding_tax_form",
+          "fields": {
+            "first_name": "irst",
+            "last_name": "CHEN",
+            "middle_name": null,
+            "tin": "987-65-4321",
+            "address": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+            "residency_country": "nited States 이f America 전화",
+            "residency_country_code": null,
+            "dividend_tax_rate": "15%",
+            "signature_date": "2026-01-12",
+            "applicant_name": "MARIA L CHEN"
+          },
+          "quality_checks": {
+            "contains_non_resident_heading": true,
+            "signature_present": true,
+            "checked_no_box_count": 7,
+            "all_no_boxes_checked": true,
+            "detected_template_id": "withholding.non_resident_v1",
+            "file_type": ".png",
+            "width": 1114,
+            "height": 1412,
+            "blur_score": 7403.2890625,
+            "blurry": false,
+            "average_ocr_confidence": 0.9247775574217639,
+            "low_ocr_confidence": false
+          },
+          "findings": [
+            {
+              "code": "required_residency_country_invalid",
+              "message": "Residency country must be United States of America.",
+              "field_name": "residency_country"
+            },
+            {
+              "code": "required_residency_country_code_invalid",
+              "message": "Residency country code must be US.",
+              "field_name": "residency_country_code"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

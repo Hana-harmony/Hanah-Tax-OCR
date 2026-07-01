@@ -1,0 +1,55 @@
+{
+  "version": "2026-07-01",
+  "baseline_report_path": "tmp/evals/current_official_v17_parser_report.json",
+  "internal_regression_root": "evals/cases",
+  "external_holdout_root": "evals/external_holdout/cases",
+  "external_holdout_manifest_path": "evals/external_holdout/manifest.json",
+  "summary_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.summarize_eval_report --report <report.json> --external-manifest evals/external_holdout/manifest.json --output <summary.json>",
+  "latency_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.measure_latency --labeled-root data/labeled --case-id <case_id> --case-id <case_id> --output evals/benchmark_latency_observations.json",
+  "required_metrics": [
+    "exact_match_rate",
+    "average_character_error_rate",
+    "average_word_error_rate",
+    "field_metrics",
+    "document_pass_rate",
+    "low_quality_subset",
+    "cpu_latency_observation"
+  ],
+  "document_pass_rule": "A case passes only when every compared expected field in that case is an exact match.",
+  "subsets": {
+    "low_quality_subset": {
+      "manifest_tags": [
+        "low_quality",
+        "blur"
+      ],
+      "source_manifest": "evals/external_holdout/manifest.json"
+    },
+    "format_variation_subset": {
+      "manifest_tags": [
+        "format_variation",
+        "pdf_render"
+      ],
+      "source_manifest": "evals/external_holdout/manifest.json"
+    },
+    "mixed_language_subset": {
+      "manifest_tags": [
+        "mixed_language"
+      ],
+      "source_manifest": "evals/external_holdout/manifest.json"
+    }
+  },
+  "comparison_rules": {
+    "promotion_gate": {
+      "internal_regression": "No exact/CER/WER regression against baseline.",
+      "date_fields": "issue_date, signature_date, issued_on must not regress in exact_match_rate.",
+      "external_holdout": "Report separately; improvements can justify promotion only when internal regression stays flat or better."
+    },
+    "latency_rule": "Latency is observational on local CPU and must be reported alongside accuracy, not substituted for it."
+  },
+  "report_artifacts": {
+    "external_holdout_manifest": "evals/external_holdout/manifest.json",
+    "error_taxonomy_manifest": "evals/error_taxonomy/hard_case_manifest.json",
+    "latency_observations": "evals/benchmark_latency_observations.json",
+    "augmentation_effect_ledger": "evals/augmentation_effects/ledger.json"
+  }
+}

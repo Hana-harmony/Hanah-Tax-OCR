@@ -1,0 +1,61 @@
+{
+  "iteration_id": "2026-07-01-iteration-01",
+  "baseline": {
+    "report_path": "tmp/evals/current_official_v17_parser_report.json",
+    "summary_path": "evals/reports/current_official_v17_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0
+  },
+  "changes": [
+    "Built `evals/external_holdout/` with schema, case manifests, required-sample gaps, and eval-overlap guards.",
+    "Added `evals/error_taxonomy/hard_case_manifest.json` plus auto-sync script seeded from historical review_queue failures.",
+    "Expanded semi-real hard-case variants with blur, JPEG blocking, border clipping, and stamp interference metadata.",
+    "Added report summarizer, latency measurer, protocol files, and SOTA comparison templates.",
+    "Tightened withholding signature-date parser prior so implausible region OCR cannot override a valid full-text date."
+  ],
+  "validation": {
+    "external_holdout_probe_summary_path": "evals/reports/external_holdout_probe_summary.json",
+    "targeted_date_regression_summary_path": "evals/reports/targeted_date_regression_after_v19_summary.json",
+    "benchmark_latency_path": "evals/benchmark_latency_observations.json",
+    "external_holdout_probe": {
+      "compared_cases": 5,
+      "comparison_count": 27,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    },
+    "targeted_date_regression": {
+      "compared_cases": 3,
+      "comparison_count": 23,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    },
+    "cpu_latency_observation_seconds": {
+      "apostille_california_001": 6.6945,
+      "residency_john_doe_001": 4.5112,
+      "withholding_maria_chen_001": 77.2408,
+      "average_case_seconds": 29.4822
+    }
+  },
+  "candidate_decisions": {
+    "kept": [
+      "date_region_specialization_for_issued_on_plus_signature_date_guarded_by_parser_prior",
+      "semi_real_hard_case_variant_expansion_for_date_and_name_groups",
+      "external_holdout_and_taxonomy_protocol_files"
+    ],
+    "discarded": [
+      "unconstrained_signature_date_region_preference_without_parser_guard",
+      "using `withholding_hana_payer_001` as a scored holdout case before fixing its source-path mismatch",
+      "using `withholding_pdf_001` as a scored holdout case before adding field labels"
+    ]
+  },
+  "next_priorities": [
+    "Label and isolate a true withholding external-holdout pair for `withholding_hana_payer_001` and `withholding_pdf_001` so mixed-language and PDF behavior can be scored outside internal eval.",
+    "Train and compare one recognizer candidate that consumes the new semi-real hard-case variants, then record field-group deltas into `evals/augmentation_effects/ledger.json`."
+  ]
+}

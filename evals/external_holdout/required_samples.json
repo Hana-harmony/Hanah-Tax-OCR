@@ -1,0 +1,114 @@
+[
+  {
+    "case_id": "withholding_hana_payer_001",
+    "sample_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
+    "document_type": "withholding_tax_form",
+    "status": "needs_annotation",
+    "missing_required_fields": [
+      "first_name",
+      "last_name",
+      "middle_name",
+      "tin",
+      "address",
+      "residency_country",
+      "residency_country_code",
+      "dividend_tax_rate",
+      "signature_date",
+      "applicant_name"
+    ],
+    "source_path_mismatch": true,
+    "mismatched_label_paths": [
+      "data/labeled/pending_review/withholding_tax_form/withholding_hana_payer_001/label.json"
+    ],
+    "subset_tags": [
+      "format_variation",
+      "mixed_language"
+    ],
+    "priority_score": 64.0
+  },
+  {
+    "case_id": "residency_legacy_001",
+    "sample_path": "sample_data/거주자증명서/4.jpg",
+    "document_type": "residency_certificate",
+    "status": "partial_expected",
+    "missing_required_fields": [
+      "tin",
+      "issue_date"
+    ],
+    "source_path_mismatch": false,
+    "mismatched_label_paths": [],
+    "subset_tags": [
+      "crop_miss",
+      "format_variation",
+      "low_quality"
+    ],
+    "priority_score": 58.0
+  },
+  {
+    "case_id": "withholding_pdf_001",
+    "sample_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
+    "document_type": "withholding_tax_form",
+    "status": "needs_annotation",
+    "missing_required_fields": [
+      "first_name",
+      "last_name",
+      "middle_name",
+      "tin",
+      "address",
+      "residency_country",
+      "residency_country_code",
+      "dividend_tax_rate",
+      "signature_date",
+      "applicant_name"
+    ],
+    "source_path_mismatch": false,
+    "mismatched_label_paths": [],
+    "subset_tags": [
+      "format_variation",
+      "mixed_language",
+      "pdf_render"
+    ],
+    "priority_score": 56.0
+  },
+  {
+    "case_id": "residency_pdf_001",
+    "sample_path": "sample_data/거주자증명서/2.pdf",
+    "document_type": "residency_certificate",
+    "status": "needs_annotation",
+    "missing_required_fields": [
+      "taxpayer_name",
+      "tin",
+      "tax_year",
+      "issue_date",
+      "residency_country",
+      "residency_country_code"
+    ],
+    "source_path_mismatch": true,
+    "mismatched_label_paths": [
+      "data/labeled/pending_review/residency_certificate/residency_pdf_001/label.json"
+    ],
+    "subset_tags": [
+      "format_variation",
+      "pdf_render"
+    ],
+    "priority_score": 52.0
+  },
+  {
+    "case_id": "apostille_california_001",
+    "sample_path": "sample_data/아포스티유 샘플/미국 california 주.png",
+    "document_type": "apostille",
+    "status": "partial_expected",
+    "missing_required_fields": [
+      "signed_by",
+      "issued_on",
+      "issuing_authority"
+    ],
+    "source_path_mismatch": false,
+    "mismatched_label_paths": [],
+    "subset_tags": [
+      "format_variation",
+      "low_quality"
+    ],
+    "priority_score": 50.0
+  }
+]

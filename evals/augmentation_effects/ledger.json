@@ -1,0 +1,22 @@
+{
+  "version": "2026-07-01",
+  "experiments": [
+    {
+      "experiment_id": "2026-07-01-semi-real-hard-case-expansion",
+      "status": "pending_measurement",
+      "variants": [
+        "gaussian_blur",
+        "jpeg_blocking",
+        "border_clip",
+        "stamp_shadow"
+      ],
+      "field_groups": [
+        "date",
+        "english_name_org",
+        "numeric_tin_code",
+        "korean_mixed_form"
+      ],
+      "notes": "Semi-real hard case variants were expanded in code, but no recognizer retrain was executed in this iteration, so measured gain is still pending."
+    }
+  ]
+}

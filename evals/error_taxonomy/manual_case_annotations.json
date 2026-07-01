@@ -1,0 +1,32 @@
+{
+  "version": "2026-07-01",
+  "cases": {
+    "apostille_north_carolina_001": {
+      "root_causes": [
+        "date_spacing_loss"
+      ],
+      "notes": "Historical review_queue output lost the space before the year in `issued_on`."
+    },
+    "cross_check_maria_chen_001": {
+      "root_causes": [
+        "cross_document_name_alignment_error",
+        "middle_name_segmentation_ambiguity",
+        "rate_or_checkbox_region_miss"
+      ],
+      "notes": "Cross-check regression mixed applicant tokens into middle_name and missed dividend rate."
+    },
+    "residency_maria_chen_001": {
+      "root_causes": [
+        "date_crop_miss"
+      ],
+      "notes": "Historical run missed issue_date on the residency sample that now serves as an internal regression case."
+    },
+    "withholding_maria_chen_001": {
+      "root_causes": [
+        "label_bleed_name_header",
+        "mixed_korean_english_interference"
+      ],
+      "notes": "Historical withholding output captured header fragments in names and mixed Korean text into residency_country."
+    }
+  }
+}

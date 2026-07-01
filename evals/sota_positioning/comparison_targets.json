@@ -1,0 +1,42 @@
+{
+  "version": "2026-07-01",
+  "comparison_scope": "Document-type-specific OCR + parser + normalization + review-aware end-to-end extraction system",
+  "targets": [
+    {
+      "name": "Google Cloud Document AI Custom Extractor",
+      "status": "planned",
+      "input_format": [
+        "PDF",
+        "PNG",
+        "JPEG"
+      ],
+      "expected_output_shape": "entity/value pairs per document processor schema",
+      "official_reference": "https://docs.cloud.google.com/document-ai/docs/custom-extractor-overview",
+      "positioning_notes": "Strong baseline for structured extraction across variable layouts; compare as a managed custom extraction stack rather than raw OCR only."
+    },
+    {
+      "name": "Microsoft Azure AI Document Intelligence Custom Extraction",
+      "status": "planned",
+      "input_format": [
+        "PDF",
+        "PNG",
+        "JPEG"
+      ],
+      "expected_output_shape": "custom field schema from Document Intelligence Studio",
+      "official_reference": "https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/train/custom-model?view=doc-intel-4.0.0",
+      "positioning_notes": "Relevant managed comparator for custom extraction on fixed document families."
+    },
+    {
+      "name": "Amazon Textract AnalyzeDocument + Queries",
+      "status": "planned",
+      "input_format": [
+        "PDF",
+        "PNG",
+        "JPEG"
+      ],
+      "expected_output_shape": "OCR blocks plus query answers / structured relationships",
+      "official_reference": "https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html",
+      "positioning_notes": "Useful end-to-end cloud baseline when structured queries and layout relationships matter more than a single generic OCR output."
+    }
+  ]
+}

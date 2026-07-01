@@ -482,6 +482,35 @@ def test_withholding_parser_extracts_sample_fields() -> None:
     assert parsed.fields["signature_date"] == "2026-01-12"
 
 
+def test_withholding_parser_prefers_full_text_signature_date_when_region_year_is_implausible(
+) -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "국내원천소득 제한세율 적용신청서(비거주자용)",
+                            "2026년 01월 12일 신청인 MARIA L. CHEN (서명 또는 인)",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "signature_date": OCRPage(
+                    page_number=1,
+                    raw_text="1312-02-02",
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["signature_date"] == "2026-01-12"
+
+
 def test_withholding_parser_extracts_single_digit_street_number_from_full_text() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

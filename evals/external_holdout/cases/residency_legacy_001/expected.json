@@ -1,0 +1,17 @@
+{
+  "case_id": "residency_legacy_001",
+  "document_type": "residency_certificate",
+  "source_path": "sample_data/거주자증명서/4.jpg",
+  "expected_fields": {
+    "taxpayer_name": "F",
+    "tax_year": "2021",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "holdout_status": "partial_expected",
+  "subset_tags": [
+    "crop_miss",
+    "format_variation",
+    "low_quality"
+  ]
+}

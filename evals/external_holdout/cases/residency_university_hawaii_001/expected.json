@@ -1,0 +1,18 @@
+{
+  "case_id": "residency_university_hawaii_001",
+  "document_type": "residency_certificate",
+  "source_path": "sample_data/거주자증명서/6.jpg",
+  "expected_fields": {
+    "taxpayer_name": "UNIVERSITY OF HAWAII",
+    "tin": "99-6000354",
+    "tax_year": "2019",
+    "issue_date": "March 18, 2019",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "holdout_status": "ready",
+  "subset_tags": [
+    "format_variation",
+    "low_quality"
+  ]
+}

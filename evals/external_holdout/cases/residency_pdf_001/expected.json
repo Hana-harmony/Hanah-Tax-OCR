@@ -1,0 +1,18 @@
+{
+  "case_id": "residency_pdf_001",
+  "document_type": "residency_certificate",
+  "source_path": "sample_data/거주자증명서/2_page1.png",
+  "expected_fields": {
+    "taxpayer_name": "UNIVERSITY OF WASHINGTON",
+    "tin": "91-6001537",
+    "tax_year": "2025",
+    "issue_date": "March 24, 2025",
+    "residency_country": "United States of America",
+    "residency_country_code": "US"
+  },
+  "holdout_status": "ready",
+  "subset_tags": [
+    "format_variation",
+    "pdf_render"
+  ]
+}
