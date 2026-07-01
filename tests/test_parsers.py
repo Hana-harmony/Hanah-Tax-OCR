@@ -930,3 +930,62 @@ def test_withholding_parser_falls_back_when_region_country_code_is_invalid() -> 
     )
 
     assert parsed.fields["residency_country_code"] == "US"
+
+
+def test_withholding_parser_recovers_country_code_and_signature_date_from_compressed_noise(
+) -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "접수일자 2026-0112",
+                            "United States of Amerca",
+                            "2026 년 01 12 인",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "residency_country": OCRPage(
+                    page_number=1,
+                    raw_text="State5 이 AnerIC경",
+                ),
+                "residency_country_code": OCRPage(
+                    page_number=1,
+                    raw_text="U5",
+                ),
+                "signature_date": OCRPage(
+                    page_number=1,
+                    raw_text="2026\n년no11일12일",
+                ),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["residency_country"] == "United States of America"
+    assert parsed.fields["residency_country_code"] == "US"
+    assert parsed.fields["signature_date"] == "2026-01-12"
+
+
+def test_withholding_parser_derives_country_code_from_normalized_country() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[OCRPage(page_number=1, raw_text="United States of Amerca")],
+            regions={
+                "residency_country": OCRPage(
+                    page_number=1,
+                    raw_text="United States of Amerca",
+                ),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["residency_country"] == "United States of America"
+    assert parsed.fields["residency_country_code"] == "US"

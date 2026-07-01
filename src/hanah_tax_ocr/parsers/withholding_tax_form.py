@@ -108,20 +108,23 @@ class WithholdingTaxFormParser(BaseDocumentParser):
                 raw_full_text_address=full_text_address_raw,
             )
         )
-        country = normalize_country(
-            self._region_value(ocr_result, "residency_country")
-            or self._find_first(r"거주지국\s*(United States of America|USA)", single_line)
-            or self._find_first(r"Country\s*[:;]?\s*(United States of America|USA)", single_line)
-            or address
-        )
+        region_country = self._region_value(ocr_result, "residency_country")
         country_code = normalize_country_code(
             self._region_value(ocr_result, "residency_country_code")
         ) or normalize_country_code(
             self._find_first(r"거주지국코드\s*([A-Z]{2})", single_line)
             or self._find_first(r"Country Code\s*[:;]?\s*([A-Z]{2})", single_line)
-            or country
+            or region_country
             or address
+            or single_line
         )
+        country = self._select_country_candidate(
+            region_country=region_country,
+            full_text_country=single_line,
+            address=address,
+            country_code=country_code,
+        )
+        country_code = country_code or normalize_country_code(country)
         dividend_tax_rate = normalize_percentage(
             self._extract_first_pattern(
                 [
@@ -140,6 +143,11 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         fallback_signature_date = self._normalize_iso_date(
             self._find_first(r"(\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)", single_line)
             or self._find_first(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2})", single_line)
+            or self._find_first(
+                r"(\d{4}\s*[-./]?\s*\d{2}\s*[-./]?\s*\d{2})(?=\s*(?:신청인|서명|또는\s*인|인\b))",
+                single_line,
+            )
+            or self._find_first(r"(\d{4}-\d{2}\d{2})", single_line)
         )
         signature_date = self._select_signature_date_candidate(
             region_signature_date,
@@ -293,6 +301,26 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if region_year != fallback_year:
             return fallback_signature_date
         return region_signature_date
+
+    def _select_country_candidate(
+        self,
+        *,
+        region_country: str | None,
+        full_text_country: str | None,
+        address: str | None,
+        country_code: str | None,
+    ) -> str | None:
+        for candidate in [region_country, full_text_country, address]:
+            normalized = normalize_country(candidate)
+            if normalized == "United States of America":
+                return normalized
+        if country_code == "US":
+            return "United States of America"
+        for candidate in [region_country, address]:
+            normalized = normalize_country(candidate)
+            if normalized:
+                return normalized
+        return None
 
     def _clean_name_value(self, value: str | None) -> str | None:
         if not value:

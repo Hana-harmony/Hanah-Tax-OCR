@@ -1,0 +1,81 @@
+{
+  "iteration_id": "2026-07-01-iteration-05",
+  "baseline": {
+    "report_path": "tmp/evals/current_official_v17_parser_report.json",
+    "summary_path": "evals/reports/current_official_v17_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0
+  },
+  "changes": [
+    "Extended `evals/semi_real_probes/manifest.json` with a document-level `jpeg_blocking` withholding probe built from the real Maria Chen sample.",
+    "Strengthened withholding parser priors so compressed OCR can recover `signature_date`, `residency_country`, and `residency_country_code` from noisy full-text candidates even when the region OCR is degraded.",
+    "Recorded the measured `jpeg_blocking` field-group delta in `evals/augmentation_effects/ledger.json` and left the probe comparison reports under `evals/reports/withholding_jpeg_blocking_probe_*`."
+  ],
+  "validation": {
+    "semi_real_probe_manifest_path": "evals/semi_real_probes/manifest.json",
+    "jpeg_probe_before_fix_summary_path": "evals/reports/withholding_jpeg_blocking_probe_before_fix_summary.json",
+    "jpeg_probe_after_fix_summary_path": "evals/reports/withholding_jpeg_blocking_probe_after_fix_summary.json",
+    "jpeg_probe_comparison_path": "evals/reports/withholding_jpeg_blocking_probe_comparison.json",
+    "targeted_date_regression_summary_path": "evals/reports/targeted_date_regression_after_jpeg_priors_summary.json",
+    "jpeg_probe_before_fix": {
+      "comparison_count": 10,
+      "exact_match_rate": 0.1,
+      "average_character_error_rate": 0.677759,
+      "average_word_error_rate": 0.884615,
+      "document_pass_rate": 0.0,
+      "failed_fields": [
+        "first_name",
+        "last_name",
+        "middle_name",
+        "tin",
+        "address",
+        "residency_country",
+        "residency_country_code",
+        "signature_date",
+        "applicant_name"
+      ]
+    },
+    "jpeg_probe_after_fix": {
+      "comparison_count": 10,
+      "exact_match_rate": 0.4,
+      "average_character_error_rate": 0.419426,
+      "average_word_error_rate": 0.584615,
+      "document_pass_rate": 0.0,
+      "failed_fields": [
+        "first_name",
+        "last_name",
+        "middle_name",
+        "tin",
+        "address",
+        "applicant_name"
+      ],
+      "remaining_review_blockers": [
+        "required_tin_invalid"
+      ]
+    },
+    "targeted_date_regression": {
+      "compared_cases": 3,
+      "comparison_count": 23,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    }
+  },
+  "candidate_decisions": {
+    "kept": [
+      "withholding jpeg-blocking parser prior for `signature_date`, `residency_country`, and `residency_country_code`",
+      "document-level `jpeg_blocking` probe as a tracked semi-real regression case"
+    ],
+    "discarded": [
+      "treating parser-only recovery as sufficient for the full `jpeg_blocking` case while `TIN`, names, and address still fail",
+      "promoting the `jpeg_blocking` candidate as an end-to-end accuracy fix before recognizer/data improvements exist"
+    ]
+  },
+  "next_priorities": [
+    "Add a `stamp_shadow` or `overlay_patch` withholding probe to isolate whether applicant-name/date failures under occlusion are parser-recoverable or recognizer-only.",
+    "Backfill at least one reviewed non-eval withholding front-side sample so region recognizer candidates can move beyond the current zero-val-sample blocker."
+  ]
+}

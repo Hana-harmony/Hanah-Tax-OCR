@@ -81,6 +81,70 @@
           "average_word_error_rate_delta": 0.0
         }
       ]
+    },
+    {
+      "experiment_id": "withholding_jpeg_blocking_probe_2026_07_01",
+      "baseline_report": "evals/reports/withholding_jpeg_blocking_probe_before_fix_report.json",
+      "candidate_report": "evals/reports/withholding_jpeg_blocking_probe_after_fix_report.json",
+      "variants": [
+        "jpeg_blocking"
+      ],
+      "field_group_deltas": [
+        {
+          "field_group": "date",
+          "baseline": {
+            "comparisons": 1.0,
+            "exact_match_rate": 0.0,
+            "average_character_error_rate": 1.0,
+            "average_word_error_rate": 1.0
+          },
+          "candidate": {
+            "comparisons": 1.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 1.0,
+          "average_character_error_rate_delta": -1.0,
+          "average_word_error_rate_delta": -1.0
+        },
+        {
+          "field_group": "english_name_org",
+          "baseline": {
+            "comparisons": 6.0,
+            "exact_match_rate": 0.0,
+            "average_character_error_rate": 0.629599,
+            "average_word_error_rate": 0.974359
+          },
+          "candidate": {
+            "comparisons": 6.0,
+            "exact_match_rate": 0.166667,
+            "average_character_error_rate": 0.532376,
+            "average_word_error_rate": 0.807692
+          },
+          "exact_match_rate_delta": 0.166667,
+          "average_character_error_rate_delta": -0.097223,
+          "average_word_error_rate_delta": -0.166667
+        },
+        {
+          "field_group": "numeric_tin_code",
+          "baseline": {
+            "comparisons": 3.0,
+            "exact_match_rate": 0.333333,
+            "average_character_error_rate": 0.666667,
+            "average_word_error_rate": 0.666667
+          },
+          "candidate": {
+            "comparisons": 3.0,
+            "exact_match_rate": 0.666667,
+            "average_character_error_rate": 0.333333,
+            "average_word_error_rate": 0.333333
+          },
+          "exact_match_rate_delta": 0.333334,
+          "average_character_error_rate_delta": -0.333334,
+          "average_word_error_rate_delta": -0.333334
+        }
+      ]
     }
   ]
 }

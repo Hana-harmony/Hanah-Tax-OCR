@@ -20,6 +20,28 @@
         "Document-level left-edge clipping probe built from the real withholding sample.",
         "Used to verify that address parsing does not absorb nearby name-header text under region misalignment."
       ]
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_type": "jpeg_blocking",
+      "focus_fields": [
+        "signature_date",
+        "residency_country",
+        "residency_country_code",
+        "tin",
+        "applicant_name"
+      ],
+      "failure_modes": [
+        "compression",
+        "low_dpi"
+      ],
+      "notes": [
+        "Document-level JPEG blocking probe built from the real withholding sample.",
+        "Used to measure how much parser prior can recover country/date fields before recognizer-level retraining is required."
+      ]
     }
   ]
 }

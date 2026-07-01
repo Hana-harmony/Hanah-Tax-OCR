@@ -34,10 +34,13 @@ def normalize_country(value: str | None) -> str | None:
     if value is None:
         return None
     normalized = normalize_whitespace(value)
-    compact_alpha = re.sub(r"[^A-Za-z]", "", normalized).lower()
+    compact_alpha = re.sub(r"[^A-Za-z0-9]", "", normalized).lower()
+    compact_alpha = compact_alpha.translate(str.maketrans({"0": "o", "1": "i", "5": "s"}))
     if re.search(r"united states(?: of america)?", normalized, re.IGNORECASE):
         return "United States of America"
-    if "nitedstates" in compact_alpha and "america" in compact_alpha:
+    if "nitedstates" in compact_alpha and (
+        "america" in compact_alpha or "amerca" in compact_alpha
+    ):
         return "United States of America"
     if re.search(r"\busa\b", normalized, re.IGNORECASE):
         return "United States of America"
@@ -49,6 +52,11 @@ def normalize_country_code(value: str | None) -> str | None:
         return None
     normalized = normalize_country(value)
     if normalized == "United States of America":
+        return "US"
+    compact = normalize_whitespace(value).upper()
+    compact = compact.translate(str.maketrans({"0": "O", "1": "I", "5": "S"}))
+    compact = re.sub(r"[^A-Z]", "", compact)
+    if compact == "US":
         return "US"
     match = re.search(r"\b([A-Z]{2})\b", value.upper())
     return match.group(1) if match else None
