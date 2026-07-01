@@ -1,0 +1,102 @@
+{
+  "iteration_id": "2026-07-02_iteration_18",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "external holdout의 mixed-language withholding 공백은 단순 샘플 부족이 아니라, 남아 있는 non-overlap withholding 샘플이 실제 front-side extraction 대상이 아닌 reverse-side/blank-template일 가능성이 높다.",
+    "holdout gap 보고를 수동 JSON이 아니라 manifest 기반 자동 보고로 바꾸면 어떤 분포가 왜 막히는지, 특히 non-extractable page와 pending_review source mismatch가 어떻게 얽혀 있는지를 반복마다 증거로 남길 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "external_holdout_manifest_enrichment",
+      "status": "kept",
+      "files": [
+        "scripts/evals/build_external_holdout.py",
+        "evals/external_holdout/manifest.json",
+        "evals/external_holdout/schema.json",
+        "tests/test_external_holdout.py"
+      ],
+      "summary": "external holdout manifest가 excluded non-extractable 케이스에 `page_role`, `exclusion_reason`, `label_case_ids`, `label_source_paths`, `source_path_mismatch`, `mismatched_label_paths`, `subset_tags`를 남기고, summary에 `excluded_non_extractable_label_conflict_count`를 기록하도록 확장했다."
+    },
+    {
+      "type": "external_holdout_gap_reporter",
+      "status": "kept",
+      "files": [
+        "scripts/evals/report_external_holdout_gaps.py",
+        "evals/external_holdout/missing_distribution_targets.json",
+        "tests/test_external_holdout.py"
+      ],
+      "summary": "missing distribution target 보고를 manifest 기반 자동 생성으로 전환해, mixed-language/crop_miss/blur target마다 overlap blocker와 non-extractable blocker를 machine-readable evidence로 남기게 했다."
+    }
+  ],
+  "holdout_blockers": {
+    "manifest_summary": {
+      "path": "evals/external_holdout/manifest.json",
+      "candidate_case_count": 5,
+      "ready_case_count": 3,
+      "partial_expected_case_count": 2,
+      "excluded_eval_overlap_count": 4,
+      "excluded_non_extractable_count": 2,
+      "excluded_non_extractable_label_conflict_count": 1
+    },
+    "reverse_side_evidence": {
+      "sample_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
+      "sample_dataset_page_role": "reverse_side_instructions",
+      "ocr_excerpt": "뒤쪽 ... 비거주자의 제한세율 적용 신청서등을 제출합니다 ... 접수번호 접수일자는 원천징수의무자가 ...",
+      "note": "실제 OCR 텍스트가 안내/제출 문구 중심이라 front-side filled withholding holdout으로 쓸 수 없음을 재확인했다."
+    },
+    "mixed_language_gap_report": {
+      "path": "evals/external_holdout/missing_distribution_targets.json",
+      "target_id": "withholding_front_filled_nonoverlap_low_quality",
+      "status": "missing_source",
+      "blocked_by_eval_overlap_case_ids": [
+        "withholding_maria_chen_001"
+      ],
+      "blocked_by_non_extractable_cases": [
+        {
+          "case_id": "withholding_hana_payer_001",
+          "page_role": "reverse_side_instructions",
+          "exclusion_reason": "back_side_reference_page",
+          "source_path_mismatch": true
+        },
+        {
+          "case_id": "withholding_pdf_001",
+          "page_role": "blank_form_template",
+          "exclusion_reason": "blank_form_without_filled_entities",
+          "source_path_mismatch": false
+        }
+      ]
+    }
+  },
+  "baseline_comparison": {
+    "official_baseline_summary_path": "evals/reports/current_middle_name_alt_v1_summary.json",
+    "external_holdout_summary_path": "evals/reports/external_holdout_baseline_rerun_summary.json",
+    "external_holdout_comparison_path": "evals/reports/external_holdout_baseline_vs_rerun.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "kept_candidate_exact_match_rate": 1.0,
+    "kept_candidate_average_character_error_rate": 0.0,
+    "kept_candidate_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "이번 반복은 OCR/parser inference를 바꾸지 않았고, holdout/manifest 운영 근거만 강화했다. external holdout rerun comparison도 `overall_status=unchanged`였다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_middle_name_alt_v1_summary.json",
+      "evals/reports/external_holdout_baseline_rerun_summary.json"
+    ],
+    "note": "이번 반복은 date 추출 로직을 수정하지 않았다."
+  },
+  "kept_candidates": [
+    "external holdout gap auto-reporter",
+    "non-extractable withholding blocker evidence in manifest"
+  ],
+  "discarded_candidates": [],
+  "next_priorities": [
+    "실제 front-side mixed-language withholding 원본 1건 이상을 확보해 external holdout mixed_language_subset을 0 comparison 상태에서 벗어나게 한다.",
+    "holdout blocker와 별개로 date/applicant_name/address region-specific candidate를 계속 좁게 검증한다."
+  ]
+}

@@ -1,7 +1,8 @@
 {
-  "version": "2026-07-01",
+  "version": "2026-07-02",
   "manifest_path": "evals/external_holdout/manifest.json",
   "required_samples_path": "evals/external_holdout/required_samples.json",
+  "gap_report_path": "evals/external_holdout/missing_distribution_targets.json",
   "case_expected_path_pattern": "evals/external_holdout/cases/<case_id>/expected.json",
   "status_values": [
     "ready",

@@ -14,6 +14,7 @@ DEFAULT_LABELED_ROOT = Path("data/labeled")
 DEFAULT_EVAL_ROOT = Path("evals/cases")
 DEFAULT_OUTPUT_ROOT = Path("evals/external_holdout")
 DEFAULT_CASE_ANNOTATIONS_PATH = Path("evals/external_holdout/case_annotations.json")
+CURRENT_VERSION = "2026-07-02"
 
 REQUIRED_FIELDS_BY_DOCUMENT_TYPE: dict[str, tuple[str, ...]] = {
     "apostille": (
@@ -253,6 +254,14 @@ def build_external_holdout_manifest(
                 source_path_mismatch = True
                 mismatched_label_paths.append(label_record["label_path"])
 
+        quality_metrics = compute_quality_metrics(sample_path)
+        subset_tags = _subset_tags_for_case(
+            case_id=case_id or None,
+            sample_path=sample_path,
+            document_type=str(sample_dataset_entry.get("document_type") or "") or None,
+            quality_metrics=quality_metrics,
+        )
+
         if sample_dataset_entry and not bool(sample_dataset_entry.get("extractable", True)):
             excluded_non_extractable_cases.append(
                 {
@@ -261,6 +270,14 @@ def build_external_holdout_manifest(
                     "document_type": sample_dataset_entry.get("document_type"),
                     "page_role": sample_dataset_entry.get("page_role"),
                     "exclusion_reason": sample_dataset_entry.get("exclusion_reason"),
+                    "label_case_ids": matched_case_ids,
+                    "label_source_paths": sorted(
+                        {normalize_path_text(record["source_path"]) for record in matched_labels}
+                    ),
+                    "source_path_mismatch": source_path_mismatch,
+                    "source_path_alias_match": source_path_alias_match,
+                    "mismatched_label_paths": mismatched_label_paths,
+                    "subset_tags": subset_tags,
                 }
             )
             continue
@@ -271,6 +288,7 @@ def build_external_holdout_manifest(
                     "case_id": case_id or None,
                     "sample_path": source_key,
                     "document_type": sample_dataset_entry.get("document_type"),
+                    "subset_tags": subset_tags,
                 }
             )
             continue
@@ -286,7 +304,6 @@ def build_external_holdout_manifest(
         if source_path_mismatch and not has_direct_or_alias_label_match:
             status = "needs_annotation"
 
-        quality_metrics = compute_quality_metrics(sample_path)
         subset_tags = _subset_tags_for_case(
             case_id=case_id or None,
             sample_path=sample_path,
@@ -349,7 +366,7 @@ def build_external_holdout_manifest(
     subset_tag_counts = Counter(tag for case in cases for tag in case["subset_tags"])
 
     return {
-        "version": "2026-07-01",
+        "version": CURRENT_VERSION,
         "sample_root": str(sample_root),
         "labeled_root": str(labeled_root),
         "eval_root": str(eval_root),
@@ -368,6 +385,9 @@ def build_external_holdout_manifest(
             ),
             "excluded_eval_overlap_count": len(excluded_overlap_cases),
             "excluded_non_extractable_count": len(excluded_non_extractable_cases),
+            "excluded_non_extractable_label_conflict_count": sum(
+                1 for case in excluded_non_extractable_cases if case["source_path_mismatch"]
+            ),
             "document_type_counts": dict(sorted(document_type_counts.items())),
             "status_counts": dict(sorted(status_counts.items())),
             "subset_tag_counts": dict(sorted(subset_tag_counts.items())),
@@ -389,9 +409,10 @@ def write_external_holdout(manifest: dict[str, Any], output_root: Path) -> None:
     cases_root.mkdir(parents=True, exist_ok=True)
 
     schema = {
-        "version": "2026-07-01",
+        "version": CURRENT_VERSION,
         "manifest_path": "evals/external_holdout/manifest.json",
         "required_samples_path": "evals/external_holdout/required_samples.json",
+        "gap_report_path": "evals/external_holdout/missing_distribution_targets.json",
         "case_expected_path_pattern": "evals/external_holdout/cases/<case_id>/expected.json",
         "status_values": ["ready", "partial_expected", "needs_annotation"],
         "subset_tags": [

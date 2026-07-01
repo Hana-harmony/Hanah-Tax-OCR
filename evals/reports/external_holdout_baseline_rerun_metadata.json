@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "expected_root": "evals/external_holdout/cases",
+    "labeled_root": "data/labeled",
+    "output_dir": "tmp/external_holdout_baseline_actual_rerun",
+    "recognizer_root": null,
+    "inference_subdir": "inference",
+    "written_case_ids": [
+      "apostille_california_001",
+      "residency_john_doe_001",
+      "residency_legacy_001",
+      "residency_pdf_001",
+      "residency_university_hawaii_001"
+    ],
+    "missing_case_ids": [],
+    "region_override_count": 0
+  },
+  "report_output": "evals/reports/external_holdout_baseline_rerun_report.json",
+  "summary_output": "evals/reports/external_holdout_baseline_rerun_summary.json",
+  "external_manifest": "evals/external_holdout/manifest.json",
+  "baseline_report": "evals/reports/external_holdout_baseline_report.json",
+  "comparison": {
+    "comparison_output": "evals/reports/external_holdout_baseline_vs_rerun.json",
+    "overall_status": "unchanged",
+    "overall_exact_match_rate_delta": 0.0
+  }
+}

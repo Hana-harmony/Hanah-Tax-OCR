@@ -9,6 +9,7 @@ from scripts.evals.build_external_holdout import (
     build_external_holdout_manifest,
     write_external_holdout,
 )
+from scripts.evals.report_external_holdout_gaps import build_external_holdout_gap_report
 
 
 def test_build_external_holdout_manifest_flags_partial_expected_and_eval_overlap(
@@ -244,6 +245,67 @@ def test_build_external_holdout_manifest_excludes_non_extractable_and_links_alia
     assert manifest["cases"][0]["source_path_alias_match"] is True
     assert manifest["summary"]["excluded_non_extractable_count"] == 1
     assert manifest["excluded_non_extractable_cases"][0]["case_id"] == "withholding_hana_payer_001"
+    assert manifest["excluded_non_extractable_cases"][0]["page_role"] == "reverse_side_instructions"
+    assert manifest["excluded_non_extractable_cases"][0]["subset_tags"] == [
+        "format_variation",
+        "mixed_language",
+    ]
+
+
+def test_build_external_holdout_manifest_tracks_non_extractable_label_conflicts(
+    tmp_path: Path,
+) -> None:
+    sample_root = tmp_path / "sample_data"
+    sample_root.mkdir()
+    sample_path = sample_root / "국내원천소득 제한세율 적용신청서-2.png"
+    label_source = sample_root / "국내원천소득 제한세율 적용신청서-1.png"
+    sample_path.write_bytes(b"img")
+    label_source.write_bytes(b"img")
+
+    labeled_root = tmp_path / "data" / "labeled"
+    label_dir = (
+        labeled_root
+        / "pending_review"
+        / "withholding_tax_form"
+        / "withholding_hana_payer_001"
+    )
+    label_dir.mkdir(parents=True)
+    (label_dir / "label.json").write_text(
+        json.dumps(
+            {
+                "case_id": "withholding_hana_payer_001",
+                "document_type": "withholding_tax_form",
+                "source_path": str(label_source),
+                "expected_fields": {"first_name": "MARIA"},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    manifest = build_external_holdout_manifest(
+        sample_root,
+        labeled_root,
+        tmp_path / "evals" / "cases",
+        sample_index={
+            str(sample_path): {
+                "source": str(sample_path),
+                "document_type": "withholding_tax_form",
+                "case_id": "withholding_hana_payer_001",
+                "split": "train",
+                "extractable": False,
+                "page_role": "reverse_side_instructions",
+                "exclusion_reason": "back_side_reference_page",
+                "source_variants": [str(sample_path)],
+            }
+        },
+    )
+
+    excluded = manifest["excluded_non_extractable_cases"][0]
+    assert manifest["summary"]["excluded_non_extractable_label_conflict_count"] == 1
+    assert excluded["case_id"] == "withholding_hana_payer_001"
+    assert excluded["source_path_mismatch"] is True
+    assert excluded["label_case_ids"] == ["withholding_hana_payer_001"]
+    assert excluded["mismatched_label_paths"]
 
 
 def test_build_external_holdout_manifest_includes_field_observations_for_partial_cases(
@@ -367,3 +429,54 @@ def test_write_external_holdout_materializes_expected_cases(tmp_path: Path) -> N
     assert payload["holdout_status"] == "ready"
     assert payload["subset_tags"] == ["low_quality"]
     assert payload["field_observations"]["issue_date"]["status"] == "verified"
+
+
+def test_build_external_holdout_gap_report_surfaces_non_extractable_blockers(
+    tmp_path: Path,
+) -> None:
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "cases": [],
+                "excluded_eval_overlap_cases": [
+                    {
+                        "case_id": "withholding_maria_chen_001",
+                        "document_type": "withholding_tax_form",
+                        "subset_tags": ["mixed_language", "low_quality"],
+                    }
+                ],
+                "excluded_non_extractable_cases": [
+                    {
+                        "case_id": "withholding_hana_payer_001",
+                        "document_type": "withholding_tax_form",
+                        "page_role": "reverse_side_instructions",
+                        "exclusion_reason": "back_side_reference_page",
+                        "source_path_mismatch": True,
+                        "label_case_ids": ["withholding_hana_payer_001"],
+                        "subset_tags": ["format_variation", "mixed_language"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_external_holdout_gap_report(manifest_path)
+
+    target = next(
+        item
+        for item in report["targets"]
+        if item["target_id"] == "withholding_front_filled_nonoverlap_low_quality"
+    )
+    assert target["status"] == "missing_source"
+    assert target["evidence"]["blocked_by_eval_overlap_case_ids"] == ["withholding_maria_chen_001"]
+    assert target["evidence"]["blocked_by_non_extractable_cases"] == [
+        {
+            "case_id": "withholding_hana_payer_001",
+            "page_role": "reverse_side_instructions",
+            "exclusion_reason": "back_side_reference_page",
+            "source_path_mismatch": True,
+            "label_case_ids": ["withholding_hana_payer_001"],
+        }
+    ]

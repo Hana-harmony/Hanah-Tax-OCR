@@ -1,0 +1,486 @@
+{
+  "baseline_compared_cases": 5,
+  "candidate_compared_cases": 5,
+  "baseline_missing_cases": [],
+  "candidate_missing_cases": [],
+  "resolved_missing_cases": [],
+  "new_missing_cases": [],
+  "improved_fields": [],
+  "regressed_fields": [],
+  "mixed_fields": [],
+  "unchanged_fields": [
+    "apostille.certificate_number",
+    "apostille.issued_at",
+    "apostille.issuing_authority",
+    "apostille.issuing_country",
+    "apostille.seal_owner",
+    "apostille.signer_capacity",
+    "residency_certificate.issue_date",
+    "residency_certificate.residency_country",
+    "residency_certificate.residency_country_code",
+    "residency_certificate.tax_year",
+    "residency_certificate.taxpayer_name",
+    "residency_certificate.tin"
+  ],
+  "added_fields": [],
+  "removed_fields": [],
+  "field_deltas": {
+    "apostille.certificate_number": {
+      "field_key": "apostille.certificate_number",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "apostille.issued_at": {
+      "field_key": "apostille.issued_at",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "apostille.issuing_authority": {
+      "field_key": "apostille.issuing_authority",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "apostille.issuing_country": {
+      "field_key": "apostille.issuing_country",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "apostille.seal_owner": {
+      "field_key": "apostille.seal_owner",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "apostille.signer_capacity": {
+      "field_key": "apostille.signer_capacity",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "residency_certificate.issue_date": {
+      "field_key": "residency_certificate.issue_date",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 3,
+        "exact_matches": 3,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 3,
+        "exact_matches": 3,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "residency_certificate.residency_country": {
+      "field_key": "residency_certificate.residency_country",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "residency_certificate.residency_country_code": {
+      "field_key": "residency_certificate.residency_country_code",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "residency_certificate.tax_year": {
+      "field_key": "residency_certificate.tax_year",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "residency_certificate.taxpayer_name": {
+      "field_key": "residency_certificate.taxpayer_name",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "residency_certificate.tin": {
+      "field_key": "residency_certificate.tin",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 3,
+        "exact_matches": 3,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 3,
+        "exact_matches": 3,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    }
+  },
+  "improved_documents": [],
+  "regressed_documents": [],
+  "mixed_documents": [],
+  "unchanged_documents": [
+    "apostille",
+    "residency_certificate"
+  ],
+  "added_documents": [],
+  "removed_documents": [],
+  "document_deltas": {
+    "apostille": {
+      "field_key": "apostille",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 6,
+        "exact_matches": 6,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 6,
+        "exact_matches": 6,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "residency_certificate": {
+      "field_key": "residency_certificate",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 22,
+        "exact_matches": 22,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 22,
+        "exact_matches": 22,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    }
+  },
+  "improved_field_groups": [],
+  "regressed_field_groups": [],
+  "mixed_field_groups": [],
+  "unchanged_field_groups": [
+    "date",
+    "english_name_org",
+    "korean_mixed_form",
+    "numeric_tin_code"
+  ],
+  "added_field_groups": [],
+  "removed_field_groups": [],
+  "field_group_deltas": {
+    "date": {
+      "field_key": "date",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 3,
+        "exact_matches": 3,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 3,
+        "exact_matches": 3,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "english_name_org": {
+      "field_key": "english_name_org",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 12,
+        "exact_matches": 12,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 12,
+        "exact_matches": 12,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "korean_mixed_form": {
+      "field_key": "korean_mixed_form",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "numeric_tin_code": {
+      "field_key": "numeric_tin_code",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 12,
+        "exact_matches": 12,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 12,
+        "exact_matches": 12,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    }
+  },
+  "improved_training_field_groups": [],
+  "regressed_training_field_groups": [],
+  "mixed_training_field_groups": [],
+  "unchanged_training_field_groups": [],
+  "added_training_field_groups": [],
+  "removed_training_field_groups": [],
+  "training_profile_deltas": {},
+  "overall_delta": {
+    "field_key": "overall",
+    "status": "unchanged",
+    "baseline": {
+      "comparisons": 28,
+      "exact_matches": 28,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "candidate": {
+      "comparisons": 28,
+      "exact_matches": 28,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "comparison_delta": 0,
+    "exact_match_rate_delta": 0.0,
+    "average_character_error_rate_delta": 0.0,
+    "average_word_error_rate_delta": 0.0
+  },
+  "promotion_assessment": {
+    "status": "promote",
+    "blocking_reasons": [],
+    "warning_reasons": [],
+    "severe_regressed_fields": [],
+    "coverage_regressed_fields": [],
+    "notable_improved_fields": []
+  }
+}

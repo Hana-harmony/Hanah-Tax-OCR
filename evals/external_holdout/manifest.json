@@ -1,5 +1,5 @@
 {
-  "version": "2026-07-01",
+  "version": "2026-07-02",
   "sample_root": "sample_data",
   "labeled_root": "data/labeled",
   "eval_root": "evals/cases",
@@ -288,6 +288,7 @@
     "source_path_mismatch_case_count": 0,
     "excluded_eval_overlap_count": 4,
     "excluded_non_extractable_count": 2,
+    "excluded_non_extractable_label_conflict_count": 1,
     "document_type_counts": {
       "apostille": 1,
       "residency_certificate": 4
@@ -308,22 +309,35 @@
     {
       "case_id": "residency_maria_chen_001",
       "sample_path": "sample_data/거주자증명서/미국 TREASURY주.png",
-      "document_type": "residency_certificate"
+      "document_type": "residency_certificate",
+      "subset_tags": [
+        "low_quality"
+      ]
     },
     {
       "case_id": "withholding_maria_chen_001",
       "sample_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
-      "document_type": "withholding_tax_form"
+      "document_type": "withholding_tax_form",
+      "subset_tags": [
+        "mixed_language"
+      ]
     },
     {
       "case_id": "apostille_north_carolina_001",
       "sample_path": "sample_data/아포스티유 샘플/미국 california 주2.jpg",
-      "document_type": "apostille"
+      "document_type": "apostille",
+      "subset_tags": [
+        "format_variation",
+        "low_quality"
+      ]
     },
     {
       "case_id": "apostille_michigan_001",
       "sample_path": "sample_data/아포스티유 샘플/미국 michigan 주.jpg",
-      "document_type": "apostille"
+      "document_type": "apostille",
+      "subset_tags": [
+        "format_variation"
+      ]
     }
   ],
   "excluded_non_extractable_cases": [
@@ -332,14 +346,43 @@
       "sample_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
       "document_type": "withholding_tax_form",
       "page_role": "reverse_side_instructions",
-      "exclusion_reason": "back_side_reference_page"
+      "exclusion_reason": "back_side_reference_page",
+      "label_case_ids": [
+        "withholding_hana_payer_001"
+      ],
+      "label_source_paths": [
+        "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png"
+      ],
+      "source_path_mismatch": true,
+      "source_path_alias_match": false,
+      "mismatched_label_paths": [
+        "data/labeled/pending_review/withholding_tax_form/withholding_hana_payer_001/label.json"
+      ],
+      "subset_tags": [
+        "format_variation",
+        "mixed_language"
+      ]
     },
     {
       "case_id": "withholding_pdf_001",
       "sample_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
       "document_type": "withholding_tax_form",
       "page_role": "blank_form_template",
-      "exclusion_reason": "blank_form_without_filled_entities"
+      "exclusion_reason": "blank_form_without_filled_entities",
+      "label_case_ids": [
+        "withholding_pdf_001"
+      ],
+      "label_source_paths": [
+        "sample_data/국내원천소득 제한세율/원본 샘플.pdf"
+      ],
+      "source_path_mismatch": false,
+      "source_path_alias_match": false,
+      "mismatched_label_paths": [],
+      "subset_tags": [
+        "format_variation",
+        "mixed_language",
+        "pdf_render"
+      ]
     }
   ]
 }

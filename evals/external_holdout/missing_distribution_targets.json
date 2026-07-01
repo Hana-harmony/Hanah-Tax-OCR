@@ -1,5 +1,5 @@
 {
-  "version": "2026-07-01",
+  "version": "2026-07-02",
   "baseline_manifest": "evals/external_holdout/manifest.json",
   "targets": [
     {
@@ -13,12 +13,30 @@
       "priority": "highest",
       "evidence": {
         "candidate_case_count_in_manifest": 0,
+        "ready_case_ids": [],
+        "partial_case_ids": [],
         "blocked_by_eval_overlap_case_ids": [
           "withholding_maria_chen_001"
         ],
-        "non_extractable_case_ids": [
-          "withholding_hana_payer_001",
-          "withholding_pdf_001"
+        "blocked_by_non_extractable_cases": [
+          {
+            "case_id": "withholding_hana_payer_001",
+            "page_role": "reverse_side_instructions",
+            "exclusion_reason": "back_side_reference_page",
+            "source_path_mismatch": true,
+            "label_case_ids": [
+              "withholding_hana_payer_001"
+            ]
+          },
+          {
+            "case_id": "withholding_pdf_001",
+            "page_role": "blank_form_template",
+            "exclusion_reason": "blank_form_without_filled_entities",
+            "source_path_mismatch": false,
+            "label_case_ids": [
+              "withholding_pdf_001"
+            ]
+          }
         ]
       },
       "needed_sample_description": "내부 eval과 다른 원본의 front-side 작성 완료 withholding 샘플 1건 이상. 저해상도 또는 blur가 있고, 한글 라벨과 영문 이름/주소가 함께 보여야 한다."
@@ -33,8 +51,30 @@
       "priority": "high",
       "evidence": {
         "candidate_case_count_in_manifest": 0,
+        "ready_case_ids": [],
+        "partial_case_ids": [],
         "blocked_by_eval_overlap_case_ids": [
           "withholding_maria_chen_001"
+        ],
+        "blocked_by_non_extractable_cases": [
+          {
+            "case_id": "withholding_hana_payer_001",
+            "page_role": "reverse_side_instructions",
+            "exclusion_reason": "back_side_reference_page",
+            "source_path_mismatch": true,
+            "label_case_ids": [
+              "withholding_hana_payer_001"
+            ]
+          },
+          {
+            "case_id": "withholding_pdf_001",
+            "page_role": "blank_form_template",
+            "exclusion_reason": "blank_form_without_filled_entities",
+            "source_path_mismatch": false,
+            "label_case_ids": [
+              "withholding_pdf_001"
+            ]
+          }
         ]
       },
       "needed_sample_description": "이름/주소/서명일 중 하나가 border clipping 또는 skew 영향을 받는 작성 완료 withholding 샘플 1건 이상."
@@ -48,10 +88,14 @@
       "status": "missing_source",
       "priority": "medium",
       "evidence": {
-        "ready_apostille_case_ids": [],
-        "partial_apostille_case_ids": [
-          "apostille_california_001"
-        ]
+        "candidate_case_count_in_manifest": 0,
+        "ready_case_ids": [],
+        "partial_case_ids": [],
+        "blocked_by_eval_overlap_case_ids": [
+          "apostille_north_carolina_001",
+          "apostille_michigan_001"
+        ],
+        "blocked_by_non_extractable_cases": []
       },
       "needed_sample_description": "서명자/발행일이 실제로 채워져 있고 blur가 있는 apostille 샘플 1건 이상."
     }
