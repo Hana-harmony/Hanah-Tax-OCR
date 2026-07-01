@@ -27,7 +27,33 @@ def normalize_address(value: str | None) -> str | None:
     normalized = re.sub(r"[\n\r\t,]+", " ", value)
     normalized = re.sub(r"[^A-Za-z0-9#.' -]", " ", normalized)
     normalized = normalize_whitespace(normalized)
+    normalized = _normalize_zip_like_tokens(normalized)
     return normalized or None
+
+
+def _normalize_zip_like_tokens(value: str) -> str:
+    digit_like_map = str.maketrans(
+        {
+            "O": "0",
+            "o": "0",
+            "I": "1",
+            "l": "1",
+            "L": "1",
+            "S": "5",
+            "B": "8",
+        }
+    )
+
+    def _replace(match: re.Match[str]) -> str:
+        token = match.group(0)
+        if len(token) != 5 or sum(character.isdigit() for character in token) < 3:
+            return token
+        normalized_token = token.translate(digit_like_map)
+        if normalized_token.isdigit():
+            return normalized_token
+        return token
+
+    return re.sub(r"\b[A-Za-z0-9]{5}\b", _replace, value)
 
 
 def normalize_country(value: str | None) -> str | None:

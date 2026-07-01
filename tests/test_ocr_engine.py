@@ -244,6 +244,56 @@ def test_paddle_ocr_engine_retries_address_region_with_left_expansion(tmp_path: 
     )
 
 
+def test_paddle_ocr_engine_searches_all_address_fallbacks_and_keeps_best_address_line(
+    tmp_path: Path,
+) -> None:
+    image_path = tmp_path / "sample.png"
+    Image.new("RGB", (100, 100), "white").save(image_path)
+
+    class FakePaddleOCR:
+        def __init__(self, **kwargs: str) -> None:
+            self.kwargs = kwargs
+
+        def ocr(self, image_input: object, cls: bool = True) -> list[list[object]]:
+            assert cls is True
+            width = len(image_input[0])  # type: ignore[index]
+            height = len(image_input)  # type: ignore[arg-type]
+            if width >= 70 and height >= 9:
+                text = (
+                    "10 Main Street Suite 10 New York NY 10001 United States of America\n"
+                    "0-30-2010"
+                )
+            else:
+                text = "2010 United States of America"
+            return [[
+                (
+                    [[0, 0], [width, 0], [width, 1], [0, 1]],
+                    (text, 0.99),
+                )
+            ]]
+
+    fake_module = types.ModuleType("paddleocr")
+    fake_module.PaddleOCR = FakePaddleOCR
+    original = sys.modules.get("paddleocr")
+    sys.modules["paddleocr"] = fake_module
+    try:
+        engine = PaddleOCREngine(lang="en")
+        regions = engine.run_regions(
+            image_path,
+            [OCRRegionSpec("address", 0.16, 0.21, 0.86, 0.25)],
+        )
+    finally:
+        if original is None:
+            del sys.modules["paddleocr"]
+        else:
+            sys.modules["paddleocr"] = original
+
+    assert (
+        regions["address"].raw_text
+        == "10 Main Street Suite 10 New York NY 10001 United States of America"
+    )
+
+
 def test_paddle_ocr_engine_prefers_applicant_name_variant_with_three_clean_tokens(
     tmp_path: Path,
 ) -> None:
@@ -419,6 +469,91 @@ def test_paddle_ocr_engine_prefers_thresholded_middle_name_variant(
     sys.modules["paddleocr"] = fake_module
     try:
         engine = PaddleOCREngine(lang="korean")
+        regions = engine.run_regions(
+            image_path,
+            [OCRRegionSpec("middle_name", 0.68, 0.16, 0.76, 0.20)],
+        )
+    finally:
+        if original is None:
+            del sys.modules["paddleocr"]
+        else:
+            sys.modules["paddleocr"] = original
+
+    assert regions["middle_name"].raw_text == "L"
+
+
+def test_paddle_ocr_engine_prefers_expanded_middle_name_region_on_tie(
+    tmp_path: Path,
+) -> None:
+    image_path = tmp_path / "sample.png"
+    Image.new("RGB", (100, 100), "white").save(image_path)
+
+    class FakePaddleOCR:
+        def __init__(self, **kwargs: str) -> None:
+            self.kwargs = kwargs
+
+        def ocr(self, image_input: object, cls: bool = True) -> list[list[object]]:
+            assert cls is True
+            width = len(image_input[0])  # type: ignore[index]
+            height = len(image_input)  # type: ignore[arg-type]
+            text = "F" if width >= 10 and height >= 6 else "E"
+            return [[
+                (
+                    [[0, 0], [width, 0], [width, 1], [0, 1]],
+                    (text, 0.99),
+                )
+            ]]
+
+    fake_module = types.ModuleType("paddleocr")
+    fake_module.PaddleOCR = FakePaddleOCR
+    original = sys.modules.get("paddleocr")
+    sys.modules["paddleocr"] = fake_module
+    try:
+        engine = PaddleOCREngine(lang="en")
+        regions = engine.run_regions(
+            image_path,
+            [OCRRegionSpec("middle_name", 0.68, 0.16, 0.76, 0.20)],
+        )
+    finally:
+        if original is None:
+            del sys.modules["paddleocr"]
+        else:
+            sys.modules["paddleocr"] = original
+
+    assert regions["middle_name"].raw_text == "F"
+
+
+def test_paddle_ocr_engine_extracts_clean_middle_name_line_from_noisy_expanded_crop(
+    tmp_path: Path,
+) -> None:
+    image_path = tmp_path / "sample.png"
+    Image.new("RGB", (100, 100), "white").save(image_path)
+
+    class FakePaddleOCR:
+        def __init__(self, **kwargs: str) -> None:
+            self.kwargs = kwargs
+
+        def ocr(self, image_input: object, cls: bool = True) -> list[list[object]]:
+            assert cls is True
+            width = len(image_input[0])  # type: ignore[index]
+            height = len(image_input)  # type: ignore[arg-type]
+            if width >= 10 and height >= 6:
+                text = "(M\nL\nof America"
+            else:
+                return [[]]
+            return [[
+                (
+                    [[0, 0], [width, 0], [width, 1], [0, 1]],
+                    (text, 0.99),
+                )
+            ]]
+
+    fake_module = types.ModuleType("paddleocr")
+    fake_module.PaddleOCR = FakePaddleOCR
+    original = sys.modules.get("paddleocr")
+    sys.modules["paddleocr"] = fake_module
+    try:
+        engine = PaddleOCREngine(lang="en")
         regions = engine.run_regions(
             image_path,
             [OCRRegionSpec("middle_name", 0.68, 0.16, 0.76, 0.20)],

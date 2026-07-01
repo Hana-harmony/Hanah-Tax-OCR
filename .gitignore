@@ -54,3 +54,7 @@ data/training/**
 !data/training/**/README.md
 
 data/manifests/*.jsonl
+
+PaddleOCR/
+output/
+tmp/

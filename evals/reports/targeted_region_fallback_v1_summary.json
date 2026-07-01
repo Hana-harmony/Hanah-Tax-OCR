@@ -1,0 +1,33 @@
+{
+  "report_path": "evals/reports/targeted_region_fallback_v1_report.json",
+  "compared_cases": 3,
+  "missing_cases": [],
+  "field_metric_count": 23,
+  "comparison_count": 23,
+  "exact_match_rate": 0.956522,
+  "average_character_error_rate": 0.043478,
+  "average_word_error_rate": 0.043478,
+  "document_pass_rate": 0.666667,
+  "passed_case_ids": [
+    "apostille_north_carolina_001",
+    "residency_maria_chen_001"
+  ],
+  "failed_case_ids": [
+    "withholding_maria_chen_001"
+  ],
+  "low_quality_subset": {
+    "case_ids": [
+      "apostille_california_001",
+      "residency_john_doe_001",
+      "residency_legacy_001",
+      "residency_university_hawaii_001"
+    ],
+    "comparison_count": 0,
+    "exact_match_rate": 0.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 0.0,
+    "passed_case_ids": [],
+    "failed_case_ids": []
+  }
+}

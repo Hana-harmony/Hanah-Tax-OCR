@@ -223,6 +223,13 @@ class WithholdingTaxFormParser(BaseDocumentParser):
                 ):
                     return sanitized_full_text_address
                 return repaired_region_address
+            if (
+                repaired_region_address
+                and sanitized_full_text_address
+                and self._has_address_street_marker(repaired_region_address)
+                and not self._has_address_street_marker(sanitized_full_text_address)
+            ):
+                return repaired_region_address
             return sanitized_full_text_address or full_text_address
         return (
             self._sanitize_full_text_address(full_text_address)
@@ -278,6 +285,15 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             return None
         repaired = re.sub(r"^(\d{1,5})([A-Za-z])", r"\1 \2", value)
         return repaired or None
+
+    def _has_address_street_marker(self, value: str | None) -> bool:
+        if not value:
+            return False
+        return re.search(
+            r"\b(street|st|road|rd|avenue|ave|blvd|boulevard|suite|apt)\b",
+            value,
+            re.IGNORECASE,
+        ) is not None
 
     def _select_signature_date_candidate(
         self,
@@ -491,6 +507,8 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             return value
         if normalized == "0":
             return "O"
+        if normalized == "1":
+            return "I"
         return normalized.upper()
 
     def _normalize_alphanumeric_name_token(self, value: str | None) -> str | None:

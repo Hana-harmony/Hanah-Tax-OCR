@@ -1,0 +1,128 @@
+{
+  "iteration_id": "2026-07-01_iteration_14",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "Withholding 상단 우측 영역에서 address와 middle_name에 search-all + box expansion을 적용하면 sparse full-text OCR을 보완하면서도 기존 date 필드를 깨지 않고 exact match를 회복할 수 있다.",
+    "Parser 단계에서 street-marker 우선 주소 병합, ZIP letter-digit rescue, middle initial 1/I 정규화를 좁게 적용하면 region OCR 이득을 실제 end-to-end extraction 개선으로 연결할 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "ocr_region_policy",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/ocr/engine.py",
+        "tests/test_ocr_engine.py"
+      ],
+      "summary": "Address와 middle_name에 대해 search-all fallback, region box expansion, tie-break, line selection을 추가해 withholding 상단 우측 필드의 region OCR 복원력을 높였다."
+    },
+    {
+      "type": "parser_normalization",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/parsers/withholding_tax_form.py",
+        "src/hanah_tax_ocr/normalization.py",
+        "tests/test_parsers.py"
+      ],
+      "summary": "Street marker가 있는 region address를 좁게 우선하고, ZIP letter-digit confusion과 middle initial 1/I를 정규화해 OCR 개선이 parser 출력까지 반영되도록 했다."
+    },
+    {
+      "type": "docs_and_repo_hygiene",
+      "status": "kept",
+      "files": [
+        "README.md",
+        ".gitignore"
+      ],
+      "summary": "Hybrid replay 기반 비교 절차와 benchmark protocol 위치를 README에 반영하고, 커밋 금지 산출물 경로를 .gitignore에 추가했다."
+    }
+  ],
+  "targeted_eval": {
+    "summary_path": "evals/reports/targeted_region_parser_combo_v1_summary.json",
+    "result": {
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    },
+    "covered_case_ids": [
+      "apostille_north_carolina_001",
+      "residency_maria_chen_001",
+      "withholding_maria_chen_001"
+    ]
+  },
+  "official_same_input_replay": {
+    "metadata_path": "evals/reports/current_official_region_parser_combo_v2_metadata.json",
+    "summary_path": "evals/reports/current_official_region_parser_combo_v2_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_region_parser_combo_v2.json",
+    "replay_baseline_comparison_path": "evals/reports/current_replay_baseline_vs_region_parser_combo_v2.json",
+    "replayed_prefixes": [
+      "withholding_"
+    ],
+    "rerun_case_count": 21,
+    "copied_case_count": 44,
+    "result": {
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    },
+    "decision": "promote",
+    "reason": "Stored official baseline 대비 no-regression을 유지했고, same-input replay baseline이 갖고 있던 withholding address/applicant_name/middle_name drift를 모두 해소했다."
+  },
+  "discarded_candidate_evidence": [
+    {
+      "candidate": "region_fallback_v1",
+      "summary_path": "evals/reports/current_official_region_fallback_v1_summary.json",
+      "reason": "withholding real sample과 다수 synthetic에서 address/middle_name 회귀가 남아 폐기했다."
+    },
+    {
+      "candidate": "region_fallback_v2",
+      "summary_path": "evals/reports/current_official_region_fallback_v2_summary.json",
+      "reason": "실샘플 회귀는 막았지만 official replay에서 withholding 회귀가 12건 남아 폐기했다."
+    },
+    {
+      "candidate": "region_parser_combo_v1",
+      "summary_path": "evals/reports/current_official_region_parser_combo_v1_summary.json",
+      "reason": "남은 오류가 address ZIP confusion 2건과 middle initial 1/I 1건으로 좁혀졌지만 baseline exact match 1.0에는 아직 못 미쳐 보류했다."
+    }
+  ],
+  "baseline_comparison": {
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "kept_candidate_exact_match_rate": 1.0,
+    "kept_candidate_average_character_error_rate": 0.0,
+    "kept_candidate_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0
+  },
+  "replay_baseline_delta": {
+    "comparison_path": "evals/reports/current_replay_baseline_vs_region_parser_combo_v2.json",
+    "exact_match_rate_delta": 0.0335305719921104,
+    "average_character_error_rate_delta": -0.017930333555333557,
+    "average_word_error_rate_delta": -0.021696252465483234,
+    "improved_fields": [
+      "withholding_tax_form.address",
+      "withholding_tax_form.applicant_name",
+      "withholding_tax_form.middle_name"
+    ]
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": "evals/reports/current_official_v17_vs_region_parser_combo_v2.json",
+    "note": "issue_date, signature_date, issued_on 관련 필드는 모두 unchanged였다."
+  },
+  "kept_candidates": [
+    "withholding region OCR + parser combo v2",
+    "withholding_top_right_dual_confusion_probe_v4"
+  ],
+  "discarded_candidates": [
+    "region_fallback_v1",
+    "region_fallback_v2",
+    "region_parser_combo_v1"
+  ],
+  "next_priorities": [
+    "external holdout manifest에 실제 low-quality and mixed-language withholding 샘플을 추가해 현재 0 comparison인 low-quality subset을 채운다.",
+    "semi-real augmentation ledger를 field_group 단위로 갱신해 blur, border clipping, label bleed가 어디에 실제 이득을 주는지 누적 측정한다."
+  ]
+}

@@ -654,6 +654,58 @@ def test_withholding_parser_strips_label_bleed_prefix_from_region_address() -> N
     )
 
 
+def test_withholding_parser_prefers_region_address_when_full_text_lacks_street_marker() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "주소",
+                            "2014 United States of America",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "address": OCRPage(
+                    page_number=1,
+                    raw_text="14 Main Street Suite 14 New York NY 10001 United States of America",
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert (
+        parsed.fields["address"]
+        == "14 Main Street Suite 14 New York NY 10001 United States of America"
+    )
+
+
+def test_withholding_parser_normalizes_zip_letter_confusion_in_address() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[OCRPage(page_number=1, raw_text="withholding probe")],
+            regions={
+                "address": OCRPage(
+                    page_number=1,
+                    raw_text="4 Main Street Suite 4 New York NY 10o01 United States of America",
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert (
+        parsed.fields["address"]
+        == "4 Main Street Suite 4 New York NY 10001 United States of America"
+    )
+
+
 def test_withholding_parser_preserves_digits_and_rebuilds_applicant_name() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(
@@ -803,6 +855,36 @@ def test_withholding_parser_normalizes_zero_middle_initial_and_rebuilds_applican
 
     assert parsed.fields["middle_name"] == "O"
     assert parsed.fields["applicant_name"] == "SAMPLE15 O USER"
+
+
+def test_withholding_parser_normalizes_one_middle_initial_and_rebuilds_applicant_name() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "209-29-2009",
+                            "2026-01-10",
+                            "SAMPLE9 1 USER",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "first_name": OCRPage(page_number=1, raw_text="SAMPLE9"),
+                "middle_name": OCRPage(page_number=1, raw_text="1"),
+                "last_name": OCRPage(page_number=1, raw_text="USER"),
+                "applicant_name": OCRPage(page_number=1, raw_text="SAMPLE9\n1\nUSER"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["middle_name"] == "I"
+    assert parsed.fields["applicant_name"] == "SAMPLE9 I USER"
 
 
 def test_withholding_parser_recovers_from_region_ocr_noise() -> None:

@@ -23,12 +23,20 @@ REGION_FALLBACK_LEFT_OFFSETS: dict[str, tuple[float, ...]] = {
 }
 
 REGION_FALLBACK_BOX_EXPANSIONS: dict[str, tuple[tuple[float, float, float, float], ...]] = {
+    "address": (
+        (0.0, 0.0, 0.0, 0.03),
+        (0.0, -0.02, 0.0, 0.06),
+    ),
     "applicant_name": (
         (-0.01, -0.01, 0.02, 0.01),
     ),
+    "middle_name": (
+        (-0.02, -0.01, 0.03, 0.02),
+    ),
 }
 
-REGION_SEARCH_ALL_FALLBACKS = {"applicant_name"}
+REGION_SEARCH_ALL_FALLBACKS = {"address", "applicant_name", "middle_name"}
+REGION_PREFER_LARGER_BOX_ON_TIE = {"middle_name"}
 
 REGION_ALTERNATE_OVERRIDES: dict[str, tuple[dict[str, Any], ...]] = {
     "applicant_name": ({"lang": "en"},),
@@ -280,6 +288,7 @@ class PaddleOCREngine:
         search_all_fallbacks = region_spec.name in REGION_SEARCH_ALL_FALLBACKS
         best_pages: list[OCRPage] = []
         best_score = (0, 0, 0)
+        best_area = 0
         for candidate_region in region_boxes:
             crop = image.crop(
                 (
@@ -300,9 +309,18 @@ class PaddleOCREngine:
                         self._build_pages(raw_result),
                     )
                     score = self._score_region_pages(region_spec.name, pages)
+                    crop_area = variant.width * variant.height
                     if score > best_score:
                         best_pages = pages
                         best_score = score
+                        best_area = crop_area
+                    elif (
+                        region_spec.name in REGION_PREFER_LARGER_BOX_ON_TIE
+                        and score == best_score
+                        and crop_area > best_area
+                    ):
+                        best_pages = pages
+                        best_area = crop_area
             if best_pages and not search_all_fallbacks:
                 return best_pages
         return best_pages
@@ -535,9 +553,14 @@ class PaddleOCREngine:
         region_name: str,
         pages: list[OCRPage],
     ) -> list[OCRPage]:
-        if region_name != "applicant_name":
+        if region_name == "applicant_name":
+            best_line = self._select_best_applicant_name_line(pages)
+        elif region_name == "address":
+            best_line = self._select_best_address_line(pages)
+        elif region_name == "middle_name":
+            best_line = self._select_best_middle_name_line(pages)
+        else:
             return pages
-        best_line = self._select_best_applicant_name_line(pages)
         if best_line is None:
             return pages
         page_number, raw_text = best_line
@@ -576,6 +599,107 @@ class PaddleOCREngine:
         if score[0] < 5 or score[1] < 2:
             return None
         return page_number, normalized_line
+
+    def _select_best_address_line(
+        self,
+        pages: list[OCRPage],
+    ) -> tuple[int, str] | None:
+        best_candidate: tuple[tuple[int, int, int], int, str] | None = None
+        for page in pages:
+            for line in page.raw_text.splitlines():
+                normalized_line = re.sub(r"\s+", " ", line).strip()
+                if not normalized_line:
+                    continue
+                score = self._score_address_line(normalized_line)
+                if score is None:
+                    continue
+                candidate = (score, page.page_number, normalized_line)
+                if best_candidate is None or candidate > best_candidate:
+                    best_candidate = candidate
+        if best_candidate is None:
+            return None
+        score, page_number, normalized_line = best_candidate
+        if score[0] < 6:
+            return None
+        return page_number, normalized_line
+
+    def _select_best_middle_name_line(
+        self,
+        pages: list[OCRPage],
+    ) -> tuple[int, str] | None:
+        best_candidate: tuple[tuple[int, int, int], int, str] | None = None
+        for page in pages:
+            for line in page.raw_text.splitlines():
+                normalized_line = re.sub(r"\s+", " ", line).strip()
+                if not normalized_line:
+                    continue
+                score = self._score_middle_name_line(normalized_line)
+                if score is None:
+                    continue
+                token = re.sub(r"[^A-Za-z0-9]", "", normalized_line)
+                if not token:
+                    continue
+                candidate = (score, page.page_number, token)
+                if best_candidate is None or candidate > best_candidate:
+                    best_candidate = candidate
+        if best_candidate is None:
+            return None
+        score, page_number, token = best_candidate
+        if score[0] < 4:
+            return None
+        return page_number, token
+
+    def _score_address_line(
+        self,
+        normalized_line: str,
+    ) -> tuple[int, int, int] | None:
+        normalized_lower = normalized_line.lower()
+        tokens = re.findall(r"[A-Za-z0-9#.'-]+", normalized_line)
+        if not tokens:
+            return None
+
+        score = 0
+        if re.match(r"^\d{1,5}\b", normalized_line):
+            score += 3
+        if re.search(
+            r"\b(street|st|road|rd|avenue|ave|blvd|boulevard|suite|apt)\b",
+            normalized_lower,
+        ):
+            score += 4
+        if "united states" in normalized_lower or normalized_lower.endswith("usa"):
+            score += 1
+        if re.search(r"\b\d{5}\b", normalized_line):
+            score += 1
+        if len(tokens) >= 6:
+            score += 1
+        if re.search(r"\b\d{3}-\d{2}-\d{4}\b", normalized_line):
+            score -= 4
+        if re.search(r"\buser\b", normalized_lower):
+            score -= 2
+        return (score, len(tokens), -len(normalized_line))
+
+    def _score_middle_name_line(
+        self,
+        normalized_line: str,
+    ) -> tuple[int, int, int] | None:
+        token = re.sub(r"[^A-Za-z0-9]", "", normalized_line)
+        if not token:
+            return None
+
+        score = 0
+        if re.fullmatch(r"[A-Za-z]", normalized_line):
+            score += 5
+        elif len(token) == 1 and token.isalpha():
+            score += 3
+        elif token.isalpha():
+            score += 1
+        elif token.isdigit():
+            score += 1
+
+        if re.search(r"\b(name|middle)\b", normalized_line.lower()):
+            score -= 2
+        noise_count = len(re.sub(r"[A-Za-z0-9\s]", "", normalized_line))
+        return (score, int(token.isalpha()), -noise_count)
 
     def _score_applicant_name_line(
         self,
