@@ -53,7 +53,10 @@ data/training/**
 !data/training/**/.gitkeep
 !data/training/**/README.md
 
-data/manifests/*.jsonl
+data/**/*manifest*.jsonl
+data/**/manifests/**/*.jsonl
+!data/**/.gitkeep
+!data/**/README.md
 
 PaddleOCR/
 output/

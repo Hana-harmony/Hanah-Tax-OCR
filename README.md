@@ -177,6 +177,19 @@ hanah-tax-ocr compare-eval-reports \
 
 비교 결과에는 필드별 변화량, 필드 그룹 집계, 문서 단위 집계, 전체 가중 변화량이 포함되어 있어 candidate recognizer 승격 전에 회귀를 더 쉽게 확인할 수 있습니다.
 
+semi-real hard case probe를 materialize, 실행, report/summary/metadata까지 한 번에 생성:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m scripts.evals.run_semi_real_probe_eval \
+  --manifest evals/semi_real_probes/manifest.json \
+  --suite-output-root tmp/manual_doc_probes_suite \
+  --actual-output-dir tmp/manual_doc_probes_actual \
+  --report-output evals/reports/current_probe_report.json \
+  --summary-output evals/reports/current_probe_summary.json \
+  --metadata-output evals/reports/current_probe_metadata.json \
+  --case-id withholding_country_row_context_probe
+```
+
 공식 baseline 기준으로 변경 문서만 재실행하는 hybrid replay 비교:
 
 ```bash
@@ -216,4 +229,5 @@ PYTHONPATH=src .venv/bin/python -m scripts.evals.summarize_eval_report \
 - 기본 배포 대상은 GPU 없는 AWS CPU 환경입니다.
 - PaddleOCR의 CPU 추론은 지원하며, 학습과 무거운 실험은 로컬에서 수행하는 것을 권장합니다.
 - 커밋 가능한 데이터는 비식별화 fixture와 결정적 라벨로 제한합니다.
+- `data/` 아래 generated manifest JSONL은 로컬 산출물로 보고 커밋하지 않습니다.
 - 로컬 실험 산출물인 `PaddleOCR/`, `output/`, `tmp/`는 커밋하지 않습니다.
