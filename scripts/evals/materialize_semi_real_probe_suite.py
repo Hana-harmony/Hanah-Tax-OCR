@@ -41,20 +41,44 @@ def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-VariantHandler = Callable[[Image.Image, list[dict[str, Any]], random.Random], Image.Image]
+VariantHandler = Callable[
+    [Image.Image, list[dict[str, Any]], random.Random, dict[str, Any]],
+    Image.Image,
+]
 
 
 def _variant_handlers() -> dict[str, VariantHandler]:
     return {
-        "border_clip": lambda image, _donors, rng: _apply_border_clip(image, rng),
-        "edge_overlap": lambda image, donors, rng: _apply_edge_overlap(image, donors, rng),
-        "gaussian_blur": lambda image, _donors, _rng: _apply_gaussian_blur(image),
-        "jpeg_blocking": lambda image, _donors, _rng: _apply_jpeg_blocking(image),
-        "left_clip": lambda image, _donors, _rng: _apply_left_clip(image),
-        "low_res": lambda image, _donors, _rng: _apply_low_res(image),
-        "overlay_patch": lambda image, donors, rng: _apply_overlay_patch(image, donors, rng),
-        "rotate": lambda image, _donors, _rng: _apply_rotate(image),
-        "stamp_shadow": lambda image, _donors, rng: _apply_stamp_shadow(image, rng),
+        "border_clip": (
+            lambda image, _donors, rng, options: _apply_border_clip(
+                image,
+                rng,
+                anchor=str(options["anchor"]) if options.get("anchor") else None,
+                clip_width_ratio=float(options.get("clip_width_ratio", 0.08)),
+                clip_height_ratio=float(options.get("clip_height_ratio", 0.12)),
+            )
+        ),
+        "edge_overlap": (
+            lambda image, donors, rng, options: _apply_edge_overlap(
+                image,
+                donors,
+                rng,
+                anchor=str(options["anchor"]) if options.get("anchor") else None,
+            )
+        ),
+        "gaussian_blur": lambda image, _donors, _rng, _options: _apply_gaussian_blur(image),
+        "jpeg_blocking": lambda image, _donors, _rng, _options: _apply_jpeg_blocking(image),
+        "left_clip": lambda image, _donors, _rng, _options: _apply_left_clip(image),
+        "low_res": lambda image, _donors, _rng, _options: _apply_low_res(image),
+        "overlay_patch": (
+            lambda image, donors, rng, _options: _apply_overlay_patch(
+                image,
+                donors,
+                rng,
+            )
+        ),
+        "rotate": lambda image, _donors, _rng, _options: _apply_rotate(image),
+        "stamp_shadow": lambda image, _donors, rng, _options: _apply_stamp_shadow(image, rng),
     }
 
 
@@ -95,6 +119,7 @@ def materialize_probe_suite(
         base_label, base_label_path = _load_base_label(probe)
         probe_seed = probe.get("seed")
         probe_rng = random.Random(int(probe_seed)) if probe_seed is not None else rng
+        augmentation_options = dict(probe.get("augmentation_options") or {})
 
         source_path = Path(str(probe.get("source_path") or base_label["source_path"]))
         if not source_path.is_file():
@@ -105,7 +130,7 @@ def materialize_probe_suite(
             {"crop_path": str(source_path)}
         ]
         image = Image.open(source_path).convert("RGB")
-        augmented = handler(image, donors, probe_rng)
+        augmented = handler(image, donors, probe_rng, augmentation_options)
 
         asset_path = assets_root / f"{case_id}{source_path.suffix.lower() or '.png'}"
         augmented.save(asset_path)
@@ -135,6 +160,7 @@ def materialize_probe_suite(
             "failure_modes": list(probe.get("failure_modes", [])),
             "focus_fields": list(probe.get("focus_fields", [])),
             "seed": probe_seed,
+            "augmentation_options": augmentation_options,
             "notes": list(probe.get("notes", [])),
         }
         label_path = labeled_root / document_type / case_id / "label.json"
@@ -155,6 +181,7 @@ def materialize_probe_suite(
             "failure_modes": list(probe.get("failure_modes", [])),
             "focus_fields": list(probe.get("focus_fields", [])),
             "seed": probe_seed,
+            "augmentation_options": augmentation_options,
             "notes": list(probe.get("notes", [])),
         }
         expected_path = cases_root / case_id / "expected.json"
@@ -173,6 +200,7 @@ def materialize_probe_suite(
                 "expected_path": str(expected_path),
                 "augmentation_type": augmentation_type,
                 "seed": probe_seed,
+                "augmentation_options": augmentation_options,
             }
         )
 

@@ -1,0 +1,313 @@
+{
+  "iteration_id": "2026-07-01_iteration_09",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "signature_date fallback should prefer a bottom signature-like date over an earlier birthdate when the region crop is invalid under top clipping.",
+    "semi-real probe augmentation should support deterministic anchor control so top-clip and right-overlap failures can be reproduced without RNG drift."
+  ],
+  "changes": [
+    {
+      "type": "probe_infra",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/training/hard_cases.py",
+        "scripts/evals/materialize_semi_real_probe_suite.py",
+        "tests/test_semi_real_probe_suite.py",
+        "evals/semi_real_probes/manifest.json"
+      ],
+      "summary": "Added per-probe augmentation_options anchor/clip controls so top and right semi-real probes materialize deterministically."
+    },
+    {
+      "type": "parser_prior",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/parsers/withholding_tax_form.py",
+        "tests/test_parsers.py"
+      ],
+      "summary": "Signature-date fallback now prioritizes valid 19xx/20xx dates near 신청인/서명 and otherwise uses the last valid full-text date, avoiding birthdate-first capture."
+    }
+  ],
+  "discarded_candidates": [
+    {
+      "candidate": "broad last-date signature fallback",
+      "reason": "Regressed withholding_maria_chen_001 to 6789-00-04 on the targeted real slice.",
+      "evidence": "tmp/targeted_real_regression_signature_date_v2/summary.json"
+    }
+  ],
+  "probe_results": {
+    "withholding_border_clip_top_name_probe": {
+      "before": {
+        "report_path": "tmp/manual_doc_probes/withholding_border_clip_top_name_probe_eval_report.json",
+        "compared_cases": 1,
+        "missing_cases": [],
+        "field_metric_count": 10,
+        "comparison_count": 10,
+        "exact_match_rate": 0.9,
+        "average_character_error_rate": 0.06,
+        "average_word_error_rate": 0.1,
+        "document_pass_rate": 0.0,
+        "passed_case_ids": [],
+        "failed_case_ids": [
+          "withholding_border_clip_top_name_probe"
+        ],
+        "low_quality_subset": {
+          "case_ids": [
+            "apostille_california_001",
+            "residency_john_doe_001",
+            "residency_legacy_001",
+            "residency_university_hawaii_001"
+          ],
+          "comparison_count": 0,
+          "exact_match_rate": 0.0,
+          "average_character_error_rate": 0.0,
+          "average_word_error_rate": 0.0,
+          "document_pass_rate": 0.0,
+          "passed_case_ids": [],
+          "failed_case_ids": []
+        }
+      },
+      "after": {
+        "report_path": "tmp/manual_doc_probes/withholding_border_clip_top_name_probe_v9_report.json",
+        "compared_cases": 1,
+        "missing_cases": [],
+        "field_metric_count": 10,
+        "comparison_count": 10,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0,
+        "document_pass_rate": 1.0,
+        "passed_case_ids": [
+          "withholding_border_clip_top_name_probe"
+        ],
+        "failed_case_ids": [],
+        "low_quality_subset": {
+          "case_ids": [
+            "apostille_california_001",
+            "residency_john_doe_001",
+            "residency_legacy_001",
+            "residency_university_hawaii_001"
+          ],
+          "comparison_count": 0,
+          "exact_match_rate": 0.0,
+          "average_character_error_rate": 0.0,
+          "average_word_error_rate": 0.0,
+          "document_pass_rate": 0.0,
+          "passed_case_ids": [],
+          "failed_case_ids": []
+        }
+      },
+      "decision": "kept"
+    }
+  },
+  "targeted_real_regression": {
+    "before": {
+      "report_path": "tmp/targeted_real_regression_signature_date_v2/report.json",
+      "compared_cases": 3,
+      "missing_cases": [],
+      "field_metric_count": 23,
+      "comparison_count": 23,
+      "exact_match_rate": 0.956522,
+      "average_character_error_rate": 0.030435,
+      "average_word_error_rate": 0.043478,
+      "document_pass_rate": 0.666667,
+      "passed_case_ids": [
+        "apostille_north_carolina_001",
+        "residency_maria_chen_001"
+      ],
+      "failed_case_ids": [
+        "withholding_maria_chen_001"
+      ],
+      "low_quality_subset": {
+        "case_ids": [
+          "apostille_california_001",
+          "residency_john_doe_001",
+          "residency_legacy_001",
+          "residency_university_hawaii_001"
+        ],
+        "comparison_count": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0,
+        "document_pass_rate": 0.0,
+        "passed_case_ids": [],
+        "failed_case_ids": []
+      }
+    },
+    "after": {
+      "report_path": "tmp/targeted_real_regression_signature_date_v3_report.json",
+      "compared_cases": 3,
+      "missing_cases": [],
+      "field_metric_count": 23,
+      "comparison_count": 23,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0,
+      "passed_case_ids": [
+        "apostille_north_carolina_001",
+        "residency_maria_chen_001",
+        "withholding_maria_chen_001"
+      ],
+      "failed_case_ids": [],
+      "low_quality_subset": {
+        "case_ids": [
+          "apostille_california_001",
+          "residency_john_doe_001",
+          "residency_legacy_001",
+          "residency_university_hawaii_001"
+        ],
+        "comparison_count": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0,
+        "document_pass_rate": 0.0,
+        "passed_case_ids": [],
+        "failed_case_ids": []
+      }
+    },
+    "decision": "kept"
+  },
+  "official_same_input_replay": {
+    "summary": {
+      "report_path": "tmp/current_official_signature_date_v3_same_inputs/report.json",
+      "compared_cases": 64,
+      "missing_cases": [
+        "residency_smoke_001"
+      ],
+      "field_metric_count": 24,
+      "comparison_count": 507,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0,
+      "passed_case_ids": [
+        "apostille_michigan_001",
+        "apostille_north_carolina_001",
+        "apostille_regression_001",
+        "apostille_regression_002",
+        "apostille_regression_003",
+        "apostille_regression_004",
+        "apostille_regression_005",
+        "apostille_regression_006",
+        "apostille_regression_007",
+        "apostille_regression_008",
+        "apostille_regression_009",
+        "apostille_regression_010",
+        "apostille_regression_011",
+        "apostille_regression_012",
+        "apostille_regression_013",
+        "apostille_regression_014",
+        "apostille_regression_015",
+        "apostille_regression_016",
+        "apostille_regression_017",
+        "apostille_regression_018",
+        "apostille_regression_019",
+        "apostille_regression_020",
+        "residency_maria_chen_001",
+        "residency_regression_001",
+        "residency_regression_002",
+        "residency_regression_003",
+        "residency_regression_004",
+        "residency_regression_005",
+        "residency_regression_006",
+        "residency_regression_007",
+        "residency_regression_008",
+        "residency_regression_009",
+        "residency_regression_010",
+        "residency_regression_011",
+        "residency_regression_012",
+        "residency_regression_013",
+        "residency_regression_014",
+        "residency_regression_015",
+        "residency_regression_016",
+        "residency_regression_017",
+        "residency_regression_018",
+        "residency_regression_019",
+        "residency_regression_020",
+        "withholding_maria_chen_001",
+        "withholding_regression_001",
+        "withholding_regression_002",
+        "withholding_regression_003",
+        "withholding_regression_004",
+        "withholding_regression_005",
+        "withholding_regression_006",
+        "withholding_regression_007",
+        "withholding_regression_008",
+        "withholding_regression_009",
+        "withholding_regression_010",
+        "withholding_regression_011",
+        "withholding_regression_012",
+        "withholding_regression_013",
+        "withholding_regression_014",
+        "withholding_regression_015",
+        "withholding_regression_016",
+        "withholding_regression_017",
+        "withholding_regression_018",
+        "withholding_regression_019",
+        "withholding_regression_020"
+      ],
+      "failed_case_ids": [],
+      "low_quality_subset": {
+        "case_ids": [
+          "apostille_california_001",
+          "residency_john_doe_001",
+          "residency_legacy_001",
+          "residency_university_hawaii_001"
+        ],
+        "comparison_count": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0,
+        "document_pass_rate": 0.0,
+        "passed_case_ids": [],
+        "failed_case_ids": []
+      }
+    },
+    "comparison_path": "evals/reports/current_official_v17_vs_signature_date_v3_same_inputs.json",
+    "overall_delta": {
+      "field_key": "overall",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 507,
+        "exact_matches": 507,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 507,
+        "exact_matches": 507,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "promotion_assessment": {
+      "status": "promote",
+      "blocking_reasons": [],
+      "warning_reasons": [],
+      "severe_regressed_fields": [],
+      "coverage_regressed_fields": [],
+      "notable_improved_fields": []
+    }
+  },
+  "baseline_comparison": {
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0
+  },
+  "next_priorities": [
+    "Design a tighter top-right semi-real perturbation that isolates middle_name without destroying unrelated right-half fields.",
+    "Expand date-focused external-holdout coverage with true low-quality scans where birthdate/signature-date co-occur and region drift is realistic."
+  ]
+}

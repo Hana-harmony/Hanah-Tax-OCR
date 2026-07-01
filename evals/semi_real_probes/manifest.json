@@ -84,6 +84,58 @@
         "Document-level edge-overlap probe forced to the bottom anchor via a probe-specific seed.",
         "Used to stress the applicant/signature area rather than the top name/address blocks."
       ]
+    },
+    {
+      "case_id": "withholding_border_clip_top_name_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_type": "border_clip",
+      "seed": 5,
+      "augmentation_options": {
+        "anchor": "top",
+        "clip_height_ratio": 0.18
+      },
+      "focus_fields": [
+        "first_name",
+        "middle_name",
+        "last_name",
+        "applicant_name"
+      ],
+      "failure_modes": [
+        "crop_miss",
+        "border_clipping"
+      ],
+      "notes": [
+        "Document-level border-clip probe forced to the top anchor via a probe-specific seed.",
+        "Used to isolate whether bottom applicant-name priors can recover the upper name row when the template header/name band is clipped."
+      ]
+    },
+    {
+      "case_id": "withholding_edge_overlap_right_name_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_type": "edge_overlap",
+      "seed": 4,
+      "augmentation_options": {
+        "anchor": "right"
+      },
+      "focus_fields": [
+        "first_name",
+        "middle_name",
+        "last_name",
+        "applicant_name"
+      ],
+      "failure_modes": [
+        "label_bleed",
+        "border_clipping",
+        "stamp_interference"
+      ],
+      "notes": [
+        "Document-level edge-overlap probe forced to the right anchor via a probe-specific seed.",
+        "Used to directly stress the top-right name band around the middle-name cell instead of only the bottom applicant signature block."
+      ]
     }
   ]
 }

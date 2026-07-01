@@ -143,15 +143,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         region_signature_date = self._normalize_iso_date(
             self._region_value(ocr_result, "signature_date")
         )
-        fallback_signature_date = self._normalize_iso_date(
-            self._find_first(r"(\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)", single_line)
-            or self._find_first(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2})", single_line)
-            or self._find_first(
-                r"(\d{4}\s*[-./]?\s*\d{2}\s*[-./]?\s*\d{2})(?=\s*(?:신청인|서명|또는\s*인|인\b))",
-                single_line,
-            )
-            or self._find_first(r"(\d{4}-\d{2}\d{2})", single_line)
-        )
+        fallback_signature_date = self._extract_signature_date_fallback(single_line)
         signature_date = self._select_signature_date_candidate(
             region_signature_date,
             fallback_signature_date,
@@ -304,6 +296,41 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if region_year != fallback_year:
             return fallback_signature_date
         return region_signature_date
+
+    def _extract_signature_date_fallback(self, text: str) -> str | None:
+        anchored_candidates = self._extract_valid_iso_date_candidates(
+            r"((?:19|20)\d{2}\s*[-./년]?\s*\d{1,2}\s*[-./월]?\s*\d{1,2}\s*일?)"
+            r"(?=[^\d]{0,24}(?:신청인|서명|또는\s*인|인\b))",
+            text,
+        )
+        if anchored_candidates:
+            return anchored_candidates[-1]
+
+        fallback_candidates: list[str] = []
+        for pattern in (
+            r"((?:19|20)\d{2}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)",
+            r"((?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2})",
+            r"((?:19|20)\d{2}\s+\d{1,2}\s+\d{1,2})",
+        ):
+            fallback_candidates.extend(self._extract_valid_iso_date_candidates(pattern, text))
+        if fallback_candidates:
+            return fallback_candidates[-1]
+        return self._normalize_iso_date(self._find_first(r"(\d{4}-\d{2}\d{2})", text))
+
+    def _extract_valid_iso_date_candidates(
+        self,
+        pattern: str,
+        text: str,
+    ) -> list[str]:
+        candidates: list[str] = []
+        for match in re.finditer(pattern, text, re.IGNORECASE):
+            value = self._normalize_iso_date(match.group(1))
+            if not self._is_valid_iso_date(value):
+                continue
+            if value in candidates:
+                continue
+            candidates.append(value)
+        return candidates
 
     def _select_country_candidate(
         self,

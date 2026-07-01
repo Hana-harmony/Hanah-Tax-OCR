@@ -40,6 +40,7 @@ def test_materialize_probe_suite_writes_assets_labels_and_expected(tmp_path: Pat
                         "base_label_path": str(base_label_path),
                         "augmentation_type": "left_clip",
                         "seed": 17,
+                        "augmentation_options": {"anchor": "top"},
                         "focus_fields": ["address"],
                         "failure_modes": ["crop_miss"],
                     }
@@ -66,6 +67,8 @@ def test_materialize_probe_suite_writes_assets_labels_and_expected(tmp_path: Pat
     assert label_payload["source_path"] == str(asset_path)
     assert label_payload["augmentation_type"] == "left_clip"
     assert label_payload["seed"] == 17
+    assert label_payload["augmentation_options"] == {"anchor": "top"}
     assert label_payload["expected_fields"]["address"] == "1 Main Street"
     assert expected_payload["failure_modes"] == ["crop_miss"]
     assert expected_payload["seed"] == 17
+    assert expected_payload["augmentation_options"] == {"anchor": "top"}

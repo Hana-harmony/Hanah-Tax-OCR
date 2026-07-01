@@ -139,18 +139,25 @@ def _apply_jpeg_blocking(image: Image.Image) -> Image.Image:
     return restored.resize(image.size, resample=Image.Resampling.BILINEAR)
 
 
-def _apply_border_clip(image: Image.Image, rng: random.Random) -> Image.Image:
-    clip_width = max(1, int(image.width * 0.08))
-    clip_height = max(1, int(image.height * 0.12))
+def _apply_border_clip(
+    image: Image.Image,
+    rng: random.Random,
+    *,
+    anchor: str | None = None,
+    clip_width_ratio: float = 0.08,
+    clip_height_ratio: float = 0.12,
+) -> Image.Image:
+    clip_width = max(1, int(image.width * clip_width_ratio))
+    clip_height = max(1, int(image.height * clip_height_ratio))
     canvas = Image.new("RGB", image.size, "white")
-    anchor = rng.choice(("left", "right", "top", "bottom"))
-    if anchor == "left":
+    resolved_anchor = anchor or rng.choice(("left", "right", "top", "bottom"))
+    if resolved_anchor == "left":
         cropped = image.crop((clip_width, 0, image.width, image.height))
         canvas.paste(cropped.resize((image.width - clip_width, image.height)), (clip_width, 0))
-    elif anchor == "right":
+    elif resolved_anchor == "right":
         cropped = image.crop((0, 0, image.width - clip_width, image.height))
         canvas.paste(cropped.resize((image.width - clip_width, image.height)), (0, 0))
-    elif anchor == "top":
+    elif resolved_anchor == "top":
         cropped = image.crop((0, clip_height, image.width, image.height))
         canvas.paste(cropped.resize((image.width, image.height - clip_height)), (0, clip_height))
     else:
@@ -199,6 +206,8 @@ def _apply_edge_overlap(
     image: Image.Image,
     donors: list[dict[str, Any]],
     rng: random.Random,
+    *,
+    anchor: str | None = None,
 ) -> Image.Image:
     canvas = image.copy().convert("RGBA")
     patch_width = max(10, image.width // 4)
@@ -233,10 +242,10 @@ def _apply_edge_overlap(
             width=1,
         )
 
-    anchor = rng.choice(("left", "right", "bottom"))
-    if anchor == "left":
+    resolved_anchor = anchor or rng.choice(("left", "right", "bottom"))
+    if resolved_anchor == "left":
         position = (0, max(0, image.height // 5))
-    elif anchor == "right":
+    elif resolved_anchor == "right":
         position = (image.width - patch.width, max(0, image.height // 5))
     else:
         position = (max(0, image.width // 3), image.height - patch.height)
