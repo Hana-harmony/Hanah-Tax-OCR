@@ -1,0 +1,278 @@
+{
+  "compared_cases": 2,
+  "missing_cases": [],
+  "comparisons": [
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "MARIA",
+      "actual": "MARIA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "CHEN",
+      "actual": "CHEN",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "L",
+      "actual": "L",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "987-65-4321",
+      "actual": "987-65-4321",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+      "actual": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026Urited States of America 34 1985-06-15 987-65-4321 US United States of America",
+      "exact_match": false,
+      "character_error_rate": 0.7681159420289855,
+      "word_error_rate": 0.6153846153846154
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-12",
+      "actual": "2026-01-12",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_jpeg_blocking_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "MARIA L. CHEN",
+      "actual": "MARIA L. CHEN",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "MARIA",
+      "actual": "MARIA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "CHEN",
+      "actual": "CHEN",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "L",
+      "actual": "L",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "987-65-4321",
+      "actual": "323-55-1234",
+      "exact_match": false,
+      "character_error_rate": 0.7272727272727273,
+      "word_error_rate": 1.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+      "actual": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-12",
+      "actual": "2026-01-12",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "MARIA L. CHEN",
+      "actual": "MARIA L. CHEN",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    }
+  ],
+  "field_metrics": {
+    "withholding_tax_form.address": {
+      "comparisons": 2,
+      "exact_matches": 1,
+      "exact_match_rate": 0.5,
+      "average_character_error_rate": 0.38405797101449274,
+      "average_word_error_rate": 0.3076923076923077
+    },
+    "withholding_tax_form.applicant_name": {
+      "comparisons": 2,
+      "exact_matches": 2,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.dividend_tax_rate": {
+      "comparisons": 2,
+      "exact_matches": 2,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.first_name": {
+      "comparisons": 2,
+      "exact_matches": 2,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.last_name": {
+      "comparisons": 2,
+      "exact_matches": 2,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.middle_name": {
+      "comparisons": 2,
+      "exact_matches": 2,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.residency_country": {
+      "comparisons": 2,
+      "exact_matches": 2,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.residency_country_code": {
+      "comparisons": 2,
+      "exact_matches": 2,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.signature_date": {
+      "comparisons": 2,
+      "exact_matches": 2,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.tin": {
+      "comparisons": 2,
+      "exact_matches": 1,
+      "exact_match_rate": 0.5,
+      "average_character_error_rate": 0.36363636363636365,
+      "average_word_error_rate": 0.5
+    }
+  }
+}

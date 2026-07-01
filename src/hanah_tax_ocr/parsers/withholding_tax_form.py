@@ -17,6 +17,7 @@ from hanah_tax_ocr.schemas import DocumentType, ExtractedDocument, OCRResult
 class WithholdingTaxFormParser(BaseDocumentParser):
     document_type = DocumentType.WITHHOLDING_TAX_FORM
     _LABEL_FRAGMENTS = {"last", "ast", "first", "irst", "middle", "iddle", "name"}
+    _PHONE_CONTEXT_PATTERN = re.compile(r"(?:\+?\d{1,2}-)$")
     _AMBIGUOUS_ALNUM_DIGIT_MAP = {
         "O": "0",
         "I": "1",
@@ -43,13 +44,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             )
         )
         full_text_address = self._sanitize_address_candidate(full_text_address_raw)
-        tin_source = self._normalize_whitespace(
-            " ".join(
-                part
-                for part in [self._region_value(ocr_result, "tin"), single_line]
-                if part
-            )
-        )
+        region_tin = self._region_value(ocr_result, "tin")
         dividend_rate_source = self._normalize_whitespace(
             " ".join(
                 part
@@ -92,15 +87,9 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             or derived_middle_name
             or self._find_first(r"Middle Name\)?\s*([A-Z])\b", single_line)
         )
-        tin = self._extract_first_pattern(
-            [
-                r"납세자번호\s*(\d{3}-\d{2}-\d{4})",
-                r"(?:Taxpayer Identification Number|TIN)\s*[:;]?\s*(\d{3}-\d{2}-\d{4})",
-                r"(?:Taxpayer Identification Number|TIN)\s*[:;]?\s*(\d{2}-\d{7})",
-                r"\b(\d{3}-\d{2}-\d{4})\b",
-                r"\b(\d{2}-\d{7})\b",
-            ],
-            tin_source,
+        tin = self._extract_best_tin(
+            single_line,
+            region_tin=region_tin,
         )
         address = normalize_address(
             self._merge_address_candidates(
@@ -305,16 +294,57 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         for candidate in candidates:
             if not candidate:
                 continue
-            tin = self._extract_first_pattern(
-                [
-                    r"\b(\d{3}-\d{2}-\d{4})\b",
-                    r"\b(\d{2}-\d{7})\b",
-                ],
-                candidate,
-            )
+            tin = self._extract_tin_from_text(candidate)
             if tin:
                 return tin
         return None
+
+    def _extract_best_tin(
+        self,
+        full_text: str,
+        *,
+        region_tin: str | None,
+    ) -> str | None:
+        return (
+            self._extract_tin_from_text(full_text, allow_overlong=True)
+            or self._extract_tin_from_text(region_tin)
+        )
+
+    def _extract_tin_from_text(
+        self,
+        text: str | None,
+        *,
+        allow_overlong: bool = False,
+    ) -> str | None:
+        if not text:
+            return None
+        patterns = [
+            r"\b(\d{3}-\d{2}-\d{4})\b",
+            r"\b(\d{2}-\d{7})\b",
+        ]
+        if allow_overlong:
+            patterns.extend(
+                [
+                    r"(\d{3}-\d{2}-\d{4})\d\b",
+                    r"(\d{2}-\d{7})\d\b",
+                ]
+            )
+        for pattern in patterns:
+            for match in re.finditer(pattern, text):
+                if self._tin_match_has_phone_context(text, match.start()):
+                    continue
+                return next(
+                    (group.strip() for group in match.groups() if group),
+                    match.group(0).strip(),
+                )
+        return None
+
+    def _tin_match_has_phone_context(self, text: str, start: int) -> bool:
+        prefix = text[max(0, start - 4) : start]
+        if self._PHONE_CONTEXT_PATTERN.search(prefix):
+            return True
+        previous_context = text[max(0, start - 20) : start]
+        return re.search(r"(전화|phone|tel)\s*$", previous_context, re.IGNORECASE) is not None
 
     def _select_signature_date_candidate(
         self,

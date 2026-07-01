@@ -67,6 +67,8 @@ def _normalize_common_address_ocr_noise(value: str) -> str:
     normalized = re.sub(r"\bAp[l1I]\b(?=\s+[0-9A-Za-z])", "Apt", value, flags=re.IGNORECASE)
     normalized = normalized.replace(".", " ")
     normalized = re.sub(r"\bB[i1l]vd\b", "Blvd", normalized, flags=re.IGNORECASE)
+    normalized = re.sub(r"\b(\d{5})(?=U(?:n|r)ited\b)", r"\1 ", normalized)
+    normalized = re.sub(r"\bUrited\b", "United", normalized, flags=re.IGNORECASE)
     normalized = re.sub(r"\b(\d+[A-Za-z])(?=[A-Z][a-z]{2,}\b)", r"\1 ", normalized)
     normalized = re.sub(
         rf"\b([A-Za-z]{{3,}})(?=(?:{US_STATE_CODE_PATTERN})\b)",

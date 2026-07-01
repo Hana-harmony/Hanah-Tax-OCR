@@ -1,0 +1,110 @@
+{
+  "iteration_id": "2026-07-02_iteration_22",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "overlay_patch와 jpeg_blocking semi-real withholding probe의 남은 실패는 recognizer 재학습보다 parser 단계의 TIN/주소 rescue 부족에 가깝다.",
+    "phone-like region TIN noise를 full-text exact/overlong fallback으로 우회하고, `90026Urited...` 류 country-tail noise를 address normalization에서 잘라내면 probe exact/CER/WER를 복구하면서 official replay 회귀를 피할 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "withholding_tin_parser_rescue",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/parsers/withholding_tax_form.py",
+        "tests/test_parsers.py"
+      ],
+      "summary": "withholding parser가 full-text exact TIN을 region phone-like noise보다 우선하고, exact 후보가 없을 때만 overlong SSN rescue를 사용하도록 조정했다."
+    },
+    {
+      "type": "address_country_tail_rescue",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/normalization.py",
+        "tests/test_normalization.py"
+      ],
+      "summary": "address normalization에 `90026Urited` split과 `Urited -> United` rescue를 추가해 jpeg blocking probe의 trailing date/TIN/country noise를 country tail에서 잘라내도록 보강했다."
+    },
+    {
+      "type": "augmentation_effect_logging",
+      "status": "kept",
+      "files": [
+        "evals/augmentation_effects/ledger.json"
+      ],
+      "summary": "jpeg_blocking + overlay_patch 조합에서 parser-only rescue가 numeric_tin_code와 english_name_org(address)에 준 실측 이득을 ledger에 추가했다."
+    }
+  ],
+  "probe_results": {
+    "withholding_tin_phone_confusion": {
+      "baseline_report_path": "evals/reports/withholding_tin_phone_confusion_refresh_before_report.json",
+      "baseline_summary_path": "evals/reports/withholding_tin_phone_confusion_refresh_before_summary.json",
+      "candidate_report_path": "evals/reports/withholding_tin_phone_confusion_parser_rescue_report.json",
+      "candidate_summary_path": "evals/reports/withholding_tin_phone_confusion_parser_rescue_summary.json",
+      "comparison_path": "evals/reports/withholding_tin_phone_confusion_refresh_vs_parser_rescue.json",
+      "baseline_exact_match_rate": 0.9,
+      "candidate_exact_match_rate": 1.0,
+      "baseline_average_character_error_rate": 0.074769,
+      "candidate_average_character_error_rate": 0.0,
+      "baseline_average_word_error_rate": 0.080769,
+      "candidate_average_word_error_rate": 0.0,
+      "baseline_document_pass_rate": 0.0,
+      "candidate_document_pass_rate": 1.0,
+      "remaining_failures": []
+    }
+  },
+  "targeted_real_regression": {
+    "summary_path": "evals/reports/targeted_tin_parser_rescue_real_slice_summary.json",
+    "comparison_path": "evals/reports/targeted_address_norm_real_slice_vs_tin_parser_rescue.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "comparison_status": "unchanged",
+    "failed_case_ids": [],
+    "note": "real 3-case slice(`apostille_north_carolina_001`, `residency_maria_chen_001`, `withholding_maria_chen_001`)는 unchanged였다."
+  },
+  "external_holdout": {
+    "summary_path": "evals/reports/external_holdout_tin_parser_rescue_summary.json",
+    "comparison_path": "evals/reports/external_holdout_address_norm_vs_tin_parser_rescue.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "comparison_status": "unchanged",
+    "note": "ready external holdout 5건과 low-quality subset은 unchanged였다."
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_tin_parser_rescue_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_tin_parser_rescue.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "official replay는 `withholding_` prefix rerun 기준 overall unchanged였고 regressed field가 없었다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/withholding_tin_phone_confusion_refresh_vs_parser_rescue.json",
+      "evals/reports/current_official_v17_vs_tin_parser_rescue.json",
+      "evals/reports/targeted_address_norm_real_slice_vs_tin_parser_rescue.json"
+    ],
+    "note": "semi-real probe, official replay, real slice 모두 date field regression이 없었다."
+  },
+  "kept_candidates": [
+    "full-text exact-first TIN parser rescue for phone-like region noise",
+    "country-tail address normalization rescue for jpeg blocking noise"
+  ],
+  "discarded_candidates": [
+    "overlong TIN candidate를 exact candidate보다 먼저 고르는 parser order"
+  ],
+  "next_priorities": [
+    "실제 front-side mixed-language withholding 원본 확보 전까지 semi-real mixed-language probe 범위를 1~2개 추가해 external holdout missing_source를 보완할 evidence를 더 만든다.",
+    "middle_name/applicant_name top-right probe 계열에 대해 region OCR fallback 또는 parser prior로 추가 exact 1.0 유지 범위를 넓힐지 검증한다."
+  ]
+}

@@ -17,3 +17,15 @@ def test_normalize_address_splits_city_and_state_suffix_without_harming_country_
         normalize_address(value)
         == "14 Main Street Suite 14 New York NY 10001 United States of America"
     )
+
+
+def test_normalize_address_trims_jpeg_noise_after_country_tail() -> None:
+    value = (
+        "1234 Sunset Blvd Apt 5B Los Angeles CA 90026Urited States of America "
+        "34 1985-06-15 987-65-4321 US United States of America"
+    )
+
+    assert (
+        normalize_address(value)
+        == "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America"
+    )

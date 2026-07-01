@@ -961,6 +961,59 @@ def test_withholding_parser_recovers_from_region_ocr_noise() -> None:
     assert parsed.fields["applicant_name"] == "MARIA L. CHEN"
 
 
+def test_withholding_parser_prefers_full_text_tin_over_phone_like_region_noise() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+                            "34",
+                            "987-65-43215",
+                            "+1-323-555-1234",
+                            "2026년 01월 12일 신청인 MARIA L. CHEN",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "tin": OCRPage(page_number=1, raw_text="+1-323\n23"),
+                "applicant_name": OCRPage(page_number=1, raw_text="MARIA L CHEN"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["tin"] == "987-65-4321"
+
+
+def test_withholding_parser_prefers_exact_tin_over_later_overlong_payer_noise() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "987-65-4321",
+                            "US",
+                            "United States of America",
+                            "123-45-67890",
+                        ]
+                    ),
+                )
+            ],
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["tin"] == "987-65-4321"
+
+
 def test_withholding_parser_prefers_region_signature_date_over_header_date() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

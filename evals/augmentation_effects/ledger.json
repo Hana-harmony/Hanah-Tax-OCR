@@ -452,6 +452,72 @@
         }
       ],
       "notes": "country-row confusion 조합에서 address OCR noise normalization만 추가해 `english_name_org(address)` exact를 0.0에서 1.0으로 복구했고, date/numeric field group 회귀는 없었다."
+    },
+    {
+      "experiment_id": "withholding_tin_phone_confusion_parser_rescue_2026_07_02",
+      "baseline_report": "evals/reports/withholding_tin_phone_confusion_refresh_before_report.json",
+      "candidate_report": "evals/reports/withholding_tin_phone_confusion_parser_rescue_report.json",
+      "variants": [
+        "jpeg_blocking",
+        "overlay_patch"
+      ],
+      "field_group_deltas": [
+        {
+          "field_group": "date",
+          "baseline": {
+            "comparisons": 2.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "candidate": {
+            "comparisons": 2.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.0,
+          "average_character_error_rate_delta": 0.0,
+          "average_word_error_rate_delta": 0.0
+        },
+        {
+          "field_group": "english_name_org",
+          "baseline": {
+            "comparisons": 12.0,
+            "exact_match_rate": 0.916667,
+            "average_character_error_rate": 0.06401,
+            "average_word_error_rate": 0.051282
+          },
+          "candidate": {
+            "comparisons": 12.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.083333,
+          "average_character_error_rate_delta": -0.06401,
+          "average_word_error_rate_delta": -0.051282
+        },
+        {
+          "field_group": "numeric_tin_code",
+          "baseline": {
+            "comparisons": 6.0,
+            "exact_match_rate": 0.833333,
+            "average_character_error_rate": 0.121212,
+            "average_word_error_rate": 0.166667
+          },
+          "candidate": {
+            "comparisons": 6.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.166667,
+          "average_character_error_rate_delta": -0.121212,
+          "average_word_error_rate_delta": -0.166667
+        }
+      ],
+      "notes": "jpeg_blocking + overlay_patch semi-real probe에서 parser-only rescue로 phone-like TIN confusion과 country-tail noise를 제거해 numeric_tin_code와 english_name_org(address)를 동시에 1.0 exact로 복구했다."
     }
   ]
 }
