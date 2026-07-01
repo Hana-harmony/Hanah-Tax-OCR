@@ -1,0 +1,80 @@
+{
+  "iteration_id": "2026-07-01_iteration_11",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "A composite semi-real probe should support multi-step perturbations so upper-name and lower-signature fragility can be measured together.",
+    "The current candidate should preserve middle_name, applicant_name, and signature_date even when top-name clipping and bottom overlap happen simultaneously."
+  ],
+  "changes": [
+    {
+      "type": "probe_infra",
+      "status": "kept",
+      "files": [
+        "scripts/evals/materialize_semi_real_probe_suite.py",
+        "tests/test_semi_real_probe_suite.py"
+      ],
+      "summary": "Added augmentation_pipeline support so a semi-real probe can apply multiple deterministic perturbations in sequence."
+    },
+    {
+      "type": "semi_real_probe",
+      "status": "kept",
+      "files": [
+        "evals/semi_real_probes/manifest.json"
+      ],
+      "summary": "Added withholding_dual_name_signature_probe combining top border clip with bottom edge overlap to validate coupled name/date robustness."
+    }
+  ],
+  "probe_results": {
+    "withholding_dual_name_signature_probe_v1": {
+      "summary": {
+        "report_path": "tmp/manual_doc_probes/withholding_dual_name_signature_probe_v1_report.json",
+        "compared_cases": 1,
+        "missing_cases": [],
+        "field_metric_count": 10,
+        "comparison_count": 10,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0,
+        "document_pass_rate": 1.0,
+        "passed_case_ids": [
+          "withholding_dual_name_signature_probe"
+        ],
+        "failed_case_ids": [],
+        "low_quality_subset": {
+          "case_ids": [
+            "apostille_california_001",
+            "residency_john_doe_001",
+            "residency_legacy_001",
+            "residency_university_hawaii_001"
+          ],
+          "comparison_count": 0,
+          "exact_match_rate": 0.0,
+          "average_character_error_rate": 0.0,
+          "average_word_error_rate": 0.0,
+          "document_pass_rate": 0.0,
+          "passed_case_ids": [],
+          "failed_case_ids": []
+        }
+      },
+      "decision": "kept",
+      "reason": "Current candidate stayed exact on first_name, middle_name, applicant_name, and signature_date under the combined perturbation."
+    }
+  },
+  "baseline_comparison": {
+    "official_exact_match_rate": 1.0,
+    "official_average_character_error_rate": 0.0,
+    "official_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "No inference-time OCR/parser code changed in this iteration, so baseline official metrics remain unchanged while semi-real coverage increased."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": "evals/reports/current_official_signature_date_v3_same_inputs_summary.json"
+  },
+  "next_priorities": [
+    "Design a composite probe that additionally introduces localized OCR confusion in the top-right middle-name band while preserving the dual top/bottom stress pattern.",
+    "Promote new external holdout withholding samples where top identity rows and bottom applicant rows degrade differently in real scans."
+  ]
+}

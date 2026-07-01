@@ -99,6 +99,35 @@ def _load_base_label(probe: dict[str, Any]) -> tuple[dict[str, Any], Path]:
     return payload, path
 
 
+def _resolve_augmentation_pipeline(probe: dict[str, Any]) -> list[dict[str, Any]]:
+    raw_pipeline = probe.get("augmentation_pipeline")
+    if isinstance(raw_pipeline, list) and raw_pipeline:
+        pipeline: list[dict[str, Any]] = []
+        for step in raw_pipeline:
+            if not isinstance(step, dict):
+                raise ValueError("augmentation_pipeline steps must be objects.")
+            augmentation_type = step.get("augmentation_type")
+            if not augmentation_type:
+                raise ValueError("augmentation_pipeline step is missing augmentation_type.")
+            pipeline.append(
+                {
+                    "augmentation_type": str(augmentation_type),
+                    "augmentation_options": dict(step.get("augmentation_options") or {}),
+                }
+            )
+        return pipeline
+
+    augmentation_type = probe.get("augmentation_type")
+    if not augmentation_type:
+        raise ValueError("Probe must define augmentation_type or augmentation_pipeline.")
+    return [
+        {
+            "augmentation_type": str(augmentation_type),
+            "augmentation_options": dict(probe.get("augmentation_options") or {}),
+        }
+    ]
+
+
 def materialize_probe_suite(
     manifest_path: Path,
     output_root: Path,
@@ -119,12 +148,10 @@ def materialize_probe_suite(
     materialized: list[dict[str, Any]] = []
     for probe in manifest.get("probes", []):
         case_id = str(probe["case_id"])
-        augmentation_type = str(probe["augmentation_type"])
-        handler = handlers[augmentation_type]
         base_label, base_label_path = _load_base_label(probe)
         probe_seed = probe.get("seed")
         probe_rng = random.Random(int(probe_seed)) if probe_seed is not None else rng
-        augmentation_options = dict(probe.get("augmentation_options") or {})
+        augmentation_pipeline = _resolve_augmentation_pipeline(probe)
 
         source_path = Path(str(probe.get("source_path") or base_label["source_path"]))
         if not source_path.is_file():
@@ -135,7 +162,27 @@ def materialize_probe_suite(
             {"crop_path": str(source_path)}
         ]
         image = Image.open(source_path).convert("RGB")
-        augmented = handler(image, donors, probe_rng, augmentation_options)
+        augmented = image
+        for augmentation_step in augmentation_pipeline:
+            augmentation_type = augmentation_step["augmentation_type"]
+            handler = handlers[augmentation_type]
+            augmented = handler(
+                augmented,
+                donors,
+                probe_rng,
+                dict(augmentation_step["augmentation_options"]),
+            )
+
+        augmentation_type = (
+            augmentation_pipeline[0]["augmentation_type"]
+            if len(augmentation_pipeline) == 1
+            else "pipeline"
+        )
+        augmentation_options = (
+            dict(augmentation_pipeline[0]["augmentation_options"])
+            if len(augmentation_pipeline) == 1
+            else {}
+        )
 
         asset_path = assets_root / f"{case_id}{source_path.suffix.lower() or '.png'}"
         augmented.save(asset_path)
@@ -166,6 +213,7 @@ def materialize_probe_suite(
             "focus_fields": list(probe.get("focus_fields", [])),
             "seed": probe_seed,
             "augmentation_options": augmentation_options,
+            "augmentation_pipeline": augmentation_pipeline,
             "notes": list(probe.get("notes", [])),
         }
         label_path = labeled_root / document_type / case_id / "label.json"
@@ -187,6 +235,7 @@ def materialize_probe_suite(
             "focus_fields": list(probe.get("focus_fields", [])),
             "seed": probe_seed,
             "augmentation_options": augmentation_options,
+            "augmentation_pipeline": augmentation_pipeline,
             "notes": list(probe.get("notes", [])),
         }
         expected_path = cases_root / case_id / "expected.json"
@@ -206,6 +255,7 @@ def materialize_probe_suite(
                 "augmentation_type": augmentation_type,
                 "seed": probe_seed,
                 "augmentation_options": augmentation_options,
+                "augmentation_pipeline": augmentation_pipeline,
             }
         )
 

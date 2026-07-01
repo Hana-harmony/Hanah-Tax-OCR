@@ -90,3 +90,86 @@ def test_materialize_probe_suite_writes_assets_labels_and_expected(tmp_path: Pat
         "x_ratio": 0.65,
         "y_ratio": 0.12,
     }
+
+
+def test_materialize_probe_suite_supports_augmentation_pipeline(tmp_path: Path) -> None:
+    source_path = tmp_path / "source.png"
+    Image.new("RGB", (120, 80), "white").save(source_path)
+
+    base_label_path = tmp_path / "data" / "labeled" / "withholding_tax_form" / "base" / "label.json"
+    base_label_path.parent.mkdir(parents=True)
+    base_label_path.write_text(
+        json.dumps(
+            {
+                "case_id": "base",
+                "document_type": "withholding_tax_form",
+                "source_path": str(source_path),
+                "expected_status": "pass",
+                "expected_fields": {"applicant_name": "SAMPLE USER"},
+                "expected_quality_checks": {"signature_present": True},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "probes": [
+                    {
+                        "case_id": "probe_pipeline",
+                        "base_case_id": "base",
+                        "document_type": "withholding_tax_form",
+                        "base_label_path": str(base_label_path),
+                        "augmentation_pipeline": [
+                            {
+                                "augmentation_type": "border_clip",
+                                "augmentation_options": {"anchor": "top", "clip_height_ratio": 0.1},
+                            },
+                            {
+                                "augmentation_type": "overlay_patch",
+                                "augmentation_options": {"anchor": "top_right", "width_ratio": 0.1},
+                            },
+                        ],
+                        "focus_fields": ["applicant_name"],
+                        "failure_modes": ["crop_miss", "label_bleed"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    summary = materialize_probe_suite(manifest_path, tmp_path / "suite", seed=7)
+
+    assert summary["probe_count"] == 1
+    materialized = summary["materialized"][0]
+    assert materialized["augmentation_type"] == "pipeline"
+    assert materialized["augmentation_options"] == {}
+    assert materialized["augmentation_pipeline"] == [
+        {
+            "augmentation_type": "border_clip",
+            "augmentation_options": {"anchor": "top", "clip_height_ratio": 0.1},
+        },
+        {
+            "augmentation_type": "overlay_patch",
+            "augmentation_options": {"anchor": "top_right", "width_ratio": 0.1},
+        },
+    ]
+
+    label_path = (
+        tmp_path
+        / "suite"
+        / "labeled"
+        / "withholding_tax_form"
+        / "probe_pipeline"
+        / "label.json"
+    )
+    expected_path = tmp_path / "suite" / "cases" / "probe_pipeline" / "expected.json"
+    label_payload = json.loads(label_path.read_text(encoding="utf-8"))
+    expected_payload = json.loads(expected_path.read_text(encoding="utf-8"))
+    assert label_payload["augmentation_type"] == "pipeline"
+    assert label_payload["augmentation_pipeline"] == materialized["augmentation_pipeline"]
+    assert expected_payload["augmentation_type"] == "pipeline"
+    assert expected_payload["augmentation_pipeline"] == materialized["augmentation_pipeline"]

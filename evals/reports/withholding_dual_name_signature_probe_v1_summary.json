@@ -1,0 +1,30 @@
+{
+  "report_path": "tmp/manual_doc_probes/withholding_dual_name_signature_probe_v1_report.json",
+  "compared_cases": 1,
+  "missing_cases": [],
+  "field_metric_count": 10,
+  "comparison_count": 10,
+  "exact_match_rate": 1.0,
+  "average_character_error_rate": 0.0,
+  "average_word_error_rate": 0.0,
+  "document_pass_rate": 1.0,
+  "passed_case_ids": [
+    "withholding_dual_name_signature_probe"
+  ],
+  "failed_case_ids": [],
+  "low_quality_subset": {
+    "case_ids": [
+      "apostille_california_001",
+      "residency_john_doe_001",
+      "residency_legacy_001",
+      "residency_university_hawaii_001"
+    ],
+    "comparison_count": 0,
+    "exact_match_rate": 0.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 0.0,
+    "passed_case_ids": [],
+    "failed_case_ids": []
+  }
+}
