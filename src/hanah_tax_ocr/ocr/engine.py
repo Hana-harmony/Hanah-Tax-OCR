@@ -40,7 +40,10 @@ REGION_PREFER_LARGER_BOX_ON_TIE = {"middle_name"}
 
 REGION_ALTERNATE_OVERRIDES: dict[str, tuple[dict[str, Any], ...]] = {
     "applicant_name": ({"lang": "en"},),
+    "middle_name": ({"lang": "en"},),
 }
+
+REGION_PREFER_ALTERNATE_ENGINES = {"middle_name"}
 
 MONTH_NAME_PATTERN = (
     r"\b(January|February|March|April|May|June|July|August|"
@@ -334,9 +337,17 @@ class PaddleOCREngine:
         if user_override is not None:
             return [self._load(user_override)]
 
+        if region_name in REGION_PREFER_ALTERNATE_ENGINES:
+            alternate_engines = [
+                self._load(override) for override in REGION_ALTERNATE_OVERRIDES.get(region_name, ())
+            ]
+            return [*alternate_engines, self._load(None)]
+
         engines = [self._load(None)]
-        for override in REGION_ALTERNATE_OVERRIDES.get(region_name, ()):
-            engines.append(self._load(override))
+        alternate_engines = [
+            self._load(override) for override in REGION_ALTERNATE_OVERRIDES.get(region_name, ())
+        ]
+        engines.extend(alternate_engines)
         return engines
 
     def _region_variants(self, region_name: str, crop: Image.Image) -> list[Image.Image]:

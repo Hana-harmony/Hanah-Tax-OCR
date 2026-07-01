@@ -1,0 +1,86 @@
+{
+  "iteration_id": "2026-07-02_iteration_17",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "withholding `middle_name` drift는 parser보다 region OCR 엔진 선택 문제일 가능성이 높고, top-right crop에서는 `korean` 엔진보다 `en` 엔진이 더 안정적으로 middle initial을 읽는다.",
+    "middle_name에 한해 `en` alternate engine을 우선 시도하면 real withholding sample을 복구하면서 official same-input replay 회귀 없이 유지할 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "region_specific_middle_name_engine_order",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/ocr/engine.py",
+        "tests/test_ocr_engine.py"
+      ],
+      "summary": "middle_name region에 `en` alternate OCR engine을 추가하고, tie-case에서 base `korean`보다 alternate `en`을 먼저 평가하도록 우선순위를 분리했다."
+    }
+  ],
+  "raw_ocr_probe": {
+    "sample": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+    "middle_name_expanded_box": {
+      "box": [0.66, 0.15, 0.79, 0.22],
+      "korean_engine_text": "M",
+      "english_engine_text": "L",
+      "evidence_note": "동일 expanded middle-name crop에서 `korean` 엔진은 반복적으로 `M`, `en` 엔진은 반복적으로 `L`을 반환했다."
+    }
+  },
+  "single_case_validation": {
+    "report_type": "withholding only",
+    "case_id": "withholding_maria_chen_001",
+    "actual_result_path": "tmp/withholding_middle_name_alt_single_actual/withholding_maria_chen_001.json",
+    "result": {
+      "middle_name": "L",
+      "applicant_name": "MARIA L. CHEN",
+      "signature_date": "2026-01-12"
+    }
+  },
+  "targeted_real_regression": {
+    "summary_path": "evals/reports/targeted_middle_name_alt_real_slice_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "passed_case_ids": [
+      "apostille_north_carolina_001",
+      "residency_maria_chen_001",
+      "withholding_maria_chen_001"
+    ],
+    "previous_summary_path": "evals/reports/targeted_country_row_real_slice_after_fix_summary.json",
+    "delta_exact_match_rate": 0.043478,
+    "delta_average_character_error_rate": -0.043478,
+    "delta_average_word_error_rate": -0.043478,
+    "note": "이전 3-case slice에서 남아 있던 `withholding_maria_chen_001 middle_name=L->M` 실패가 제거됐다."
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_middle_name_alt_v1_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_middle_name_alt_v1.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "kept_candidate_exact_match_rate": 1.0,
+    "kept_candidate_average_character_error_rate": 0.0,
+    "kept_candidate_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "note": "withholding 21건을 다시 돌린 official same-input replay에서 regressed field가 없고 overall status는 `unchanged`였다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_vs_middle_name_alt_v1.json",
+      "evals/reports/targeted_middle_name_alt_real_slice_report.json"
+    ],
+    "note": "Official replay와 targeted real slice 모두에서 signature_date delta가 0.0이다."
+  },
+  "kept_candidates": [
+    "middle_name region-specific english alternate engine priority"
+  ],
+  "discarded_candidates": [],
+  "next_priorities": [
+    "mixed-language withholding external holdout 공백을 채워 middle_name alternate가 새로운 분포에서도 유지되는지 검증한다.",
+    "date/applicant_name/address에 대해서도 같은 방식의 region-specific alternate engine 또는 decoding ROI를 좁게 탐색한다."
+  ]
+}
