@@ -30,8 +30,8 @@ class WithholdingTaxFormParser(BaseDocumentParser):
     def parse(self, ocr_result: OCRResult, source_path: str | Path) -> ExtractedDocument:
         text = ocr_result.combined_text()
         single_line = self._normalize_whitespace(text)
-        region_address = normalize_address(self._region_value(ocr_result, "address"))
-        full_text_address = normalize_address(
+        region_address = self._sanitize_address_candidate(self._region_value(ocr_result, "address"))
+        full_text_address_raw = (
             self._find_first(
                 r"(\d{1,5}\s+[A-Za-z0-9 ,.'#-]+?(?:United States of America|USA))",
                 single_line,
@@ -41,6 +41,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
                 single_line,
             )
         )
+        full_text_address = self._sanitize_address_candidate(full_text_address_raw)
         tin_source = self._normalize_whitespace(
             " ".join(
                 part
@@ -104,6 +105,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             self._merge_address_candidates(
                 region_address=region_address,
                 full_text_address=full_text_address,
+                raw_full_text_address=full_text_address_raw,
             )
         )
         country = normalize_country(
@@ -194,6 +196,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         *,
         region_address: str | None,
         full_text_address: str | None,
+        raw_full_text_address: str | None,
     ) -> str | None:
         if region_address and full_text_address:
             sanitized_full_text_address = self._sanitize_full_text_address(full_text_address)
@@ -201,7 +204,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             repaired_region_address = self._repair_address_spacing(region_address) or region_address
             if full_text_street_number and not self._leading_street_number(region_address):
                 repaired_region_address = f"{full_text_street_number} {region_address}"
-            if self._contains_leading_name_noise(full_text_address):
+            if self._contains_leading_name_noise(raw_full_text_address):
                 region_has_suite_number = re.search(
                     r"\bSuite\s+[0-9][A-Za-z0-9-]*",
                     region_address,
@@ -241,8 +244,31 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if not value:
             return None
         sanitized = re.sub(r"^\d{1,5}\s+USER\b\s+", "", value, flags=re.IGNORECASE)
-        sanitized = normalize_address(sanitized)
-        return self._repair_address_spacing(sanitized)
+        return self._sanitize_address_candidate(sanitized)
+
+    def _sanitize_address_candidate(self, value: str | None) -> str | None:
+        normalized = normalize_address(value)
+        if not normalized:
+            return None
+        normalized = self._repair_address_spacing(normalized) or normalized
+        normalized = self._strip_leading_address_noise(normalized)
+        return normalized or None
+
+    def _strip_leading_address_noise(self, value: str) -> str:
+        label_matches = list(
+            re.finditer(
+                r"\b(?:USER|Last Name|First Name|Middle Name)\b",
+                value,
+                re.IGNORECASE,
+            )
+        )
+        if label_matches:
+            search_start = label_matches[-1].end()
+            street_match = re.search(r"\b\d{1,5}\s+[A-Za-z]", value[search_start:])
+            if street_match:
+                return value[search_start + street_match.start() :]
+            return value
+        return value
 
     def _repair_address_spacing(self, value: str | None) -> str | None:
         if not value:

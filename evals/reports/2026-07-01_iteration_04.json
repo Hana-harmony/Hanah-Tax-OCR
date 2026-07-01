@@ -1,0 +1,68 @@
+{
+  "iteration_id": "2026-07-01-iteration-04",
+  "baseline": {
+    "report_path": "tmp/evals/current_official_v17_parser_report.json",
+    "summary_path": "evals/reports/current_official_v17_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0
+  },
+  "changes": [
+    "Added a document-level semi-real probe workflow via `evals/semi_real_probes/manifest.json` and `scripts/evals/materialize_semi_real_probe_suite.py` so real labeled samples can be stress-tested with controlled augmentations.",
+    "Hardened withholding address parsing against left-edge crop bleed by stripping name-header prefixes before selecting the final address candidate.",
+    "Extended the error taxonomy with `address_label_bleed` so new address/header contamination failures can be auto-classified from review_queue outputs.",
+    "Recorded the measured field-group delta for the `left_clip` augmentation in `evals/augmentation_effects/ledger.json`."
+  ],
+  "validation": {
+    "semi_real_probe_manifest_path": "evals/semi_real_probes/manifest.json",
+    "before_fix_report_path": "evals/reports/withholding_left_clip_probe_before_fix_report.json",
+    "before_fix_summary_path": "evals/reports/withholding_left_clip_probe_before_fix_summary.json",
+    "after_fix_report_path": "evals/reports/withholding_left_clip_probe_after_fix_report.json",
+    "after_fix_summary_path": "evals/reports/withholding_left_clip_probe_after_fix_summary.json",
+    "comparison_path": "evals/reports/withholding_left_clip_probe_comparison.json",
+    "targeted_date_regression_report_path": "evals/reports/targeted_date_regression_after_address_fix_report.json",
+    "targeted_date_regression_summary_path": "evals/reports/targeted_date_regression_after_address_fix_summary.json",
+    "semi_real_probe_before_fix": {
+      "comparison_count": 10,
+      "exact_match_rate": 0.9,
+      "average_character_error_rate": 0.068116,
+      "average_word_error_rate": 0.069231,
+      "document_pass_rate": 0.0,
+      "failed_fields": [
+        "address"
+      ]
+    },
+    "semi_real_probe_after_fix": {
+      "comparison_count": 10,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0,
+      "failed_fields": []
+    },
+    "targeted_date_regression": {
+      "compared_cases": 3,
+      "comparison_count": 23,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    }
+  },
+  "candidate_decisions": {
+    "kept": [
+      "withholding address rescue for left-clip label bleed",
+      "document-level semi-real probe materialization flow",
+      "automatic `address_label_bleed` taxonomy classification"
+    ],
+    "discarded": [
+      "using the raw left-clipped address crop without parser rescue",
+      "treating address contamination as a spacing-only issue (`address_spacing_merge`) when label/header bleed is the actual cause"
+    ]
+  },
+  "next_priorities": [
+    "Add one more semi-real withholding probe for `jpeg_blocking` or `stamp_shadow` to see whether `applicant_name` or `middle_name` fails under non-crop degradations.",
+    "Secure at least one non-eval withholding front-side sample with reviewed labels so region recognizer candidates can move past the current zero-val-sample blocker."
+  ]
+}

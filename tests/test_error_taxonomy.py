@@ -109,3 +109,41 @@ def test_build_hard_case_manifest_detects_middle_name_and_address_patterns(
     case = manifest["cases"][0]
     assert "middle_name_segmentation_ambiguity" in case["root_causes"]
     assert "address_spacing_merge" in case["root_causes"]
+
+
+def test_build_hard_case_manifest_detects_address_label_bleed(tmp_path: Path) -> None:
+    review_queue_dir = tmp_path / "review_queue"
+    review_queue_dir.mkdir()
+    (review_queue_dir / "case_003.json").write_text(
+        json.dumps(
+            {
+                "case_id": "case_003",
+                "review_result": {
+                    "status": "reject",
+                    "findings": [
+                        {"field_name": "address", "code": "required_address_invalid"},
+                    ],
+                },
+                "documents": [
+                    {
+                        "document_type": "withholding_tax_form",
+                        "source_path": "sample_data/withholding.png",
+                        "fields": {
+                            "address": (
+                                "12 Last Name First Name Middle Name CHEN MARIA "
+                                "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 "
+                                "United States of America"
+                            )
+                        },
+                        "quality_checks": {"blur_score": 820},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    manifest = build_hard_case_manifest(review_queue_dir)
+
+    case = manifest["cases"][0]
+    assert "address_label_bleed" in case["root_causes"]

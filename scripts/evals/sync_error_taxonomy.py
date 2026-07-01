@@ -12,6 +12,10 @@ DEFAULT_MANUAL_ANNOTATIONS_PATH = Path("evals/error_taxonomy/manual_case_annotat
 DEFAULT_OUTPUT_PATH = Path("evals/error_taxonomy/hard_case_manifest.json")
 
 ROOT_CAUSE_CATALOG: dict[str, dict[str, str]] = {
+    "address_label_bleed": {
+        "description": "Address crop absorbed nearby name or header labels before the street body.",
+        "field_groups": "english_name_org",
+    },
     "address_spacing_merge": {
         "description": "Street number and address body collapsed without spacing.",
         "field_groups": "english_name_org",
@@ -106,8 +110,15 @@ def _field_root_causes(document: dict[str, Any], findings: list[dict[str, Any]])
                 root_causes.add("label_bleed_name_header")
             if field_name == "middle_name" and len(value.split()) >= 2:
                 root_causes.add("middle_name_segmentation_ambiguity")
-        if field_name == "address" and re.search(r"^\d{1,5}[A-Za-z]", value):
-            root_causes.add("address_spacing_merge")
+        if field_name == "address":
+            if re.search(r"^\d{1,5}[A-Za-z]", value):
+                root_causes.add("address_spacing_merge")
+            if re.search(
+                r"\b(?:Last Name|First Name|Middle Name|USER)\b",
+                value,
+                re.IGNORECASE,
+            ):
+                root_causes.add("address_label_bleed")
         if field_name in {"residency_country", "residency_country_code"} and re.search(
             r"[가-힣]",
             value,

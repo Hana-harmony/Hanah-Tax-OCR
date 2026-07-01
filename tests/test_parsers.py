@@ -630,6 +630,30 @@ def test_withholding_parser_repairs_missing_space_after_leading_street_number() 
     )
 
 
+def test_withholding_parser_strips_label_bleed_prefix_from_region_address() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[OCRPage(page_number=1, raw_text="withholding probe")],
+            regions={
+                "address": OCRPage(
+                    page_number=1,
+                    raw_text=(
+                        "12 Last Name First Name Middle Name CHEN MARIA "
+                        "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America"
+                    ),
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert (
+        parsed.fields["address"]
+        == "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America"
+    )
+
+
 def test_withholding_parser_preserves_digits_and_rebuilds_applicant_name() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

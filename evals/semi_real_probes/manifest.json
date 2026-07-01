@@ -1,0 +1,25 @@
+{
+  "version": "2026-07-01",
+  "probes": [
+    {
+      "case_id": "withholding_left_clip_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_type": "left_clip",
+      "focus_fields": [
+        "address",
+        "applicant_name",
+        "middle_name"
+      ],
+      "failure_modes": [
+        "crop_miss",
+        "label_bleed"
+      ],
+      "notes": [
+        "Document-level left-edge clipping probe built from the real withholding sample.",
+        "Used to verify that address parsing does not absorb nearby name-header text under region misalignment."
+      ]
+    }
+  ]
+}

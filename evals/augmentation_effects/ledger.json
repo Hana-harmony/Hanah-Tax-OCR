@@ -17,6 +17,70 @@
         "korean_mixed_form"
       ],
       "notes": "Semi-real hard case variants were expanded in code, but no recognizer retrain was executed in this iteration, so measured gain is still pending."
+    },
+    {
+      "experiment_id": "withholding_left_clip_probe_2026_07_01",
+      "baseline_report": "evals/reports/withholding_left_clip_probe_before_fix_report.json",
+      "candidate_report": "evals/reports/withholding_left_clip_probe_after_fix_report.json",
+      "variants": [
+        "left_clip"
+      ],
+      "field_group_deltas": [
+        {
+          "field_group": "date",
+          "baseline": {
+            "comparisons": 1.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "candidate": {
+            "comparisons": 1.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.0,
+          "average_character_error_rate_delta": 0.0,
+          "average_word_error_rate_delta": 0.0
+        },
+        {
+          "field_group": "english_name_org",
+          "baseline": {
+            "comparisons": 6.0,
+            "exact_match_rate": 0.833333,
+            "average_character_error_rate": 0.113527,
+            "average_word_error_rate": 0.115385
+          },
+          "candidate": {
+            "comparisons": 6.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.166667,
+          "average_character_error_rate_delta": -0.113527,
+          "average_word_error_rate_delta": -0.115385
+        },
+        {
+          "field_group": "numeric_tin_code",
+          "baseline": {
+            "comparisons": 3.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "candidate": {
+            "comparisons": 3.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.0,
+          "average_character_error_rate_delta": 0.0,
+          "average_word_error_rate_delta": 0.0
+        }
+      ]
     }
   ]
 }
