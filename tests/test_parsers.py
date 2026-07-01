@@ -417,6 +417,8 @@ def test_apostille_california_parser_prefers_full_text_over_misaligned_regions()
     )
     assert parsed.fields["seal_owner"] == "County of Los Angeles, State of California"
     assert parsed.fields["issued_at"] == "Los Angeles, California"
+    assert parsed.fields["issued_on"] is None
+    assert parsed.fields["issuing_authority"] == "Deputy Secretary of State, State of California"
     assert parsed.fields["certificate_number"] == "4"
 
 

@@ -1,0 +1,83 @@
+{
+  "iteration_id": "2026-07-01-iteration-03",
+  "baseline": {
+    "report_path": "tmp/evals/current_official_v17_parser_report.json",
+    "summary_path": "evals/reports/current_official_v17_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0
+  },
+  "changes": [
+    "Normalized apostille `issuing_authority` commas so California line 7 parses as `Deputy Secretary of State, State of California` instead of collapsing the comma-space boundary.",
+    "Backfilled `apostille_california_001.issuing_authority` into the pending-review label and external holdout expected payload because the source image visibly contains the value.",
+    "Added `evals/external_holdout/case_annotations.json` and surfaced `field_observations` through the holdout manifest/expected payloads so remaining partial fields are explicitly marked as blank, redacted, or truncated on the source document."
+  ],
+  "validation": {
+    "tests": {
+      "pytest": "PYTHONPATH=src .venv/bin/pytest tests/test_parsers.py tests/test_external_holdout.py -q",
+      "ruff": "PYTHONPATH=src .venv/bin/ruff check scripts/evals/build_external_holdout.py src/hanah_tax_ocr/normalization.py tests/test_parsers.py tests/test_external_holdout.py"
+    },
+    "external_holdout_manifest_path": "evals/external_holdout/manifest.json",
+    "external_holdout_probe_summary_path": "evals/reports/external_holdout_probe_summary.json",
+    "external_holdout": {
+      "candidate_case_count": 5,
+      "ready_case_count": 3,
+      "partial_expected_case_count": 2,
+      "excluded_non_extractable_count": 2,
+      "source_path_mismatch_case_count": 0
+    },
+    "external_holdout_probe": {
+      "compared_cases": 5,
+      "comparison_count": 28,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    },
+    "remaining_partial_cases": {
+      "residency_legacy_001": {
+        "missing_required_fields": [
+          "tin",
+          "issue_date"
+        ],
+        "field_observations": {
+          "tin": {
+            "status": "source_redacted"
+          },
+          "issue_date": {
+            "status": "source_truncated"
+          }
+        }
+      },
+      "apostille_california_001": {
+        "missing_required_fields": [
+          "signed_by",
+          "issued_on"
+        ],
+        "field_observations": {
+          "signed_by": {
+            "status": "source_blank"
+          },
+          "issued_on": {
+            "status": "source_blank"
+          }
+        }
+      }
+    }
+  },
+  "candidate_decisions": {
+    "kept": [
+      "apostille issuing_authority normalization and holdout backfill",
+      "field-level source-visibility annotations for partial external-holdout cases"
+    ],
+    "discarded": [
+      "attempting to fabricate `signed_by` or `issued_on` for `apostille_california_001` despite the source document being blank",
+      "treating `residency_legacy_001` missing TIN/date tokens as annotatable fields without source evidence"
+    ]
+  },
+  "next_priorities": [
+    "Add at least one reviewed withholding front-side sample outside current eval so address/applicant_name/middle_name/date recognizer candidates can gain non-zero val coverage.",
+    "Acquire one additional external apostille or residency sample where the currently blank/redacted fields are actually visible, so holdout coverage can expand without synthetic assumptions."
+  ]
+}

@@ -7,7 +7,22 @@
     "signer_capacity": "Deputy Registrar-Recorder/County Clerk, County of Los Angeles, State of California",
     "seal_owner": "County of Los Angeles, State of California",
     "issued_at": "Los Angeles, California",
+    "issuing_authority": "Deputy Secretary of State, State of California",
     "certificate_number": "4"
+  },
+  "field_observations": {
+    "signed_by": {
+      "status": "source_blank",
+      "evidence": "Item 2 (`has been signed by`) is blank on sample_data/아포스티유 샘플/미국 california 주.png."
+    },
+    "issued_on": {
+      "status": "source_blank",
+      "evidence": "Item 6 ends at `the 18th day of` with no month/year on the source image."
+    },
+    "issuing_authority": {
+      "status": "backfilled_from_visible_source",
+      "evidence": "Item 7 visibly reads `by Deputy Secretary of State, State of California`."
+    }
   },
   "holdout_status": "partial_expected",
   "subset_tags": [

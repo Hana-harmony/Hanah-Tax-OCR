@@ -163,6 +163,162 @@ def test_build_external_holdout_manifest_flags_source_path_mismatch(tmp_path: Pa
     assert case["mismatched_label_paths"]
 
 
+def test_build_external_holdout_manifest_excludes_non_extractable_and_links_alias_labels(
+    tmp_path: Path,
+) -> None:
+    sample_root = tmp_path / "sample_data"
+    sample_root.mkdir()
+    pdf_path = sample_root / "거주자증명서" / "2.pdf"
+    rasterized_path = sample_root / "거주자증명서" / "2_page1.png"
+    pdf_path.parent.mkdir(parents=True)
+    pdf_path.write_bytes(b"%PDF-1.5")
+    rasterized_path.write_bytes(b"png")
+    reverse_side_path = (
+        sample_root / "국내원천소득 제한세율" / "국내원천소득 제한세율 적용신청서-2.png"
+    )
+    reverse_side_path.parent.mkdir(parents=True, exist_ok=True)
+    reverse_side_path.write_bytes(b"img")
+
+    labeled_root = tmp_path / "data" / "labeled"
+    label_dir = labeled_root / "pending_review" / "residency_certificate" / "residency_pdf_001"
+    label_dir.mkdir(parents=True)
+    (label_dir / "label.json").write_text(
+        json.dumps(
+            {
+                "case_id": "residency_pdf_001",
+                "document_type": "residency_certificate",
+                "source_path": str(rasterized_path),
+                "expected_fields": {
+                    "taxpayer_name": "UNIVERSITY OF WASHINGTON",
+                    "tin": "91-6001537",
+                    "tax_year": "2025",
+                    "issue_date": "March 24, 2025",
+                    "residency_country": "United States of America",
+                    "residency_country_code": "US",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    manifest = build_external_holdout_manifest(
+        sample_root,
+        labeled_root,
+        tmp_path / "evals" / "cases",
+        sample_index={
+            str(pdf_path): {
+                "source": str(pdf_path),
+                "document_type": "residency_certificate",
+                "case_id": "residency_pdf_001",
+                "split": "test",
+                "extractable": True,
+                "page_role": "front_pdf",
+                "source_variants": [str(pdf_path), str(rasterized_path)],
+            },
+            str(rasterized_path): {
+                "source": str(pdf_path),
+                "document_type": "residency_certificate",
+                "case_id": "residency_pdf_001",
+                "split": "test",
+                "extractable": True,
+                "page_role": "front_pdf",
+                "source_variants": [str(pdf_path), str(rasterized_path)],
+            },
+            str(reverse_side_path): {
+                "source": str(reverse_side_path),
+                "document_type": "withholding_tax_form",
+                "case_id": "withholding_hana_payer_001",
+                "split": "train",
+                "extractable": False,
+                "page_role": "reverse_side_instructions",
+                "exclusion_reason": "back_side_reference_page",
+                "source_variants": [str(reverse_side_path)],
+            },
+        },
+    )
+
+    assert manifest["summary"]["candidate_case_count"] == 1
+    status_by_case = {case["case_id"]: case["status"] for case in manifest["cases"]}
+    assert status_by_case == {"residency_pdf_001": "ready"}
+    assert manifest["cases"][0]["source_path_mismatch"] is False
+    assert manifest["cases"][0]["source_path_alias_match"] is True
+    assert manifest["summary"]["excluded_non_extractable_count"] == 1
+    assert manifest["excluded_non_extractable_cases"][0]["case_id"] == "withholding_hana_payer_001"
+
+
+def test_build_external_holdout_manifest_includes_field_observations_for_partial_cases(
+    tmp_path: Path,
+) -> None:
+    sample_root = tmp_path / "sample_data"
+    sample_root.mkdir()
+    sample_path = sample_root / "apostille.png"
+    Image.new("RGB", (1041, 1312), "white").save(sample_path)
+
+    labeled_root = tmp_path / "data" / "labeled"
+    label_dir = labeled_root / "pending_review" / "apostille" / "apostille_case_001"
+    label_dir.mkdir(parents=True)
+    (label_dir / "label.json").write_text(
+        json.dumps(
+            {
+                "case_id": "apostille_case_001",
+                "document_type": "apostille",
+                "source_path": str(sample_path),
+                "expected_fields": {
+                    "issuing_country": "United States of America",
+                    "signer_capacity": "Deputy Clerk",
+                    "seal_owner": "County of Sample",
+                    "issued_at": "Los Angeles, California",
+                    "certificate_number": "4",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    annotations_path = tmp_path / "case_annotations.json"
+    annotations_path.write_text(
+        json.dumps(
+            {
+                "cases": {
+                    "apostille_case_001": {
+                        "field_observations": {
+                            "signed_by": {"status": "source_blank"},
+                            "issued_on": {"status": "source_blank"},
+                        }
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    manifest = build_external_holdout_manifest(
+        sample_root,
+        labeled_root,
+        tmp_path / "evals" / "cases",
+        sample_index={
+            str(sample_path): {
+                "source": str(sample_path),
+                "document_type": "apostille",
+                "case_id": "apostille_case_001",
+                "split": "train",
+                "extractable": True,
+                "page_role": "front",
+                "source_variants": [str(sample_path)],
+            }
+        },
+        case_annotations_path=annotations_path,
+    )
+
+    case = manifest["cases"][0]
+    assert case["missing_required_fields"] == ["signed_by", "issued_on", "issuing_authority"]
+    assert case["field_observations"]["signed_by"]["status"] == "source_blank"
+    assert case["field_observations"]["issued_on"]["status"] == "source_blank"
+    assert manifest["required_samples"][0]["field_observations"] == {
+        "signed_by": {"status": "source_blank"},
+        "issued_on": {"status": "source_blank"},
+    }
+
+
 def test_write_external_holdout_materializes_expected_cases(tmp_path: Path) -> None:
     manifest = {
         "cases": [
@@ -180,6 +336,7 @@ def test_write_external_holdout_materializes_expected_cases(tmp_path: Path) -> N
                     "residency_country": "United States of America",
                     "residency_country_code": "US",
                 },
+                "field_observations": {"issue_date": {"status": "verified"}},
             },
             {
                 "case_id": "holdout_case_002",
@@ -188,6 +345,7 @@ def test_write_external_holdout_materializes_expected_cases(tmp_path: Path) -> N
                 "status": "needs_annotation",
                 "subset_tags": ["format_variation"],
                 "expected_fields": {},
+                "field_observations": {},
             },
         ],
         "required_samples": [],
@@ -208,3 +366,4 @@ def test_write_external_holdout_materializes_expected_cases(tmp_path: Path) -> N
     payload = json.loads(expected_path.read_text(encoding="utf-8"))
     assert payload["holdout_status"] == "ready"
     assert payload["subset_tags"] == ["low_quality"]
+    assert payload["field_observations"]["issue_date"]["status"] == "verified"

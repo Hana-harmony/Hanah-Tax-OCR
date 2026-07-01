@@ -1,0 +1,127 @@
+{
+  "semi_real_summary": {
+    "field_crops_root": "data/training/field_crops",
+    "output_root": "tmp/recognizer_candidate_v2_hard_cases",
+    "total_augmented_crops": 383,
+    "counts_by_group": {
+      "date": 35,
+      "english_name_org": 210,
+      "korean_mixed_form": 12,
+      "numeric_tin_code": 126
+    },
+    "counts_by_variant": {
+      "border_clip": 25,
+      "edge_overlap": 18,
+      "gaussian_blur": 57,
+      "jpeg_blocking": 57,
+      "left_clip": 50,
+      "low_res": 57,
+      "overlay_patch": 32,
+      "rotate": 55,
+      "stamp_shadow": 32
+    },
+    "counts_by_variant_by_group": {
+      "date": {
+        "border_clip": 7,
+        "gaussian_blur": 7,
+        "jpeg_blocking": 7,
+        "low_res": 7,
+        "rotate": 7
+      },
+      "english_name_org": {
+        "gaussian_blur": 30,
+        "jpeg_blocking": 30,
+        "left_clip": 30,
+        "low_res": 30,
+        "overlay_patch": 30,
+        "rotate": 30,
+        "stamp_shadow": 30
+      },
+      "korean_mixed_form": {
+        "gaussian_blur": 2,
+        "jpeg_blocking": 2,
+        "left_clip": 2,
+        "low_res": 2,
+        "overlay_patch": 2,
+        "stamp_shadow": 2
+      },
+      "numeric_tin_code": {
+        "border_clip": 18,
+        "edge_overlap": 18,
+        "gaussian_blur": 18,
+        "jpeg_blocking": 18,
+        "left_clip": 18,
+        "low_res": 18,
+        "rotate": 18
+      }
+    },
+    "variant_failure_modes": {
+      "border_clip": [
+        "border_clipping",
+        "crop_miss"
+      ],
+      "edge_overlap": [
+        "border_clipping",
+        "label_bleed"
+      ],
+      "gaussian_blur": [
+        "blur"
+      ],
+      "jpeg_blocking": [
+        "compression",
+        "low_dpi"
+      ],
+      "left_clip": [
+        "crop_miss"
+      ],
+      "low_res": [
+        "low_dpi"
+      ],
+      "overlay_patch": [
+        "label_bleed",
+        "stamp_interference"
+      ],
+      "rotate": [
+        "skew"
+      ],
+      "stamp_shadow": [
+        "stamp_interference",
+        "label_bleed"
+      ]
+    }
+  },
+  "date_synthetic_summary": {
+    "field_crops_root": "data/training/field_crops",
+    "output_root": "tmp/recognizer_candidate_v2_hard_cases",
+    "base_entry_count": 6,
+    "synthetic_entry_count": 48,
+    "variants_per_entry": 8,
+    "counts_by_field_name": {
+      "issue_date": 16,
+      "issued_on": 8,
+      "signature_date": 24
+    },
+    "counts_by_variant": {
+      "context_footer": 6,
+      "context_header": 14,
+      "left_clip": 8,
+      "plain": 11,
+      "underline_noise": 9
+    }
+  },
+  "english_synthetic_summary": {
+    "field_crops_root": "data/training/field_crops",
+    "output_root": "tmp/recognizer_candidate_v2_hard_cases",
+    "base_entry_count": 16,
+    "synthetic_entry_count": 96,
+    "variants_per_entry": 6,
+    "counts_by_field_name": {
+      "address": 18,
+      "applicant_name": 18,
+      "first_name": 18,
+      "middle_name": 18,
+      "signed_by": 6,
+      "taxpayer_name": 18
+    }
+  }
+}

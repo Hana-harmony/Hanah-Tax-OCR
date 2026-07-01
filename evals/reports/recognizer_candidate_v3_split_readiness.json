@@ -1,0 +1,1617 @@
+{
+  "field_crops_root": "data/training/field_crops",
+  "output_root": "tmp/recognizer_candidate_v3",
+  "hard_cases_root": "tmp/recognizer_candidate_v2_hard_cases",
+  "include_hard_cases": true,
+  "ensure_hard_cases_manifest": false,
+  "hard_cases_sync": null,
+  "include_rejected_crops": false,
+  "max_hard_case_ratio": 0.5,
+  "split_field_groups": [
+    "date",
+    "english_name_org"
+  ],
+  "groups": {
+    "address": {
+      "train_count": 6,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/address/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 6
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "withholding_tax_form": 3
+            },
+            "hard_case": {
+              "withholding_tax_form": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 3,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 36,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "applicant_name": {
+      "train_count": 6,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/applicant_name/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 6
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "withholding_tax_form": 3
+            },
+            "hard_case": {
+              "withholding_tax_form": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 3,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 36,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "first_name": {
+      "train_count": 6,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/first_name/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 6
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "withholding_tax_form": 3
+            },
+            "hard_case": {
+              "withholding_tax_form": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 3,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 36,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "issue_date": {
+      "train_count": 4,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/issue_date/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "residency_certificate": 4
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "residency_certificate": 2
+            },
+            "hard_case": {
+              "residency_certificate": 2
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "residency_certificate": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 2,
+            "hard_case": 2
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "border_clip": 1,
+            "gaussian_blur": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "residency_certificate": {
+              "border_clip": 1,
+              "gaussian_blur": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 2,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 24,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "issued_at": {
+      "train_count": 4,
+      "val_count": 1,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/issued_at/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "apostille": 4
+          },
+          "val": {
+            "apostille": 1
+          }
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "apostille": 2
+            },
+            "hard_case": {
+              "apostille": 2
+            }
+          },
+          "val": {
+            "base": {
+              "apostille": 1
+            },
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 2,
+          "val": 1
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "apostille": 2
+          },
+          "val": {
+            "apostille": 1
+          }
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 2,
+            "hard_case": 2
+          },
+          "val": {
+            "base": 1
+          }
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "apostille": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 2,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 12,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "review_required",
+        "ready_for_execution": true,
+        "blocking_warnings": [],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "issued_on": {
+      "train_count": 4,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/issued_on/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "apostille": 4
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "apostille": 1
+            },
+            "hard_case": {
+              "apostille": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "apostille": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 1,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "border_clip": 1,
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "apostille": {
+              "border_clip": 1,
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.75,
+        "filtered_hard_case_train_count": 10,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance_with_scarce_full_variant_floor",
+        "hard_case_variant_floor_applied": true,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_dominant_train_split",
+          "hard_case_train_capped",
+          "hard_case_variant_floor_applied",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_dominant_train_split",
+          "hard_case_train_capped",
+          "hard_case_variant_floor_applied",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "issuing_authority": {
+      "train_count": 4,
+      "val_count": 1,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/issuing_authority/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "apostille": 4
+          },
+          "val": {
+            "apostille": 1
+          }
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "apostille": 1
+            },
+            "hard_case": {
+              "apostille": 3
+            }
+          },
+          "val": {
+            "base": {
+              "apostille": 1
+            },
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 1
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "apostille": 1
+          },
+          "val": {
+            "apostille": 1
+          }
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 1,
+            "hard_case": 3
+          },
+          "val": {
+            "base": 1
+          }
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "apostille": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.75,
+        "filtered_hard_case_train_count": 4,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance_with_scarce_full_variant_floor",
+        "hard_case_variant_floor_applied": true,
+        "warnings": [
+          "low_train_sample_count",
+          "hard_case_dominant_train_split",
+          "hard_case_train_capped",
+          "hard_case_variant_floor_applied",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "review_required",
+        "ready_for_execution": true,
+        "blocking_warnings": [],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_dominant_train_split",
+          "hard_case_train_capped",
+          "hard_case_variant_floor_applied",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "korean_mixed_form": {
+      "train_count": 4,
+      "val_count": 1,
+      "character_count": 3688,
+      "plan_path": "tmp/recognizer_candidate_v3/korean_mixed_form/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "apostille": 4
+          },
+          "val": {
+            "apostille": 1
+          }
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "apostille": 2
+            },
+            "hard_case": {
+              "apostille": 2
+            }
+          },
+          "val": {
+            "base": {
+              "apostille": 1
+            },
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 2,
+          "val": 1
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "apostille": 2
+          },
+          "val": {
+            "apostille": 1
+          }
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 2,
+            "hard_case": 2
+          },
+          "val": {
+            "base": 1
+          }
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "apostille": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 2,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 10,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "review_required",
+        "ready_for_execution": true,
+        "blocking_warnings": [],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "last_name": {
+      "train_count": 6,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/last_name/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 6
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "withholding_tax_form": 3
+            },
+            "hard_case": {
+              "withholding_tax_form": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 3,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 18,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "middle_name": {
+      "train_count": 6,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/middle_name/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 6
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "withholding_tax_form": 3
+            },
+            "hard_case": {
+              "withholding_tax_form": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 3,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 36,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "numeric_tin_code": {
+      "train_count": 30,
+      "val_count": 4,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/numeric_tin_code/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "apostille": 2,
+            "residency_certificate": 10,
+            "withholding_tax_form": 18
+          },
+          "val": {
+            "residency_certificate": 4
+          }
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "apostille": 1,
+              "residency_certificate": 5,
+              "withholding_tax_form": 9
+            },
+            "hard_case": {
+              "apostille": 1,
+              "residency_certificate": 5,
+              "withholding_tax_form": 9
+            }
+          },
+          "val": {
+            "base": {
+              "residency_certificate": 4
+            },
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 4,
+          "val": 2
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "apostille": 1,
+            "residency_certificate": 2,
+            "withholding_tax_form": 1
+          },
+          "val": {
+            "residency_certificate": 2
+          }
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 15,
+            "hard_case": 15
+          },
+          "val": {
+            "base": 4
+          }
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "border_clip": 4,
+            "edge_overlap": 3,
+            "gaussian_blur": 2,
+            "jpeg_blocking": 2,
+            "left_clip": 2,
+            "low_res": 1,
+            "rotate": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "apostille": {
+              "border_clip": 1
+            },
+            "residency_certificate": {
+              "border_clip": 1,
+              "edge_overlap": 1,
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            },
+            "withholding_tax_form": {
+              "border_clip": 2,
+              "edge_overlap": 2,
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1,
+              "low_res": 1,
+              "rotate": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 7,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 90,
+        "filtered_stale_hard_case_count": 21,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "hard_case_train_capped",
+          "stale_hard_cases_filtered"
+        ]
+      },
+      "training_readiness": {
+        "status": "review_required",
+        "ready_for_execution": true,
+        "blocking_warnings": [],
+        "advisory_warnings": [
+          "hard_case_train_capped",
+          "stale_hard_cases_filtered"
+        ]
+      }
+    },
+    "residency_country": {
+      "train_count": 6,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/residency_country/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 6
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "withholding_tax_form": 3
+            },
+            "hard_case": {
+              "withholding_tax_form": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 3,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 18,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "seal_owner": {
+      "train_count": 4,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/seal_owner/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "apostille": 4
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "apostille": 2
+            },
+            "hard_case": {
+              "apostille": 2
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 2,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "apostille": 2
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 2,
+            "hard_case": 2
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "apostille": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 2,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 12,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "signature_date": {
+      "train_count": 6,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/signature_date/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 6
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "withholding_tax_form": 3
+            },
+            "hard_case": {
+              "withholding_tax_form": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 3,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "border_clip": 1,
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "withholding_tax_form": {
+              "border_clip": 1,
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 36,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "signed_by": {
+      "train_count": 4,
+      "val_count": 0,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/signed_by/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "apostille": 4
+          },
+          "val": {}
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "apostille": 1
+            },
+            "hard_case": {
+              "apostille": 3
+            }
+          },
+          "val": {
+            "base": {},
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 1,
+          "val": 0
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "apostille": 1
+          },
+          "val": {}
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 1,
+            "hard_case": 3
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "apostille": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.75,
+        "filtered_hard_case_train_count": 10,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance_with_scarce_full_variant_floor",
+        "hard_case_variant_floor_applied": true,
+        "warnings": [
+          "low_train_sample_count",
+          "no_val_samples",
+          "hard_case_dominant_train_split",
+          "hard_case_train_capped",
+          "hard_case_variant_floor_applied",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "blocked",
+        "ready_for_execution": false,
+        "blocking_warnings": [
+          "no_val_samples"
+        ],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_dominant_train_split",
+          "hard_case_train_capped",
+          "hard_case_variant_floor_applied",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "signer_capacity": {
+      "train_count": 4,
+      "val_count": 1,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/signer_capacity/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "apostille": 4
+          },
+          "val": {
+            "apostille": 1
+          }
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "apostille": 2
+            },
+            "hard_case": {
+              "apostille": 2
+            }
+          },
+          "val": {
+            "base": {
+              "apostille": 1
+            },
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 2,
+          "val": 1
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "apostille": 2
+          },
+          "val": {
+            "apostille": 1
+          }
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 2,
+            "hard_case": 2
+          },
+          "val": {
+            "base": 1
+          }
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "apostille": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 2,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 12,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      },
+      "training_readiness": {
+        "status": "review_required",
+        "ready_for_execution": true,
+        "blocking_warnings": [],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped",
+          "low_val_source_diversity"
+        ]
+      }
+    },
+    "taxpayer_name": {
+      "train_count": 6,
+      "val_count": 2,
+      "character_count": 95,
+      "plan_path": "tmp/recognizer_candidate_v3/taxpayer_name/plan.json",
+      "data_profile": {
+        "counts_by_document_type": {
+          "train": {
+            "residency_certificate": 6
+          },
+          "val": {
+            "residency_certificate": 2
+          }
+        },
+        "counts_by_document_type_and_source": {
+          "train": {
+            "base": {
+              "residency_certificate": 3
+            },
+            "hard_case": {
+              "residency_certificate": 3
+            }
+          },
+          "val": {
+            "base": {
+              "residency_certificate": 2
+            },
+            "hard_case": {}
+          }
+        },
+        "unique_source_counts": {
+          "train": 2,
+          "val": 2
+        },
+        "unique_source_counts_by_document_type": {
+          "train": {
+            "residency_certificate": 2
+          },
+          "val": {
+            "residency_certificate": 2
+          }
+        },
+        "counts_by_source_type": {
+          "train": {
+            "base": 3,
+            "hard_case": 3
+          },
+          "val": {
+            "base": 2
+          }
+        },
+        "hard_case_variant_counts": {
+          "train": {
+            "gaussian_blur": 1,
+            "jpeg_blocking": 1,
+            "left_clip": 1
+          },
+          "val": {}
+        },
+        "hard_case_variant_counts_by_document_type": {
+          "train": {
+            "residency_certificate": {
+              "gaussian_blur": 1,
+              "jpeg_blocking": 1,
+              "left_clip": 1
+            }
+          },
+          "val": {}
+        },
+        "unique_hard_case_variant_counts": {
+          "train": 3,
+          "val": 0
+        },
+        "hard_case_train_ratio": 0.5,
+        "filtered_hard_case_train_count": 36,
+        "filtered_stale_hard_case_count": 0,
+        "max_hard_case_ratio": 0.5,
+        "hard_case_selection_strategy": "base_document_balance",
+        "hard_case_variant_floor_applied": false,
+        "warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped"
+        ]
+      },
+      "training_readiness": {
+        "status": "review_required",
+        "ready_for_execution": true,
+        "blocking_warnings": [],
+        "advisory_warnings": [
+          "low_train_sample_count",
+          "hard_case_train_capped"
+        ]
+      }
+    }
+  }
+}

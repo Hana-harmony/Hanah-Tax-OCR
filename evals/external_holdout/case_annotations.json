@@ -1,0 +1,33 @@
+{
+  "version": "2026-07-01",
+  "cases": {
+    "residency_legacy_001": {
+      "field_observations": {
+        "tin": {
+          "status": "source_redacted",
+          "evidence": "TIN digits are visually obscured on sample_data/거주자증명서/4.jpg."
+        },
+        "issue_date": {
+          "status": "source_truncated",
+          "evidence": "Only `8, 2021` is visible on the source image; the month token is absent."
+        }
+      }
+    },
+    "apostille_california_001": {
+      "field_observations": {
+        "signed_by": {
+          "status": "source_blank",
+          "evidence": "Item 2 (`has been signed by`) is blank on sample_data/아포스티유 샘플/미국 california 주.png."
+        },
+        "issued_on": {
+          "status": "source_blank",
+          "evidence": "Item 6 ends at `the 18th day of` with no month/year on the source image."
+        },
+        "issuing_authority": {
+          "status": "backfilled_from_visible_source",
+          "evidence": "Item 7 visibly reads `by Deputy Secretary of State, State of California`."
+        }
+      }
+    }
+  }
+}

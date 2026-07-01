@@ -13,6 +13,7 @@ DEFAULT_SAMPLE_ROOT = Path("sample_data")
 DEFAULT_LABELED_ROOT = Path("data/labeled")
 DEFAULT_EVAL_ROOT = Path("evals/cases")
 DEFAULT_OUTPUT_ROOT = Path("evals/external_holdout")
+DEFAULT_CASE_ANNOTATIONS_PATH = Path("evals/external_holdout/case_annotations.json")
 
 REQUIRED_FIELDS_BY_DOCUMENT_TYPE: dict[str, tuple[str, ...]] = {
     "apostille": (
@@ -66,11 +67,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--labeled-root", type=Path, default=DEFAULT_LABELED_ROOT)
     parser.add_argument("--eval-root", type=Path, default=DEFAULT_EVAL_ROOT)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
+    parser.add_argument("--case-annotations", type=Path, default=DEFAULT_CASE_ANNOTATIONS_PATH)
     return parser.parse_args()
 
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _load_case_annotations(path: Path | None) -> dict[str, dict[str, Any]]:
+    if path is None or not path.exists():
+        return {}
+    return {
+        str(case_id): dict(payload)
+        for case_id, payload in load_json(path).get("cases", {}).items()
+    }
 
 
 def _expected_fields_for_document_type(document_type: str) -> tuple[str, ...]:
@@ -160,8 +171,10 @@ def build_external_holdout_manifest(
     eval_root: Path,
     *,
     sample_index: dict[str, dict[str, str]] | None = None,
+    case_annotations_path: Path | None = None,
 ) -> dict[str, Any]:
     sample_index = sample_index or build_sample_index(sample_root)
+    case_annotations = _load_case_annotations(case_annotations_path)
 
     labels_by_source: dict[str, list[dict[str, Any]]] = {}
     labels_by_case_id: dict[str, list[dict[str, Any]]] = {}
@@ -195,6 +208,7 @@ def build_external_holdout_manifest(
     cases: list[dict[str, Any]] = []
     required_samples: list[dict[str, Any]] = []
     excluded_overlap_cases: list[dict[str, Any]] = []
+    excluded_non_extractable_cases: list[dict[str, Any]] = []
 
     for sample_path in sorted(path for path in sample_root.rglob("*") if path.is_file()):
         if sample_path.name == ".DS_Store":
@@ -202,17 +216,54 @@ def build_external_holdout_manifest(
 
         source_key = normalize_path_text(sample_path)
         sample_dataset_entry = sample_index.get(source_key, {})
-        matched_labels = labels_by_source.get(source_key, [])
+        canonical_source = normalize_path_text(str(sample_dataset_entry.get("source") or ""))
+        if canonical_source and source_key != canonical_source:
+            continue
+        source_variants = {
+            str(variant)
+            for variant in sample_dataset_entry.get("source_variants", [])
+            if isinstance(variant, str) and variant
+        }
+        matched_label_map: dict[str, dict[str, Any]] = {}
+        for variant in {source_key, *source_variants}:
+            for record in labels_by_source.get(variant, []):
+                matched_label_map[record["label_path"]] = record
         sample_case_id = str(sample_dataset_entry.get("case_id") or "")
+        if sample_case_id:
+            for record in labels_by_case_id.get(sample_case_id, []):
+                matched_label_map[record["label_path"]] = record
+        matched_labels = sorted(matched_label_map.values(), key=lambda record: record["label_path"])
         matched_case_ids = sorted({record["case_id"] for record in matched_labels})
         case_id = sample_case_id or (matched_case_ids[0] if matched_case_ids else "")
+        has_direct_or_alias_label_match = any(
+            normalize_path_text(record["source_path"]) in {source_key, *source_variants}
+            for record in matched_labels
+        )
         source_path_mismatch = False
+        source_path_alias_match = False
         mismatched_label_paths: list[str] = []
         if sample_case_id:
             for label_record in labels_by_case_id.get(sample_case_id, []):
-                if normalize_path_text(label_record["source_path"]) != source_key:
-                    source_path_mismatch = True
-                    mismatched_label_paths.append(label_record["label_path"])
+                normalized_label_source = normalize_path_text(label_record["source_path"])
+                if normalized_label_source == source_key:
+                    continue
+                if normalized_label_source in source_variants:
+                    source_path_alias_match = True
+                    continue
+                source_path_mismatch = True
+                mismatched_label_paths.append(label_record["label_path"])
+
+        if sample_dataset_entry and not bool(sample_dataset_entry.get("extractable", True)):
+            excluded_non_extractable_cases.append(
+                {
+                    "case_id": case_id or None,
+                    "sample_path": source_key,
+                    "document_type": sample_dataset_entry.get("document_type"),
+                    "page_role": sample_dataset_entry.get("page_role"),
+                    "exclusion_reason": sample_dataset_entry.get("exclusion_reason"),
+                }
+            )
+            continue
 
         if source_key in eval_sources or case_id in eval_case_ids:
             excluded_overlap_cases.append(
@@ -232,7 +283,7 @@ def build_external_holdout_manifest(
         ) or None
         expected_fields = dict((label_record or {}).get("expected_fields") or {})
         status, missing_required_fields = _label_status(document_type, expected_fields)
-        if source_path_mismatch and not matched_labels:
+        if source_path_mismatch and not has_direct_or_alias_label_match:
             status = "needs_annotation"
 
         quality_metrics = compute_quality_metrics(sample_path)
@@ -247,6 +298,9 @@ def build_external_holdout_manifest(
             subset_tags=subset_tags,
             missing_required_fields=missing_required_fields,
             source_path_mismatch=source_path_mismatch,
+        )
+        field_observations = dict(
+            case_annotations.get(case_id, {}).get("field_observations", {}) or {}
         )
 
         case_entry = {
@@ -264,7 +318,9 @@ def build_external_holdout_manifest(
             "quality_metrics": quality_metrics,
             "priority_score": priority_score,
             "expected_fields": expected_fields,
+            "field_observations": field_observations,
             "source_path_mismatch": source_path_mismatch,
+            "source_path_alias_match": source_path_alias_match,
             "mismatched_label_paths": mismatched_label_paths,
         }
         cases.append(case_entry)
@@ -276,6 +332,11 @@ def build_external_holdout_manifest(
                     "document_type": document_type,
                     "status": status,
                     "missing_required_fields": missing_required_fields,
+                    "field_observations": {
+                        field_name: observation
+                        for field_name, observation in field_observations.items()
+                        if field_name in missing_required_fields
+                    },
                     "source_path_mismatch": source_path_mismatch,
                     "mismatched_label_paths": mismatched_label_paths,
                     "subset_tags": subset_tags,
@@ -306,12 +367,17 @@ def build_external_holdout_manifest(
                 1 for case in cases if case["source_path_mismatch"]
             ),
             "excluded_eval_overlap_count": len(excluded_overlap_cases),
+            "excluded_non_extractable_count": len(excluded_non_extractable_cases),
             "document_type_counts": dict(sorted(document_type_counts.items())),
             "status_counts": dict(sorted(status_counts.items())),
             "subset_tag_counts": dict(sorted(subset_tag_counts.items())),
         },
         "excluded_eval_overlap_cases": sorted(
             excluded_overlap_cases,
+            key=lambda item: item["sample_path"],
+        ),
+        "excluded_non_extractable_cases": sorted(
+            excluded_non_extractable_cases,
             key=lambda item: item["sample_path"],
         ),
     }
@@ -362,6 +428,7 @@ def write_external_holdout(manifest: dict[str, Any], output_root: Path) -> None:
             "document_type": case["document_type"],
             "source_path": case["sample_path"],
             "expected_fields": expected_fields,
+            "field_observations": case.get("field_observations", {}),
             "holdout_status": case["status"],
             "subset_tags": case["subset_tags"],
         }
@@ -377,6 +444,7 @@ def main() -> None:
         args.sample_root,
         args.labeled_root,
         args.eval_root,
+        case_annotations_path=args.case_annotations,
     )
     write_external_holdout(manifest, args.output_root)
     print(json.dumps(manifest["summary"], ensure_ascii=False))

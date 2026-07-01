@@ -10,6 +10,7 @@
     "residency_country": "United States of America",
     "residency_country_code": "US"
   },
+  "field_observations": {},
   "holdout_status": "ready",
   "subset_tags": [
     "format_variation",

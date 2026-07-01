@@ -38,48 +38,10 @@
         "residency_country": "United States of America",
         "residency_country_code": "US"
       },
+      "field_observations": {},
       "source_path_mismatch": false,
+      "source_path_alias_match": false,
       "mismatched_label_paths": []
-    },
-    {
-      "case_id": "withholding_hana_payer_001",
-      "sample_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
-      "document_type": "withholding_tax_form",
-      "status": "needs_annotation",
-      "current_eval_overlap": false,
-      "source_origin": "sample_data",
-      "sample_dataset_split": "train",
-      "label_case_ids": [],
-      "expected_field_count": 0,
-      "missing_required_fields": [
-        "first_name",
-        "last_name",
-        "middle_name",
-        "tin",
-        "address",
-        "residency_country",
-        "residency_country_code",
-        "dividend_tax_rate",
-        "signature_date",
-        "applicant_name"
-      ],
-      "subset_tags": [
-        "format_variation",
-        "mixed_language"
-      ],
-      "quality_metrics": {
-        "file_type": ".png",
-        "width": 1023,
-        "height": 1537,
-        "blur_score": 8966.900390625,
-        "blurry": false
-      },
-      "priority_score": 64.0,
-      "expected_fields": {},
-      "source_path_mismatch": true,
-      "mismatched_label_paths": [
-        "data/labeled/pending_review/withholding_tax_form/withholding_hana_payer_001/label.json"
-      ]
     },
     {
       "case_id": "residency_legacy_001",
@@ -116,7 +78,18 @@
         "residency_country": "United States of America",
         "residency_country_code": "US"
       },
+      "field_observations": {
+        "tin": {
+          "status": "source_redacted",
+          "evidence": "TIN digits are visually obscured on sample_data/거주자증명서/4.jpg."
+        },
+        "issue_date": {
+          "status": "source_truncated",
+          "evidence": "Only `8, 2021` is visible on the source image; the month token is absent."
+        }
+      },
       "source_path_mismatch": false,
+      "source_path_alias_match": false,
       "mismatched_label_paths": []
     },
     {
@@ -152,68 +125,24 @@
         "residency_country": "United States of America",
         "residency_country_code": "US"
       },
+      "field_observations": {},
       "source_path_mismatch": false,
-      "mismatched_label_paths": []
-    },
-    {
-      "case_id": "withholding_pdf_001",
-      "sample_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
-      "document_type": "withholding_tax_form",
-      "status": "needs_annotation",
-      "current_eval_overlap": false,
-      "source_origin": "sample_data",
-      "sample_dataset_split": "test",
-      "label_case_ids": [
-        "withholding_pdf_001"
-      ],
-      "expected_field_count": 0,
-      "missing_required_fields": [
-        "first_name",
-        "last_name",
-        "middle_name",
-        "tin",
-        "address",
-        "residency_country",
-        "residency_country_code",
-        "dividend_tax_rate",
-        "signature_date",
-        "applicant_name"
-      ],
-      "subset_tags": [
-        "format_variation",
-        "mixed_language",
-        "pdf_render"
-      ],
-      "quality_metrics": {
-        "file_type": ".pdf",
-        "width": null,
-        "height": null,
-        "blur_score": null,
-        "blurry": null
-      },
-      "priority_score": 56.0,
-      "expected_fields": {},
-      "source_path_mismatch": false,
+      "source_path_alias_match": false,
       "mismatched_label_paths": []
     },
     {
       "case_id": "residency_pdf_001",
       "sample_path": "sample_data/거주자증명서/2.pdf",
       "document_type": "residency_certificate",
-      "status": "needs_annotation",
+      "status": "ready",
       "current_eval_overlap": false,
       "source_origin": "sample_data",
       "sample_dataset_split": "test",
-      "label_case_ids": [],
-      "expected_field_count": 0,
-      "missing_required_fields": [
-        "taxpayer_name",
-        "tin",
-        "tax_year",
-        "issue_date",
-        "residency_country",
-        "residency_country_code"
+      "label_case_ids": [
+        "residency_pdf_001"
       ],
+      "expected_field_count": 6,
+      "missing_required_fields": [],
       "subset_tags": [
         "format_variation",
         "pdf_render"
@@ -225,12 +154,19 @@
         "blur_score": null,
         "blurry": null
       },
-      "priority_score": 52.0,
-      "expected_fields": {},
-      "source_path_mismatch": true,
-      "mismatched_label_paths": [
-        "data/labeled/pending_review/residency_certificate/residency_pdf_001/label.json"
-      ]
+      "priority_score": 48.0,
+      "expected_fields": {
+        "taxpayer_name": "UNIVERSITY OF WASHINGTON",
+        "tin": "91-6001537",
+        "tax_year": "2025",
+        "issue_date": "March 24, 2025",
+        "residency_country": "United States of America",
+        "residency_country_code": "US"
+      },
+      "field_observations": {},
+      "source_path_mismatch": false,
+      "source_path_alias_match": true,
+      "mismatched_label_paths": []
     },
     {
       "case_id": "apostille_california_001",
@@ -243,11 +179,10 @@
       "label_case_ids": [
         "apostille_california_001"
       ],
-      "expected_field_count": 5,
+      "expected_field_count": 6,
       "missing_required_fields": [
         "signed_by",
-        "issued_on",
-        "issuing_authority"
+        "issued_on"
       ],
       "subset_tags": [
         "format_variation",
@@ -260,82 +195,35 @@
         "blur_score": 827.26025390625,
         "blurry": false
       },
-      "priority_score": 50.0,
+      "priority_score": 48.0,
       "expected_fields": {
         "issuing_country": "United States of America",
         "signer_capacity": "Deputy Registrar-Recorder/County Clerk, County of Los Angeles, State of California",
         "seal_owner": "County of Los Angeles, State of California",
         "issued_at": "Los Angeles, California",
+        "issuing_authority": "Deputy Secretary of State, State of California",
         "certificate_number": "4"
       },
-      "source_path_mismatch": false,
-      "mismatched_label_paths": []
-    },
-    {
-      "case_id": "residency_pdf_001",
-      "sample_path": "sample_data/거주자증명서/2_page1.png",
-      "document_type": "residency_certificate",
-      "status": "ready",
-      "current_eval_overlap": false,
-      "source_origin": "sample_data",
-      "sample_dataset_split": null,
-      "label_case_ids": [
-        "residency_pdf_001"
-      ],
-      "expected_field_count": 6,
-      "missing_required_fields": [],
-      "subset_tags": [
-        "format_variation",
-        "pdf_render"
-      ],
-      "quality_metrics": {
-        "file_type": ".png",
-        "width": 1284,
-        "height": 1657,
-        "blur_score": 2063.943359375,
-        "blurry": false
-      },
-      "priority_score": 48.0,
-      "expected_fields": {
-        "taxpayer_name": "UNIVERSITY OF WASHINGTON",
-        "tin": "91-6001537",
-        "tax_year": "2025",
-        "issue_date": "March 24, 2025",
-        "residency_country": "United States of America",
-        "residency_country_code": "US"
+      "field_observations": {
+        "signed_by": {
+          "status": "source_blank",
+          "evidence": "Item 2 (`has been signed by`) is blank on sample_data/아포스티유 샘플/미국 california 주.png."
+        },
+        "issued_on": {
+          "status": "source_blank",
+          "evidence": "Item 6 ends at `the 18th day of` with no month/year on the source image."
+        },
+        "issuing_authority": {
+          "status": "backfilled_from_visible_source",
+          "evidence": "Item 7 visibly reads `by Deputy Secretary of State, State of California`."
+        }
       },
       "source_path_mismatch": false,
+      "source_path_alias_match": false,
       "mismatched_label_paths": []
     }
   ],
   "required_samples": [
-    {
-      "case_id": "withholding_hana_payer_001",
-      "sample_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
-      "document_type": "withholding_tax_form",
-      "status": "needs_annotation",
-      "missing_required_fields": [
-        "first_name",
-        "last_name",
-        "middle_name",
-        "tin",
-        "address",
-        "residency_country",
-        "residency_country_code",
-        "dividend_tax_rate",
-        "signature_date",
-        "applicant_name"
-      ],
-      "source_path_mismatch": true,
-      "mismatched_label_paths": [
-        "data/labeled/pending_review/withholding_tax_form/withholding_hana_payer_001/label.json"
-      ],
-      "subset_tags": [
-        "format_variation",
-        "mixed_language"
-      ],
-      "priority_score": 64.0
-    },
     {
       "case_id": "residency_legacy_001",
       "sample_path": "sample_data/거주자증명서/4.jpg",
@@ -345,6 +233,16 @@
         "tin",
         "issue_date"
       ],
+      "field_observations": {
+        "tin": {
+          "status": "source_redacted",
+          "evidence": "TIN digits are visually obscured on sample_data/거주자증명서/4.jpg."
+        },
+        "issue_date": {
+          "status": "source_truncated",
+          "evidence": "Only `8, 2021` is visible on the source image; the month token is absent."
+        }
+      },
       "source_path_mismatch": false,
       "mismatched_label_paths": [],
       "subset_tags": [
@@ -355,97 +253,55 @@
       "priority_score": 58.0
     },
     {
-      "case_id": "withholding_pdf_001",
-      "sample_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
-      "document_type": "withholding_tax_form",
-      "status": "needs_annotation",
-      "missing_required_fields": [
-        "first_name",
-        "last_name",
-        "middle_name",
-        "tin",
-        "address",
-        "residency_country",
-        "residency_country_code",
-        "dividend_tax_rate",
-        "signature_date",
-        "applicant_name"
-      ],
-      "source_path_mismatch": false,
-      "mismatched_label_paths": [],
-      "subset_tags": [
-        "format_variation",
-        "mixed_language",
-        "pdf_render"
-      ],
-      "priority_score": 56.0
-    },
-    {
-      "case_id": "residency_pdf_001",
-      "sample_path": "sample_data/거주자증명서/2.pdf",
-      "document_type": "residency_certificate",
-      "status": "needs_annotation",
-      "missing_required_fields": [
-        "taxpayer_name",
-        "tin",
-        "tax_year",
-        "issue_date",
-        "residency_country",
-        "residency_country_code"
-      ],
-      "source_path_mismatch": true,
-      "mismatched_label_paths": [
-        "data/labeled/pending_review/residency_certificate/residency_pdf_001/label.json"
-      ],
-      "subset_tags": [
-        "format_variation",
-        "pdf_render"
-      ],
-      "priority_score": 52.0
-    },
-    {
       "case_id": "apostille_california_001",
       "sample_path": "sample_data/아포스티유 샘플/미국 california 주.png",
       "document_type": "apostille",
       "status": "partial_expected",
       "missing_required_fields": [
         "signed_by",
-        "issued_on",
-        "issuing_authority"
+        "issued_on"
       ],
+      "field_observations": {
+        "signed_by": {
+          "status": "source_blank",
+          "evidence": "Item 2 (`has been signed by`) is blank on sample_data/아포스티유 샘플/미국 california 주.png."
+        },
+        "issued_on": {
+          "status": "source_blank",
+          "evidence": "Item 6 ends at `the 18th day of` with no month/year on the source image."
+        }
+      },
       "source_path_mismatch": false,
       "mismatched_label_paths": [],
       "subset_tags": [
         "format_variation",
         "low_quality"
       ],
-      "priority_score": 50.0
+      "priority_score": 48.0
     }
   ],
   "summary": {
-    "candidate_case_count": 8,
+    "candidate_case_count": 5,
     "ready_case_count": 3,
     "partial_expected_case_count": 2,
-    "needs_annotation_case_count": 3,
-    "source_path_mismatch_case_count": 2,
+    "needs_annotation_case_count": 0,
+    "source_path_mismatch_case_count": 0,
     "excluded_eval_overlap_count": 4,
+    "excluded_non_extractable_count": 2,
     "document_type_counts": {
       "apostille": 1,
-      "residency_certificate": 5,
-      "withholding_tax_form": 2
+      "residency_certificate": 4
     },
     "status_counts": {
-      "needs_annotation": 3,
       "partial_expected": 2,
       "ready": 3
     },
     "subset_tag_counts": {
       "blur": 1,
       "crop_miss": 1,
-      "format_variation": 8,
+      "format_variation": 5,
       "low_quality": 4,
-      "mixed_language": 2,
-      "pdf_render": 3
+      "pdf_render": 1
     }
   },
   "excluded_eval_overlap_cases": [
@@ -468,6 +324,22 @@
       "case_id": "apostille_michigan_001",
       "sample_path": "sample_data/아포스티유 샘플/미국 michigan 주.jpg",
       "document_type": "apostille"
+    }
+  ],
+  "excluded_non_extractable_cases": [
+    {
+      "case_id": "withholding_hana_payer_001",
+      "sample_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
+      "document_type": "withholding_tax_form",
+      "page_role": "reverse_side_instructions",
+      "exclusion_reason": "back_side_reference_page"
+    },
+    {
+      "case_id": "withholding_pdf_001",
+      "sample_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
+      "document_type": "withholding_tax_form",
+      "page_role": "blank_form_template",
+      "exclusion_reason": "blank_form_without_filled_entities"
     }
   ]
 }

@@ -80,3 +80,31 @@ def test_bootstrap_uncovered_samples_skips_existing_labels_without_overwrite(
 
     assert written == []
     assert json.loads(label_path.read_text(encoding="utf-8")) == {"case_id": "existing"}
+
+
+def test_bootstrap_uncovered_samples_prefers_alias_ocr_source_and_skips_non_extractable(
+    tmp_path: Path,
+) -> None:
+    coverage_report_path = tmp_path / "sample_data_coverage.json"
+    coverage_report_path.write_text(
+        json.dumps(
+            {
+                "uncovered_sample_paths": [
+                    "sample_data/거주자증명서/2.pdf",
+                    "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
+                ]
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    written = bootstrap_uncovered_samples(
+        coverage_report_path,
+        tmp_path / "pending_review",
+    )
+
+    assert len(written) == 1
+    payload = json.loads(written[0].read_text(encoding="utf-8"))
+    assert payload["case_id"] == "residency_pdf_001"
+    assert payload["source_path"] == "sample_data/거주자증명서/2_page1.png"

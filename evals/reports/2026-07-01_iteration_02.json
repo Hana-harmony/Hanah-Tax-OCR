@@ -1,0 +1,93 @@
+{
+  "iteration_id": "2026-07-01-iteration-02",
+  "baseline": {
+    "report_path": "tmp/evals/current_official_v17_parser_report.json",
+    "summary_path": "evals/reports/current_official_v17_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0
+  },
+  "changes": [
+    "Linked `sample_data/거주자증명서/2.pdf` with its rasterized OCR alias `2_page1.png` so holdout/coverage can score the same residency PDF case without duplicating it.",
+    "Marked `sample_data/국내원천소득 제한세율/...-2.png` as `reverse_side_instructions` and `sample_data/국내원천소득 제한세율/원본 샘플.pdf` as `blank_form_template`, then excluded both from extraction holdout/bootstrap flows.",
+    "Rebuilt external holdout so canonical candidates are now only extractable front-side cases.",
+    "Generated semi-real hard-case v2 summaries plus recognizer split-readiness reports for `date` and `english_name_org` split candidates."
+  ],
+  "validation": {
+    "external_holdout_manifest_path": "evals/external_holdout/manifest.json",
+    "external_holdout_probe_summary_path": "evals/reports/external_holdout_probe_summary.json",
+    "semi_real_summary_path": "evals/reports/semi_real_hard_case_v2_summary.json",
+    "recognizer_candidate_v2_readiness_path": "evals/reports/recognizer_candidate_v2_readiness.json",
+    "recognizer_candidate_v3_split_readiness_path": "evals/reports/recognizer_candidate_v3_split_readiness.json",
+    "external_holdout": {
+      "candidate_case_count": 5,
+      "ready_case_count": 3,
+      "partial_expected_case_count": 2,
+      "excluded_non_extractable_count": 2,
+      "source_path_mismatch_case_count": 0
+    },
+    "external_holdout_probe": {
+      "compared_cases": 5,
+      "comparison_count": 27,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    },
+    "recognizer_split_blockers": {
+      "address": {
+        "status": "blocked",
+        "blocking_warning": "no_val_samples",
+        "train_count": 6,
+        "val_count": 0
+      },
+      "applicant_name": {
+        "status": "blocked",
+        "blocking_warning": "no_val_samples",
+        "train_count": 6,
+        "val_count": 0
+      },
+      "middle_name": {
+        "status": "blocked",
+        "blocking_warning": "no_val_samples",
+        "train_count": 6,
+        "val_count": 0
+      },
+      "issue_date": {
+        "status": "blocked",
+        "blocking_warning": "no_val_samples",
+        "train_count": 4,
+        "val_count": 0
+      },
+      "signature_date": {
+        "status": "blocked",
+        "blocking_warning": "no_val_samples",
+        "train_count": 6,
+        "val_count": 0
+      },
+      "issued_on": {
+        "status": "blocked",
+        "blocking_warning": "no_val_samples",
+        "train_count": 4,
+        "val_count": 0
+      }
+    }
+  },
+  "candidate_decisions": {
+    "kept": [
+      "canonical-source holdout handling with alias-linked OCR inputs",
+      "non-extractable sample exclusion for reverse-side and blank-template pages",
+      "semi-real hard-case v2 candidate prep summaries"
+    ],
+    "discarded": [
+      "treating the withholding back-side image as a field-extraction holdout candidate",
+      "treating the blank withholding PDF template as a scored extraction holdout candidate",
+      "promoting per-field recognizer split candidates for address/applicant_name/middle_name/date before resolving zero-val-sample blockers"
+    ]
+  },
+  "next_priorities": [
+    "Add at least one reviewed withholding front-side sample outside current eval so `address`, `applicant_name`, `middle_name`, and `signature_date` can gain real val coverage.",
+    "Backfill missing labels for `apostille_california_001` (`signed_by`, `issued_on`, `issuing_authority`) so all current external-holdout cases become fully scored rather than partial."
+  ]
+}

@@ -27,6 +27,33 @@ def parse_args() -> argparse.Namespace:
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _linked_records(
+    *,
+    sample_key: str,
+    sample_dataset_entry: dict[str, Any] | None,
+    records_by_sample: dict[str, list[dict[str, str]]],
+    records_by_case_id: dict[str, list[dict[str, str]]],
+) -> list[dict[str, str]]:
+    linked: dict[str, dict[str, str]] = {}
+    source_variants = {sample_key}
+    if sample_dataset_entry is not None:
+        source_variants.update(
+            str(variant)
+            for variant in sample_dataset_entry.get("source_variants", [])
+            if isinstance(variant, str) and variant
+        )
+    for variant in source_variants:
+        for record in records_by_sample.get(variant, []):
+            linked[record["label_path"]] = record
+    case_id = None if sample_dataset_entry is None else sample_dataset_entry.get("case_id")
+    if isinstance(case_id, str) and case_id:
+        for record in records_by_case_id.get(case_id, []):
+            linked[record["label_path"]] = record
+    return sorted(linked.values(), key=lambda record: record["label_path"])
+
+
 def build_sample_data_coverage_report(
     sample_root: Path,
     labeled_root: Path,
@@ -37,6 +64,7 @@ def build_sample_data_coverage_report(
     labels_by_sample: dict[str, list[dict[str, str]]] = {}
     labels_by_case_id: dict[str, list[dict[str, str]]] = {}
     pending_review_by_sample: dict[str, list[dict[str, str]]] = {}
+    pending_review_by_case_id: dict[str, list[dict[str, str]]] = {}
 
     for label_path in sorted(labeled_root.rglob("label.json")):
         payload = load_json(label_path)
@@ -53,6 +81,7 @@ def build_sample_data_coverage_report(
         source_key = normalize_path_text(source_path)
         if is_pending_review_label(label_path, labeled_root):
             pending_review_by_sample.setdefault(source_key, []).append(record)
+            pending_review_by_case_id.setdefault(str(case_id), []).append(record)
             continue
         labels_by_sample.setdefault(source_key, []).append(record)
         labels_by_case_id.setdefault(str(case_id), []).append(record)
@@ -75,6 +104,7 @@ def build_sample_data_coverage_report(
 
     samples: list[dict[str, Any]] = []
     uncovered_sample_paths: list[str] = []
+    non_extractable_sample_paths: list[str] = []
     labeled_without_eval_case_ids: list[str] = sorted(
         {
             record["case_id"]
@@ -86,12 +116,33 @@ def build_sample_data_coverage_report(
     for sample_path in sample_paths:
         sample_key = normalize_path_text(sample_path)
         sample_dataset_entry = sample_index.get(sample_key)
-        label_records = labels_by_sample.get(sample_key, [])
-        pending_review_records = pending_review_by_sample.get(sample_key, [])
+        label_records = _linked_records(
+            sample_key=sample_key,
+            sample_dataset_entry=sample_dataset_entry,
+            records_by_sample=labels_by_sample,
+            records_by_case_id=labels_by_case_id,
+        )
+        pending_review_records = _linked_records(
+            sample_key=sample_key,
+            sample_dataset_entry=sample_dataset_entry,
+            records_by_sample=pending_review_by_sample,
+            records_by_case_id=pending_review_by_case_id,
+        )
         sample_eval_case_ids = sorted(set(eval_by_sample.get(sample_key, [])))
+        if sample_dataset_entry is not None:
+            case_id = sample_dataset_entry.get("case_id")
+            if isinstance(case_id, str) and case_id:
+                sample_eval_case_ids = sorted(
+                    set(sample_eval_case_ids) | ({case_id} if case_id in eval_case_ids else set())
+                )
         covered_by_labeled = bool(label_records)
         covered_by_eval = bool(sample_eval_case_ids)
-        if not covered_by_labeled:
+        extractable = True
+        if sample_dataset_entry is not None:
+            extractable = bool(sample_dataset_entry.get("extractable", True))
+        if not extractable:
+            non_extractable_sample_paths.append(sample_key)
+        elif not covered_by_labeled:
             uncovered_sample_paths.append(sample_key)
         samples.append(
             {
@@ -114,6 +165,15 @@ def build_sample_data_coverage_report(
                 "sample_dataset_split": None
                 if sample_dataset_entry is None
                 else sample_dataset_entry["split"],
+                "sample_dataset_extractable": None
+                if sample_dataset_entry is None
+                else sample_dataset_entry.get("extractable", True),
+                "sample_dataset_page_role": None
+                if sample_dataset_entry is None
+                else sample_dataset_entry.get("page_role"),
+                "sample_dataset_exclusion_reason": None
+                if sample_dataset_entry is None
+                else sample_dataset_entry.get("exclusion_reason"),
             }
         )
 
@@ -128,6 +188,7 @@ def build_sample_data_coverage_report(
         ),
         "covered_by_eval_count": sum(1 for item in samples if item["covered_by_eval"]),
         "uncovered_sample_paths": uncovered_sample_paths,
+        "non_extractable_sample_paths": non_extractable_sample_paths,
         "labeled_without_eval_case_ids": labeled_without_eval_case_ids,
         "samples": samples,
     }

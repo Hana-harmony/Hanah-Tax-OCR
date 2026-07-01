@@ -40,6 +40,8 @@ def bootstrap_uncovered_samples(
         entry = sample_index.get(normalize_path_text(sample_path))
         if entry is None:
             continue
+        if not bool(entry.get("extractable", True)):
+            continue
         label_dir = output_root / entry["document_type"] / entry["case_id"]
         label_path = label_dir / "label.json"
         if label_path.exists() and not overwrite:
@@ -49,7 +51,7 @@ def bootstrap_uncovered_samples(
         label_payload = {
             "case_id": entry["case_id"],
             "document_type": entry["document_type"],
-            "source_path": entry["source"],
+            "source_path": entry.get("preferred_ocr_source") or entry["source"],
             "dataset_split": "pending_review",
             "promotion_status": "needs_human_verification",
             "expected_status": None,

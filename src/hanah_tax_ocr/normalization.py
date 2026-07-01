@@ -104,4 +104,5 @@ def normalize_apostille_authority(value: str | None) -> str | None:
         return None
     cleaned = value.replace("StateState", "State State")
     cleaned = cleaned.replace("Deputy Secretary of StateState", "Deputy Secretary of State State")
+    cleaned = re.sub(r"(?<=[A-Za-z]),(?=[A-Za-z])", ", ", cleaned)
     return normalize_whitespace(cleaned) or None
