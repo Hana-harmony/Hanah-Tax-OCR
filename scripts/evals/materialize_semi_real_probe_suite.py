@@ -71,10 +71,15 @@ def _variant_handlers() -> dict[str, VariantHandler]:
         "left_clip": lambda image, _donors, _rng, _options: _apply_left_clip(image),
         "low_res": lambda image, _donors, _rng, _options: _apply_low_res(image),
         "overlay_patch": (
-            lambda image, donors, rng, _options: _apply_overlay_patch(
+            lambda image, donors, rng, options: _apply_overlay_patch(
                 image,
                 donors,
                 rng,
+                anchor=str(options["anchor"]) if options.get("anchor") else None,
+                width_ratio=float(options.get("width_ratio", 1 / 3)),
+                height_ratio=float(options.get("height_ratio", 1 / 2)),
+                x_ratio=float(options["x_ratio"]) if options.get("x_ratio") is not None else None,
+                y_ratio=float(options["y_ratio"]) if options.get("y_ratio") is not None else None,
             )
         ),
         "rotate": lambda image, _donors, _rng, _options: _apply_rotate(image),

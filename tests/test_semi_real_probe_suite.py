@@ -38,9 +38,15 @@ def test_materialize_probe_suite_writes_assets_labels_and_expected(tmp_path: Pat
                         "base_case_id": "base",
                         "document_type": "withholding_tax_form",
                         "base_label_path": str(base_label_path),
-                        "augmentation_type": "left_clip",
+                        "augmentation_type": "overlay_patch",
                         "seed": 17,
-                        "augmentation_options": {"anchor": "top"},
+                        "augmentation_options": {
+                            "anchor": "top_right",
+                            "width_ratio": 0.2,
+                            "height_ratio": 0.1,
+                            "x_ratio": 0.65,
+                            "y_ratio": 0.12,
+                        },
                         "focus_fields": ["address"],
                         "failure_modes": ["crop_miss"],
                     }
@@ -65,10 +71,22 @@ def test_materialize_probe_suite_writes_assets_labels_and_expected(tmp_path: Pat
     label_payload = json.loads(label_path.read_text(encoding="utf-8"))
     expected_payload = json.loads(expected_path.read_text(encoding="utf-8"))
     assert label_payload["source_path"] == str(asset_path)
-    assert label_payload["augmentation_type"] == "left_clip"
+    assert label_payload["augmentation_type"] == "overlay_patch"
     assert label_payload["seed"] == 17
-    assert label_payload["augmentation_options"] == {"anchor": "top"}
+    assert label_payload["augmentation_options"] == {
+        "anchor": "top_right",
+        "width_ratio": 0.2,
+        "height_ratio": 0.1,
+        "x_ratio": 0.65,
+        "y_ratio": 0.12,
+    }
     assert label_payload["expected_fields"]["address"] == "1 Main Street"
     assert expected_payload["failure_modes"] == ["crop_miss"]
     assert expected_payload["seed"] == 17
-    assert expected_payload["augmentation_options"] == {"anchor": "top"}
+    assert expected_payload["augmentation_options"] == {
+        "anchor": "top_right",
+        "width_ratio": 0.2,
+        "height_ratio": 0.1,
+        "x_ratio": 0.65,
+        "y_ratio": 0.12,
+    }

@@ -136,6 +136,36 @@
         "Document-level edge-overlap probe forced to the right anchor via a probe-specific seed.",
         "Used to directly stress the top-right name band around the middle-name cell instead of only the bottom applicant signature block."
       ]
+    },
+    {
+      "case_id": "withholding_overlay_patch_top_right_middle_name_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_type": "overlay_patch",
+      "seed": 11,
+      "augmentation_options": {
+        "anchor": "top_right",
+        "width_ratio": 0.13,
+        "height_ratio": 0.085,
+        "x_ratio": 0.655,
+        "y_ratio": 0.105
+      },
+      "focus_fields": [
+        "middle_name",
+        "applicant_name",
+        "first_name",
+        "last_name"
+      ],
+      "failure_modes": [
+        "label_bleed",
+        "stamp_interference",
+        "middle_name_segmentation_ambiguity"
+      ],
+      "notes": [
+        "Small overlay patch targeted at the top-right name band so middle-name robustness can be evaluated without overwhelming TIN or address regions.",
+        "Used to distinguish true middle-name recovery from coarse right-half robustness."
+      ]
     }
   ]
 }

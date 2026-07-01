@@ -170,26 +170,34 @@ def _apply_overlay_patch(
     image: Image.Image,
     donors: list[dict[str, Any]],
     rng: random.Random,
+    *,
+    anchor: str | None = None,
+    width_ratio: float = 1 / 3,
+    height_ratio: float = 1 / 2,
+    x_ratio: float | None = None,
+    y_ratio: float | None = None,
 ) -> Image.Image:
     canvas = image.copy().convert("RGBA")
+    overlay_width = max(8, int(image.width * width_ratio))
+    overlay_height = max(8, int(image.height * height_ratio))
     if donors:
         donor_path = Path(rng.choice(donors)["crop_path"])
         try:
             donor = _open_image(donor_path)
             overlay = donor.resize(
-                (max(8, image.width // 3), max(8, image.height // 2)),
+                (overlay_width, overlay_height),
                 resample=Image.Resampling.BILINEAR,
             ).convert("RGBA")
         except OSError:
             overlay = Image.new(
                 "RGBA",
-                (max(8, image.width // 3), max(8, image.height // 2)),
+                (overlay_width, overlay_height),
                 (255, 0, 0, 0),
             )
     else:
         overlay = Image.new(
             "RGBA",
-            (max(8, image.width // 3), max(8, image.height // 2)),
+            (overlay_width, overlay_height),
             (255, 0, 0, 0),
         )
 
@@ -197,7 +205,33 @@ def _apply_overlay_patch(
     overlay = Image.blend(overlay, tint, 0.45)
     draw = ImageDraw.Draw(overlay)
     draw.ellipse((0, 0, overlay.width - 1, overlay.height - 1), outline=(160, 30, 30, 180), width=2)
-    position = (image.width // 5, image.height // 4)
+    if x_ratio is not None or y_ratio is not None:
+        position = (
+            int(image.width * float(x_ratio or 0.0)),
+            int(image.height * float(y_ratio or 0.0)),
+        )
+    else:
+        resolved_anchor = anchor or "mid_left"
+        if resolved_anchor == "top_left":
+            position = (image.width // 10, image.height // 10)
+        elif resolved_anchor == "top_right":
+            position = (max(0, image.width - overlay.width - image.width // 10), image.height // 10)
+        elif resolved_anchor == "bottom_right":
+            position = (
+                max(0, image.width - overlay.width - image.width // 10),
+                max(0, image.height - overlay.height - image.height // 10),
+            )
+        elif resolved_anchor == "bottom_left":
+            position = (
+                image.width // 10,
+                max(0, image.height - overlay.height - image.height // 10),
+            )
+        else:
+            position = (image.width // 5, image.height // 4)
+    position = (
+        min(max(0, position[0]), max(0, image.width - overlay.width)),
+        min(max(0, position[1]), max(0, image.height - overlay.height)),
+    )
     canvas.alpha_composite(overlay, position)
     return canvas.convert("RGB")
 

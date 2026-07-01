@@ -1,0 +1,115 @@
+{
+  "iteration_id": "2026-07-01_iteration_10",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "Top-right semi-real perturbation should isolate middle_name without contaminating address/TIN fields.",
+    "Current candidate should preserve middle_name/applicant_name extraction under a localized name-band overlay once the perturbation is correctly targeted."
+  ],
+  "changes": [
+    {
+      "type": "probe_infra",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/training/hard_cases.py",
+        "scripts/evals/materialize_semi_real_probe_suite.py",
+        "tests/test_semi_real_probe_suite.py"
+      ],
+      "summary": "overlay_patch now accepts per-probe size and position controls so semi-real overlays can target a single region instead of a coarse document block."
+    },
+    {
+      "type": "semi_real_probe",
+      "status": "kept",
+      "files": [
+        "evals/semi_real_probes/manifest.json"
+      ],
+      "summary": "Added withholding_overlay_patch_top_right_middle_name_probe and tuned it from a coarse address-bleeding version to a tight middle-name-only overlay."
+    }
+  ],
+  "probe_results": {
+    "withholding_overlay_patch_top_right_middle_name_probe_v1": {
+      "summary": {
+        "report_path": "tmp/manual_doc_probes/withholding_overlay_patch_top_right_middle_name_probe_v1_report.json",
+        "compared_cases": 1,
+        "missing_cases": [],
+        "field_metric_count": 10,
+        "comparison_count": 10,
+        "exact_match_rate": 0.9,
+        "average_character_error_rate": 0.014493,
+        "average_word_error_rate": 0.023077,
+        "document_pass_rate": 0.0,
+        "passed_case_ids": [],
+        "failed_case_ids": [
+          "withholding_overlay_patch_top_right_middle_name_probe"
+        ],
+        "low_quality_subset": {
+          "case_ids": [
+            "apostille_california_001",
+            "residency_john_doe_001",
+            "residency_legacy_001",
+            "residency_university_hawaii_001"
+          ],
+          "comparison_count": 0,
+          "exact_match_rate": 0.0,
+          "average_character_error_rate": 0.0,
+          "average_word_error_rate": 0.0,
+          "document_pass_rate": 0.0,
+          "passed_case_ids": [],
+          "failed_case_ids": []
+        }
+      },
+      "decision": "discarded",
+      "reason": "Patch size was too large and regressed address instead of isolating the top-right name band."
+    },
+    "withholding_overlay_patch_top_right_middle_name_probe_v2": {
+      "summary": {
+        "report_path": "tmp/manual_doc_probes/withholding_overlay_patch_top_right_middle_name_probe_v2_report.json",
+        "compared_cases": 1,
+        "missing_cases": [],
+        "field_metric_count": 10,
+        "comparison_count": 10,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0,
+        "document_pass_rate": 1.0,
+        "passed_case_ids": [
+          "withholding_overlay_patch_top_right_middle_name_probe"
+        ],
+        "failed_case_ids": [],
+        "low_quality_subset": {
+          "case_ids": [
+            "apostille_california_001",
+            "residency_john_doe_001",
+            "residency_legacy_001",
+            "residency_university_hawaii_001"
+          ],
+          "comparison_count": 0,
+          "exact_match_rate": 0.0,
+          "average_character_error_rate": 0.0,
+          "average_word_error_rate": 0.0,
+          "document_pass_rate": 0.0,
+          "passed_case_ids": [],
+          "failed_case_ids": []
+        }
+      },
+      "decision": "kept",
+      "reason": "Localized overlay preserved address/TIN while keeping middle_name and applicant_name exact, making it a cleaner future regression probe."
+    }
+  },
+  "baseline_comparison": {
+    "official_exact_match_rate": 1.0,
+    "official_average_character_error_rate": 0.0,
+    "official_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "This iteration only changed semi-real probe generation and did not touch inference-time OCR/parser logic, so official extraction metrics remain unchanged."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": "evals/reports/current_official_signature_date_v3_same_inputs_summary.json"
+  },
+  "next_priorities": [
+    "Compose a dual-perturbation semi-real probe that combines top name-band damage with bottom applicant-signature drift to stress name/date coupling.",
+    "Expand external holdout with real low-quality withholding samples where upper-name crops and lower applicant fields disagree in quality."
+  ]
+}
