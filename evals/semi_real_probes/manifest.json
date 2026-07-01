@@ -42,6 +42,26 @@
         "Document-level JPEG blocking probe built from the real withholding sample.",
         "Used to measure how much parser prior can recover country/date fields before recognizer-level retraining is required."
       ]
+    },
+    {
+      "case_id": "withholding_overlay_patch_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_type": "overlay_patch",
+      "focus_fields": [
+        "residency_country_code",
+        "residency_country",
+        "tin"
+      ],
+      "failure_modes": [
+        "label_bleed",
+        "stamp_interference"
+      ],
+      "notes": [
+        "Document-level overlay patch probe built from the real withholding sample.",
+        "Used to verify that parser prior can override a noisy country-code crop when the normalized country is still confidently United States."
+      ]
     }
   ]
 }

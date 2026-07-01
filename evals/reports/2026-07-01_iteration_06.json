@@ -1,0 +1,68 @@
+{
+  "iteration_id": "2026-07-01-iteration-06",
+  "baseline": {
+    "report_path": "tmp/evals/current_official_v17_parser_report.json",
+    "summary_path": "evals/reports/current_official_v17_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0
+  },
+  "changes": [
+    "Extended `evals/semi_real_probes/manifest.json` with a document-level `overlay_patch` withholding probe and confirmed that `stamp_shadow` does not create a regression worth keeping in the current seed/case.",
+    "Strengthened withholding parser priors so `residency_country_code` is forced back to `US` when the normalized country is confidently `United States of America`, even if the crop reads `ST` or another adjacent token fragment.",
+    "Added the taxonomy root cause `country_code_context_bleed` so invalid country-code crops that absorb nearby country text can be auto-classified from review_queue evidence.",
+    "Recorded the measured `overlay_patch` field-group delta in `evals/augmentation_effects/ledger.json`."
+  ],
+  "validation": {
+    "overlay_probe_before_fix_summary_path": "evals/reports/withholding_overlay_patch_probe_before_fix_summary.json",
+    "overlay_probe_after_fix_summary_path": "evals/reports/withholding_overlay_patch_probe_after_fix_summary.json",
+    "overlay_probe_comparison_path": "evals/reports/withholding_overlay_patch_probe_comparison.json",
+    "targeted_real_regression_summary_path": "evals/reports/targeted_real_regression_after_overlay_prior_summary.json",
+    "overlay_probe_before_fix": {
+      "comparison_count": 10,
+      "exact_match_rate": 0.8,
+      "average_character_error_rate": 0.172727,
+      "average_word_error_rate": 0.2,
+      "document_pass_rate": 0.0,
+      "failed_fields": [
+        "residency_country_code",
+        "tin"
+      ]
+    },
+    "overlay_probe_after_fix": {
+      "comparison_count": 10,
+      "exact_match_rate": 0.9,
+      "average_character_error_rate": 0.072727,
+      "average_word_error_rate": 0.1,
+      "document_pass_rate": 0.0,
+      "failed_fields": [
+        "tin"
+      ],
+      "review_status": "pass"
+    },
+    "targeted_real_regression": {
+      "compared_cases": 3,
+      "comparison_count": 23,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0
+    }
+  },
+  "candidate_decisions": {
+    "kept": [
+      "overlay-patch parser prior for country-code context bleed",
+      "document-level `overlay_patch` probe as a tracked semi-real regression case",
+      "automatic `country_code_context_bleed` taxonomy classification"
+    ],
+    "discarded": [
+      "stamp-shadow probe as a current-priority candidate because the selected real-sample probe still passed before any code changes",
+      "treating the overlay-patch case as fully solved while `TIN` remains semantically wrong despite review pass"
+    ]
+  },
+  "next_priorities": [
+    "Add a probe that specifically stresses `middle_name` or `applicant_name` under occlusion, since current overlay/crop probes mostly expose address/country-code behavior.",
+    "Backfill at least one reviewed non-eval withholding front-side sample so region recognizer candidates can move beyond the current zero-val-sample blocker."
+  ]
+}

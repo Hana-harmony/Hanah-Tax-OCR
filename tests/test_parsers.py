@@ -989,3 +989,26 @@ def test_withholding_parser_derives_country_code_from_normalized_country() -> No
 
     assert parsed.fields["residency_country"] == "United States of America"
     assert parsed.fields["residency_country_code"] == "US"
+
+
+def test_withholding_parser_overrides_noisy_country_code_when_country_is_us() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[OCRPage(page_number=1, raw_text="United States of America")],
+            regions={
+                "residency_country": OCRPage(
+                    page_number=1,
+                    raw_text="United States of America",
+                ),
+                "residency_country_code": OCRPage(
+                    page_number=1,
+                    raw_text="ST",
+                ),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["residency_country"] == "United States of America"
+    assert parsed.fields["residency_country_code"] == "US"

@@ -124,7 +124,10 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             address=address,
             country_code=country_code,
         )
-        country_code = country_code or normalize_country_code(country)
+        if country == "United States of America":
+            country_code = "US"
+        else:
+            country_code = country_code or normalize_country_code(country)
         dividend_tax_rate = normalize_percentage(
             self._extract_first_pattern(
                 [

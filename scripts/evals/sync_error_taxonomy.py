@@ -26,6 +26,13 @@ ROOT_CAUSE_CATALOG: dict[str, dict[str, str]] = {
         ),
         "field_groups": "english_name_org",
     },
+    "country_code_context_bleed": {
+        "description": (
+            "Country-code crop absorbed adjacent country text "
+            "instead of the 2-letter code."
+        ),
+        "field_groups": "numeric_tin_code",
+    },
     "date_crop_miss": {
         "description": "Region OCR or parser missed the date crop entirely.",
         "field_groups": "date",
@@ -124,6 +131,11 @@ def _field_root_causes(document: dict[str, Any], findings: list[dict[str, Any]])
             value,
         ) and re.search(r"[A-Za-z]", value):
             root_causes.add("mixed_korean_english_interference")
+        if field_name == "residency_country_code" and "invalid" in code:
+            normalized_country = str(fields.get("residency_country") or "")
+            if re.search(r"united states(?: of america)?", normalized_country, re.IGNORECASE):
+                if value and value.upper() != "US":
+                    root_causes.add("country_code_context_bleed")
         if field_name == "dividend_tax_rate" and ("invalid" in code or "missing" in code):
             root_causes.add("rate_or_checkbox_region_miss")
         if field_name == "taxpayer_name" and "cross_check_mismatch" in code:

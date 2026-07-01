@@ -147,3 +147,41 @@ def test_build_hard_case_manifest_detects_address_label_bleed(tmp_path: Path) ->
 
     case = manifest["cases"][0]
     assert "address_label_bleed" in case["root_causes"]
+
+
+def test_build_hard_case_manifest_detects_country_code_context_bleed(tmp_path: Path) -> None:
+    review_queue_dir = tmp_path / "review_queue"
+    review_queue_dir.mkdir()
+    (review_queue_dir / "case_004.json").write_text(
+        json.dumps(
+            {
+                "case_id": "case_004",
+                "review_result": {
+                    "status": "reject",
+                    "findings": [
+                        {
+                            "field_name": "residency_country_code",
+                            "code": "required_residency_country_code_invalid",
+                        },
+                    ],
+                },
+                "documents": [
+                    {
+                        "document_type": "withholding_tax_form",
+                        "source_path": "sample_data/withholding.png",
+                        "fields": {
+                            "residency_country": "United States of America",
+                            "residency_country_code": "ST",
+                        },
+                        "quality_checks": {"blur_score": 820},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    manifest = build_hard_case_manifest(review_queue_dir)
+
+    case = manifest["cases"][0]
+    assert "country_code_context_bleed" in case["root_causes"]
