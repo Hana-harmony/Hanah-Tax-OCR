@@ -1,0 +1,107 @@
+{
+  "iteration_id": "2026-07-02_iteration_19",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "semi-real mixed-language withholding probe의 핵심 약점은 parser 자체보다 eval/holdout 경로가 `withholding_tax_form`에 `korean` 기본 OCR lang을 강제하는 데 있다.",
+    "run_eval_suite 계열의 withholding 기본 OCR lang을 `en`으로 정렬하면 mixed-language country-row confusion probe를 크게 개선하면서 official replay와 external holdout 회귀를 피할 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "withholding_eval_lang_alignment",
+      "status": "kept",
+      "files": [
+        "scripts/evals/run_eval_suite.py",
+        "tests/test_eval_suite_runner.py"
+      ],
+      "summary": "run_eval_suite 계열에서 `withholding_tax_form` 기본 OCR lang을 `korean`에서 `en`으로 바꿔 mixed Korean-English form에 맞는 eval/holdout 경로를 production 기본값과 정렬했다."
+    },
+    {
+      "type": "docs_ignore_alignment",
+      "status": "kept",
+      "files": [
+        "README.md",
+        ".gitignore"
+      ],
+      "summary": "README에 withholding eval 기본 OCR lang과 로컬 training report 산출물 정책을 반영하고, `.gitignore`에 `data/training/reports/*.json` 명시 규칙을 추가했다."
+    }
+  ],
+  "probe_results": {
+    "withholding_country_row_confusion_probe": {
+      "before": {
+        "report_path": "evals/reports/withholding_country_row_confusion_probe_refresh_report.json",
+        "summary_path": "evals/reports/withholding_country_row_confusion_probe_refresh_summary.json",
+        "exact_match_rate": 0.5,
+        "average_character_error_rate": 0.336371,
+        "average_word_error_rate": 0.482051,
+        "document_pass_rate": 0.0
+      },
+      "after": {
+        "report_path": "evals/reports/withholding_country_row_confusion_probe_en_default_report.json",
+        "summary_path": "evals/reports/withholding_country_row_confusion_probe_en_default_summary.json",
+        "exact_match_rate": 0.9,
+        "average_character_error_rate": 0.008696,
+        "average_word_error_rate": 0.053846,
+        "document_pass_rate": 0.0
+      },
+      "comparison_path": "evals/reports/withholding_country_row_confusion_probe_refresh_vs_en_default.json",
+      "remaining_failure_fields": [
+        {
+          "field_name": "address",
+          "expected": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+          "actual": "1234 Sunset Bivd.Apt 5BLos ArgelesCA 90026. United States of America"
+        }
+      ]
+    }
+  },
+  "targeted_real_regression": {
+    "summary_path": "evals/reports/targeted_en_default_real_slice_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "failed_case_ids": [],
+    "note": "real 3-case slice(`apostille_north_carolina_001`, `residency_maria_chen_001`, `withholding_maria_chen_001`)에서 회귀가 없었다."
+  },
+  "external_holdout": {
+    "summary_path": "evals/reports/external_holdout_en_default_summary.json",
+    "comparison_path": "evals/reports/external_holdout_baseline_vs_en_default.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "comparison_status": "unchanged",
+    "note": "현재 ready external holdout은 apostille/residency 5건이며, low-quality subset도 unchanged였다."
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_eval_lang_alignment_v1_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_eval_lang_alignment_v1.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "official replay는 기존과 동일하게 withholding 21건을 `en`으로 재실행하므로 overall exact/CER/WER/doc pass가 baseline과 동일했다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/withholding_country_row_confusion_probe_refresh_vs_en_default.json",
+      "evals/reports/current_official_v17_vs_eval_lang_alignment_v1.json",
+      "evals/reports/targeted_en_default_real_slice_report.json"
+    ],
+    "note": "semi-real confusion probe와 official replay, real slice 모두 `signature_date`는 unchanged였다."
+  },
+  "kept_candidates": [
+    "withholding eval/holdout OCR lang alignment (`korean` -> `en`)"
+  ],
+  "discarded_candidates": [],
+  "next_priorities": [
+    "남은 `withholding_country_row_confusion_probe.address` 1필드에 대해 `Bivd/Argeles/5BLos`류 OCR noise를 address normalization으로 좁게 복구할지 검증한다.",
+    "실제 front-side mixed-language withholding 원본을 external holdout ready case로 추가해 현재 0 comparison인 mixed_language_subset을 채운다."
+  ]
+}

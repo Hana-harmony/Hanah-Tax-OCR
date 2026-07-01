@@ -215,6 +215,7 @@ PYTHONPATH=src .venv/bin/python -m scripts.evals.summarize_eval_report \
 ```
 
 후보 승격 판단은 반드시 `evals/benchmark_protocol.json`의 exact match, CER, WER, field-level metrics, document pass rate, low-quality subset, CPU latency 관찰 규칙을 따릅니다.
+평가 harness는 mixed Korean-English 비중이 높은 `withholding_tax_form`에 대해 기본 OCR lang을 `en`으로 사용합니다.
 
 ## 검수 워크플로
 
@@ -230,4 +231,5 @@ PYTHONPATH=src .venv/bin/python -m scripts.evals.summarize_eval_report \
 - PaddleOCR의 CPU 추론은 지원하며, 학습과 무거운 실험은 로컬에서 수행하는 것을 권장합니다.
 - 커밋 가능한 데이터는 비식별화 fixture와 결정적 라벨로 제한합니다.
 - `data/` 아래 generated manifest JSONL은 로컬 산출물로 보고 커밋하지 않습니다.
+- `data/training/reports/*.json` 같은 로컬 분석 보고서는 재생성 가능한 산출물로 보고 커밋하지 않습니다.
 - 로컬 실험 산출물인 `PaddleOCR/`, `output/`, `tmp/`는 커밋하지 않습니다.

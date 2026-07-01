@@ -52,6 +52,8 @@ data/training/**
 !data/training/**/
 !data/training/**/.gitkeep
 !data/training/**/README.md
+data/training/reports/*.json
+data/training/reports/**/*.json
 
 data/**/*manifest*.jsonl
 data/**/manifests/**/*.jsonl

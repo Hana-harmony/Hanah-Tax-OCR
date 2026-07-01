@@ -105,8 +105,8 @@ def test_discover_case_documents_materializes_synthetic_sources(tmp_path: Path) 
     assert cases["case_001"][0].ocr_lang == "en"
 
 
-def test_default_ocr_lang_uses_korean_for_withholding() -> None:
-    assert _default_ocr_lang(DocumentType.WITHHOLDING_TAX_FORM) == "korean"
+def test_default_ocr_lang_uses_english_for_withholding() -> None:
+    assert _default_ocr_lang(DocumentType.WITHHOLDING_TAX_FORM) == "en"
     assert _default_ocr_lang(DocumentType.APOSTILLE) == "en"
 
 

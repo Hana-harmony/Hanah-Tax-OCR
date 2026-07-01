@@ -31,7 +31,7 @@ def _safe_marker_filename(document_type: DocumentType, case_id: str) -> str:
 
 def _default_ocr_lang(document_type: DocumentType) -> str:
     if document_type == DocumentType.WITHHOLDING_TAX_FORM:
-        return "korean"
+        return "en"
     return "en"
 
 
