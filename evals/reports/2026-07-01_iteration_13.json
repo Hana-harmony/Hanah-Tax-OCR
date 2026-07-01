@@ -1,0 +1,97 @@
+{
+  "iteration_id": "2026-07-01_iteration_13",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "Official same-input replay must be codified so parser candidates can be judged with a reproducible hybrid protocol instead of ad hoc shell steps.",
+    "The current baseline parser itself may already drift from the stored v17 report on withholding synthetic inputs, and that drift should be measured before accepting or rejecting further parser candidates."
+  ],
+  "changes": [
+    {
+      "type": "benchmark_protocol",
+      "status": "kept",
+      "files": [
+        "scripts/evals/replay_hybrid_eval.py",
+        "tests/test_replay_hybrid_eval.py",
+        "evals/benchmark_protocol.json"
+      ],
+      "summary": "Added a reusable hybrid replay script that copies baseline actual results for untouched cases, reruns only selected case_ids or prefixes on the current code, and writes report/summary/comparison artifacts in one step."
+    }
+  ],
+  "official_same_input_replay_audit": {
+    "metadata_path": "evals/reports/current_official_v17_replay_baseline_metadata.json",
+    "summary_path": "evals/reports/current_official_v17_replay_baseline_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_replay_baseline.json",
+    "replayed_prefixes": [
+      "withholding_"
+    ],
+    "rerun_case_count": 21,
+    "copied_case_count": 44,
+    "result": {
+      "exact_match_rate": 0.966469,
+      "average_character_error_rate": 0.01793,
+      "average_word_error_rate": 0.021696,
+      "document_pass_rate": 0.796875
+    },
+    "regressed_fields": [
+      "withholding_tax_form.address",
+      "withholding_tax_form.applicant_name",
+      "withholding_tax_form.middle_name"
+    ],
+    "failed_case_ids": [
+      "withholding_regression_001",
+      "withholding_regression_004",
+      "withholding_regression_006",
+      "withholding_regression_008",
+      "withholding_regression_010",
+      "withholding_regression_011",
+      "withholding_regression_013",
+      "withholding_regression_014",
+      "withholding_regression_015",
+      "withholding_regression_016",
+      "withholding_regression_017",
+      "withholding_regression_018",
+      "withholding_regression_019"
+    ],
+    "raw_drift_examples": [
+      {
+        "case_id": "withholding_regression_001",
+        "field_name": "address",
+        "expected": "1 Main Street Suite 1 New York NY 10001 United States of America",
+        "actual": "2001 United States of America"
+      },
+      {
+        "case_id": "withholding_regression_014",
+        "field_name": "applicant_name",
+        "expected": "SAMPLE14 N USER",
+        "actual": "SAMPLE14 Z USER"
+      }
+    ],
+    "decision": "kept_as_audit_only",
+    "reason": "This replay establishes that the current environment no longer reproduces the stored v17 withholding outputs, so future parser promotions must interpret official replay regressions with an explicit OCR drift audit."
+  },
+  "baseline_comparison": {
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "kept_candidate_exact_match_rate": 1.0,
+    "kept_candidate_average_character_error_rate": 0.0,
+    "kept_candidate_average_word_error_rate": 0.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "No OCR/parser candidate was promoted in this iteration; the retained change is replay protocol stabilization only."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": "evals/reports/current_official_v17_vs_replay_baseline.json",
+    "note": "The replay audit regressed withholding address and name fields only; `signature_date` remained unchanged."
+  },
+  "kept_candidates": [
+    "hybrid official replay script and protocol hook"
+  ],
+  "discarded_candidates": [],
+  "next_priorities": [
+    "Design a narrower withholding address rescue that targets sparse full-text address captures like `2001 United States of America` without broad region-address preference.",
+    "Add a replay-baseline comparison step to the next parser candidate so OCR drift and parser deltas are reported separately in the same iteration."
+  ]
+}

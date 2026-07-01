@@ -6,6 +6,7 @@
   "external_holdout_manifest_path": "evals/external_holdout/manifest.json",
   "summary_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.summarize_eval_report --report <report.json> --external-manifest evals/external_holdout/manifest.json --output <summary.json>",
   "latency_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.measure_latency --labeled-root data/labeled --case-id <case_id> --case-id <case_id> --output evals/benchmark_latency_observations.json",
+  "hybrid_replay_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.replay_hybrid_eval --baseline-actual-dir <baseline_actual_dir> --expected-root evals/cases --output-dir <tmp_replay_dir> --report-output <report.json> --summary-output <summary.json> --baseline-report tmp/evals/current_official_v17_parser_report.json --comparison-output <comparison.json> --rerun-prefix <document_prefix>",
   "required_metrics": [
     "exact_match_rate",
     "average_character_error_rate",
@@ -42,7 +43,8 @@
     "promotion_gate": {
       "internal_regression": "No exact/CER/WER regression against baseline.",
       "date_fields": "issue_date, signature_date, issued_on must not regress in exact_match_rate.",
-      "external_holdout": "Report separately; improvements can justify promotion only when internal regression stays flat or better."
+      "external_holdout": "Report separately; improvements can justify promotion only when internal regression stays flat or better.",
+      "same_input_hybrid_replay": "When a candidate changes only selected document types, copy the baseline actual-dir for untouched cases and rerun only the affected case_ids or prefixes before comparing to the baseline report."
     },
     "latency_rule": "Latency is observational on local CPU and must be reported alongside accuracy, not substituted for it."
   },
@@ -50,6 +52,7 @@
     "external_holdout_manifest": "evals/external_holdout/manifest.json",
     "error_taxonomy_manifest": "evals/error_taxonomy/hard_case_manifest.json",
     "latency_observations": "evals/benchmark_latency_observations.json",
-    "augmentation_effect_ledger": "evals/augmentation_effects/ledger.json"
+    "augmentation_effect_ledger": "evals/augmentation_effects/ledger.json",
+    "hybrid_replay_metadata": "evals/reports/current_official_v17_replay_baseline_metadata.json"
   }
 }
