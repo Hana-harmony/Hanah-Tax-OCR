@@ -1,0 +1,62 @@
+{
+  "probe_case_id": "withholding_edge_overlap_bottom_probe",
+  "baseline_summary_path": "evals/reports/withholding_edge_overlap_bottom_probe_before_candidate_summary.json",
+  "candidate_summary_path": "evals/reports/withholding_edge_overlap_bottom_probe_discarded_candidate_summary.json",
+  "baseline": {
+    "exact_match_rate": 0.8,
+    "average_character_error_rate": 0.123077,
+    "average_word_error_rate": 0.133333,
+    "document_pass_rate": 0.0,
+    "failed_fields": [
+      "applicant_name",
+      "middle_name"
+    ]
+  },
+  "candidate": {
+    "exact_match_rate": 0.7,
+    "average_character_error_rate": 0.246154,
+    "average_word_error_rate": 0.266667,
+    "document_pass_rate": 0.0,
+    "failed_fields": [
+      "applicant_name",
+      "first_name",
+      "middle_name"
+    ]
+  },
+  "delta": {
+    "exact_match_rate": -0.1,
+    "average_character_error_rate": 0.123077,
+    "average_word_error_rate": 0.133334,
+    "document_pass_rate": 0.0
+  },
+  "field_changes": [
+    {
+      "field_name": "applicant_name",
+      "baseline_actual": "MARIA CHEN",
+      "candidate_actual": "To S. CHEN",
+      "baseline_cer": 0.23076923076923078,
+      "candidate_cer": 0.46153846153846156,
+      "baseline_wer": 0.3333333333333333,
+      "candidate_wer": 0.6666666666666666
+    },
+    {
+      "field_name": "first_name",
+      "baseline_actual": null,
+      "candidate_actual": "To",
+      "baseline_cer": null,
+      "candidate_cer": 1.0,
+      "baseline_wer": null,
+      "candidate_wer": 1.0
+    },
+    {
+      "field_name": "middle_name",
+      "baseline_actual": null,
+      "candidate_actual": "S",
+      "baseline_cer": 1.0,
+      "candidate_cer": 1.0,
+      "baseline_wer": 1.0,
+      "candidate_wer": 1.0
+    }
+  ],
+  "decision": "discarded"
+}

@@ -93,6 +93,8 @@ def materialize_probe_suite(
         augmentation_type = str(probe["augmentation_type"])
         handler = handlers[augmentation_type]
         base_label, base_label_path = _load_base_label(probe)
+        probe_seed = probe.get("seed")
+        probe_rng = random.Random(int(probe_seed)) if probe_seed is not None else rng
 
         source_path = Path(str(probe.get("source_path") or base_label["source_path"]))
         if not source_path.is_file():
@@ -103,7 +105,7 @@ def materialize_probe_suite(
             {"crop_path": str(source_path)}
         ]
         image = Image.open(source_path).convert("RGB")
-        augmented = handler(image, donors, rng)
+        augmented = handler(image, donors, probe_rng)
 
         asset_path = assets_root / f"{case_id}{source_path.suffix.lower() or '.png'}"
         augmented.save(asset_path)
@@ -132,6 +134,7 @@ def materialize_probe_suite(
             "base_label_path": str(base_label_path),
             "failure_modes": list(probe.get("failure_modes", [])),
             "focus_fields": list(probe.get("focus_fields", [])),
+            "seed": probe_seed,
             "notes": list(probe.get("notes", [])),
         }
         label_path = labeled_root / document_type / case_id / "label.json"
@@ -151,6 +154,7 @@ def materialize_probe_suite(
             "base_case_id": probe.get("base_case_id"),
             "failure_modes": list(probe.get("failure_modes", [])),
             "focus_fields": list(probe.get("focus_fields", [])),
+            "seed": probe_seed,
             "notes": list(probe.get("notes", [])),
         }
         expected_path = cases_root / case_id / "expected.json"
@@ -168,6 +172,7 @@ def materialize_probe_suite(
                 "label_path": str(label_path),
                 "expected_path": str(expected_path),
                 "augmentation_type": augmentation_type,
+                "seed": probe_seed,
             }
         )
 

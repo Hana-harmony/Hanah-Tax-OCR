@@ -1,0 +1,67 @@
+{
+  "iteration_id": "2026-07-01-iteration-07",
+  "baseline": {
+    "report_path": "tmp/evals/current_official_v17_parser_report.json",
+    "summary_path": "evals/reports/current_official_v17_summary.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0
+  },
+  "changes": [
+    "Extended `scripts/evals/materialize_semi_real_probe_suite.py` and `tests/test_semi_real_probe_suite.py` so each semi-real probe can pin its own RNG seed, which lets a single manifest hold deterministic anchors for distinct failure modes.",
+    "Added `withholding_edge_overlap_bottom_probe` to `evals/semi_real_probes/manifest.json` to stress the applicant/signature area with a bottom-anchored `edge_overlap` variant rather than only top/address-side corruption.",
+    "Materialized the new probe, measured its exact/CER/WER baseline, and recorded a discarded applicant-name scoring candidate plus field-group deltas in `evals/augmentation_effects/ledger.json`."
+  ],
+  "validation": {
+    "probe_before_report_path": "evals/reports/withholding_edge_overlap_bottom_probe_before_candidate_report.json",
+    "probe_before_summary_path": "evals/reports/withholding_edge_overlap_bottom_probe_before_candidate_summary.json",
+    "probe_discarded_candidate_report_path": "evals/reports/withholding_edge_overlap_bottom_probe_discarded_candidate_report.json",
+    "probe_discarded_candidate_summary_path": "evals/reports/withholding_edge_overlap_bottom_probe_discarded_candidate_summary.json",
+    "probe_candidate_comparison_path": "evals/reports/withholding_edge_overlap_bottom_probe_candidate_comparison.json",
+    "probe_before": {
+      "comparison_count": 10,
+      "exact_match_rate": 0.8,
+      "average_character_error_rate": 0.123077,
+      "average_word_error_rate": 0.133333,
+      "document_pass_rate": 0.0,
+      "failed_fields": [
+        "applicant_name",
+        "middle_name"
+      ],
+      "review_status": "pass"
+    },
+    "probe_discarded_candidate": {
+      "comparison_count": 10,
+      "exact_match_rate": 0.7,
+      "average_character_error_rate": 0.246154,
+      "average_word_error_rate": 0.266667,
+      "document_pass_rate": 0.0,
+      "failed_fields": [
+        "applicant_name",
+        "first_name",
+        "middle_name"
+      ],
+      "review_status": "pass"
+    },
+    "date_probe_observation": {
+      "baseline_signature_date": "2026-01-12",
+      "discarded_candidate_signature_date": "2026-01-12",
+      "regressed": false
+    }
+  },
+  "candidate_decisions": {
+    "kept": [
+      "per-probe RNG seed support for deterministic semi-real probe generation",
+      "document-level `withholding_edge_overlap_bottom_probe` as a tracked applicant/signature hard case",
+      "negative augmentation delta record for `edge_overlap` applicant-name scoring so this failed idea does not get retried blindly"
+    ],
+    "discarded": [
+      "applicant-name region scoring candidate that preferred a noisy `MARIA L. CHEN` line but regressed probe exact match from 0.8 to 0.7 by emitting `To S. CHEN` and corrupting `first_name`"
+    ]
+  },
+  "next_priorities": [
+    "Inspect applicant-name crop selection with first/last-name anchors or line-level post-filtering that explicitly preserves `MARIA`/`CHEN` before considering any middle-initial rescue.",
+    "Prepare a dedicated region-OCR experiment for `applicant_name` versus `middle_name`, because the current `middle_name` template crop is effectively blank on both the original and edge-overlap samples."
+  ]
+}
