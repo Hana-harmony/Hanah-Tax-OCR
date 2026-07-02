@@ -18,7 +18,7 @@
     },
     {
       "name": "Microsoft Azure AI Document Intelligence Custom Extraction",
-      "status": "planned",
+      "status": "adapter_ready",
       "input_format": [
         "PDF",
         "PNG",
@@ -26,11 +26,13 @@
       ],
       "expected_output_shape": "custom field schema from Document Intelligence Studio",
       "official_reference": "https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/train/custom-model?view=doc-intel-4.0.0",
+      "adapter_contract_path": "evals/sota_positioning/azure_document_intelligence_custom_extraction_contract.json",
+      "protocol_eval_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_azure_document_intelligence_protocol_eval --raw-dir <raw_json_dir> --expected-root <expected_root> --output-dir <actual_dir> --report-output <report.json> --summary-output <summary.json> --metadata-output <metadata.json> --baseline-report <baseline_report.json> --comparison-output <comparison.json>",
       "positioning_notes": "Relevant managed comparator for custom extraction on fixed document families."
     },
     {
       "name": "Amazon Textract AnalyzeDocument + Queries",
-      "status": "planned",
+      "status": "adapter_ready",
       "input_format": [
         "PDF",
         "PNG",
@@ -38,6 +40,8 @@
       ],
       "expected_output_shape": "OCR blocks plus query answers / structured relationships",
       "official_reference": "https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html",
+      "adapter_contract_path": "evals/sota_positioning/aws_textract_queries_contract.json",
+      "protocol_eval_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_aws_textract_protocol_eval --raw-dir <raw_json_dir> --expected-root <expected_root> --output-dir <actual_dir> --report-output <report.json> --summary-output <summary.json> --metadata-output <metadata.json> --baseline-report <baseline_report.json> --comparison-output <comparison.json>",
       "positioning_notes": "Useful end-to-end cloud baseline when structured queries and layout relationships matter more than a single generic OCR output."
     }
   ]

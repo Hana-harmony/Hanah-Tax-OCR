@@ -1,0 +1,128 @@
+{
+  "version": "2026-07-02",
+  "system_name": "Microsoft Azure AI Document Intelligence Custom Extraction",
+  "system_id": "azure_document_intelligence_custom_extraction",
+  "protocol_scope": "same_protocol_only",
+  "raw_payload_expectations": {
+    "one_file_per_case": true,
+    "file_name_pattern": "<case_id>.json",
+    "expected_top_level_keys": [
+      "documents"
+    ],
+    "supported_field_value_keys": [
+      "valueString",
+      "valueDate",
+      "valueNumber",
+      "valueInteger",
+      "valueCountryRegion",
+      "valuePhoneNumber",
+      "valueAddress",
+      "content"
+    ]
+  },
+  "document_type_aliases": {
+    "residency_certificate": {
+      "taxpayer_name": [
+        "taxpayer_name",
+        "TaxpayerName"
+      ],
+      "tin": [
+        "tin",
+        "TIN"
+      ],
+      "tax_year": [
+        "tax_year",
+        "TaxYear"
+      ],
+      "issue_date": [
+        "issue_date",
+        "IssueDate"
+      ],
+      "residency_country": [
+        "residency_country",
+        "ResidencyCountry"
+      ],
+      "residency_country_code": [
+        "residency_country_code",
+        "ResidencyCountryCode"
+      ]
+    },
+    "withholding_tax_form": {
+      "first_name": [
+        "first_name",
+        "FirstName"
+      ],
+      "last_name": [
+        "last_name",
+        "LastName"
+      ],
+      "middle_name": [
+        "middle_name",
+        "MiddleName"
+      ],
+      "tin": [
+        "tin",
+        "TIN"
+      ],
+      "address": [
+        "address",
+        "ResidenceAddress"
+      ],
+      "residency_country": [
+        "residency_country",
+        "ResidencyCountry"
+      ],
+      "residency_country_code": [
+        "residency_country_code",
+        "ResidencyCountryCode"
+      ],
+      "dividend_tax_rate": [
+        "dividend_tax_rate",
+        "DividendTaxRate"
+      ],
+      "signature_date": [
+        "signature_date",
+        "SignatureDate"
+      ],
+      "applicant_name": [
+        "applicant_name",
+        "ApplicantName"
+      ]
+    },
+    "apostille": {
+      "issuing_country": [
+        "issuing_country",
+        "IssuingCountry"
+      ],
+      "signed_by": [
+        "signed_by",
+        "SignedBy"
+      ],
+      "signer_capacity": [
+        "signer_capacity",
+        "SignerCapacity"
+      ],
+      "seal_owner": [
+        "seal_owner",
+        "SealOwner"
+      ],
+      "issued_at": [
+        "issued_at",
+        "IssuedAt"
+      ],
+      "issued_on": [
+        "issued_on",
+        "IssuedOn"
+      ],
+      "issuing_authority": [
+        "issuing_authority",
+        "IssuingAuthority"
+      ],
+      "certificate_number": [
+        "certificate_number",
+        "CertificateNumber"
+      ]
+    }
+  },
+  "protocol_eval_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_azure_document_intelligence_protocol_eval --raw-dir <raw_json_dir> --expected-root <expected_root> --output-dir <actual_dir> --report-output <report.json> --summary-output <summary.json> --metadata-output <metadata.json> --baseline-report <baseline_report.json> --comparison-output <comparison.json>"
+}

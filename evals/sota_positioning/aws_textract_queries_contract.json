@@ -1,0 +1,149 @@
+{
+  "version": "2026-07-02",
+  "system_name": "Amazon Textract AnalyzeDocument + Queries",
+  "system_id": "aws_textract_analyze_document",
+  "protocol_scope": "same_protocol_only",
+  "raw_payload_expectations": {
+    "one_file_per_case": true,
+    "file_name_pattern": "<case_id>.json",
+    "expected_top_level_keys": [
+      "Blocks"
+    ],
+    "supported_block_types": [
+      "QUERY",
+      "QUERY_RESULT",
+      "KEY_VALUE_SET",
+      "WORD",
+      "SELECTION_ELEMENT"
+    ]
+  },
+  "document_type_aliases": {
+    "residency_certificate": {
+      "taxpayer_name": [
+        "taxpayer_name",
+        "TAXPAYER_NAME",
+        "Taxpayer Name"
+      ],
+      "tin": [
+        "tin",
+        "TIN",
+        "Taxpayer Identification Number"
+      ],
+      "tax_year": [
+        "tax_year",
+        "TAX_YEAR",
+        "Tax Year"
+      ],
+      "issue_date": [
+        "issue_date",
+        "ISSUE_DATE",
+        "Issue Date"
+      ],
+      "residency_country": [
+        "residency_country",
+        "RESIDENCY_COUNTRY",
+        "Residency Country"
+      ],
+      "residency_country_code": [
+        "residency_country_code",
+        "RESIDENCY_COUNTRY_CODE",
+        "Residency Country Code"
+      ]
+    },
+    "withholding_tax_form": {
+      "first_name": [
+        "first_name",
+        "FIRST_NAME",
+        "First Name"
+      ],
+      "last_name": [
+        "last_name",
+        "LAST_NAME",
+        "Last Name"
+      ],
+      "middle_name": [
+        "middle_name",
+        "MIDDLE_NAME",
+        "Middle Name"
+      ],
+      "tin": [
+        "tin",
+        "TIN",
+        "Taxpayer Identification Number"
+      ],
+      "address": [
+        "address",
+        "ADDRESS",
+        "Residence Address"
+      ],
+      "residency_country": [
+        "residency_country",
+        "RESIDENCY_COUNTRY",
+        "Residency Country"
+      ],
+      "residency_country_code": [
+        "residency_country_code",
+        "RESIDENCY_COUNTRY_CODE",
+        "Residency Country Code"
+      ],
+      "dividend_tax_rate": [
+        "dividend_tax_rate",
+        "DIVIDEND_TAX_RATE",
+        "Dividend Tax Rate"
+      ],
+      "signature_date": [
+        "signature_date",
+        "SIGNATURE_DATE",
+        "Signature Date"
+      ],
+      "applicant_name": [
+        "applicant_name",
+        "APPLICANT_NAME",
+        "Applicant Name"
+      ]
+    },
+    "apostille": {
+      "issuing_country": [
+        "issuing_country",
+        "ISSUING_COUNTRY",
+        "Issuing Country"
+      ],
+      "signed_by": [
+        "signed_by",
+        "SIGNED_BY",
+        "Signed By"
+      ],
+      "signer_capacity": [
+        "signer_capacity",
+        "SIGNER_CAPACITY",
+        "Signer Capacity"
+      ],
+      "seal_owner": [
+        "seal_owner",
+        "SEAL_OWNER",
+        "Seal Owner"
+      ],
+      "issued_at": [
+        "issued_at",
+        "ISSUED_AT",
+        "Issued At"
+      ],
+      "issued_on": [
+        "issued_on",
+        "ISSUED_ON",
+        "Issued On"
+      ],
+      "issuing_authority": [
+        "issuing_authority",
+        "ISSUING_AUTHORITY",
+        "Issuing Authority"
+      ],
+      "certificate_number": [
+        "certificate_number",
+        "CERTIFICATE_NUMBER",
+        "Certificate Number"
+      ]
+    }
+  },
+  "protocol_eval_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_aws_textract_protocol_eval --raw-dir <raw_json_dir> --expected-root <expected_root> --output-dir <actual_dir> --report-output <report.json> --summary-output <summary.json> --metadata-output <metadata.json> --baseline-report <baseline_report.json> --comparison-output <comparison.json>"
+}
