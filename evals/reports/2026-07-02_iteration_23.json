@@ -1,0 +1,86 @@
+{
+  "iteration_id": "2026-07-02_iteration_23",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "SOTA 비교 준비는 템플릿만 있는 상태보다 current candidate 수치를 자동으로 채우고 coverage gap과 historical risk를 함께 보여주는 snapshot이 있어야 실무적으로 바로 비교를 시작할 수 있다.",
+    "internal perfect score만 내세우면 외부 비교에서 과장될 수 있으므로, mixed-language holdout 공백과 CPU latency 같은 약점을 comparison artifact에 강제로 드러내는 구조가 필요하다."
+  ],
+  "changes": [
+    {
+      "type": "sota_positioning_snapshot_builder",
+      "status": "kept",
+      "files": [
+        "scripts/evals/build_sota_comparison_snapshot.py",
+        "tests/test_sota_positioning_snapshot.py"
+      ],
+      "summary": "benchmark protocol, current summary, holdout gap report, latency observation, error taxonomy를 합쳐 current candidate rows와 planned comparator rows를 채우는 snapshot builder를 추가했다."
+    },
+    {
+      "type": "comparison_table_honesty_fields",
+      "status": "kept",
+      "files": [
+        "evals/sota_positioning/comparison_table_template.json",
+        "evals/sota_positioning/current_comparison_snapshot.json"
+      ],
+      "summary": "comparison table template에 `comparison_readiness`, `evidence_path`를 추가하고, current snapshot에서 internal/external rows, latency, coverage gap, historical risk를 함께 노출하도록 갱신했다."
+    }
+  ],
+  "sota_positioning": {
+    "snapshot_path": "evals/sota_positioning/current_comparison_snapshot.json",
+    "table_template_path": "evals/sota_positioning/comparison_table_template.json",
+    "targets_path": "evals/sota_positioning/comparison_targets.json",
+    "input_output_contract_path": "evals/sota_positioning/input_output_contract.json",
+    "current_internal_row": {
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0,
+      "low_quality_exact_match_rate": null,
+      "cpu_latency_observation_seconds": 29.4822
+    },
+    "current_external_holdout_row": {
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0,
+      "low_quality_exact_match_rate": 1.0,
+      "cpu_latency_observation_seconds": 29.4822
+    },
+    "honest_risks": [
+      "Mixed-language external holdout coverage is still zero, so that claim is not yet benchmarked.",
+      "Local CPU latency is still high enough that managed services may win on throughput."
+    ]
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_tin_parser_rescue_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_tin_parser_rescue.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "이번 반복은 비교 준비 artifact만 추가했기 때문에 official replay accuracy는 unchanged였다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_vs_tin_parser_rescue.json"
+    ],
+    "note": "date OCR/parser 로직 수정이 없었다."
+  },
+  "kept_candidates": [
+    "current candidate + gap + latency + taxonomy를 함께 채우는 SOTA comparison snapshot"
+  ],
+  "discarded_candidates": [
+    "internal perfect score만 보여주고 coverage gap과 latency를 따로 숨기는 비교 템플릿"
+  ],
+  "next_priorities": [
+    "mixed-language withholding 외부 홀드아웃 원본을 확보해 current snapshot의 `mixed-language not benchmarked` gap을 줄인다.",
+    "planned comparator 중 1개를 선택해 output normalization adapter skeleton을 만들고 same-protocol scoring 경로를 준비한다."
+  ]
+}

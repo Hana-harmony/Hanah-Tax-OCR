@@ -1,0 +1,282 @@
+{
+  "version": "2026-07-02",
+  "protocol_reference": "evals/benchmark_protocol.json",
+  "table_template_reference": "evals/sota_positioning/comparison_table_template.json",
+  "comparison_scope": "Document-type-specific OCR + parser + normalization + review-aware end-to-end extraction system",
+  "current_candidate_references": {
+    "internal_summary": "evals/reports/current_tin_parser_rescue_summary.json",
+    "external_summary": "evals/reports/external_holdout_tin_parser_rescue_summary.json",
+    "latency_observations": "evals/benchmark_latency_observations.json",
+    "holdout_gap_report": "evals/external_holdout/missing_distribution_targets.json",
+    "error_taxonomy": "evals/error_taxonomy/hard_case_manifest.json"
+  },
+  "rows": [
+    {
+      "system_name": "hanah_tax_ocr_current_candidate_internal",
+      "system_scope": "ocr+parser+normalization+review",
+      "dataset_split": "internal_regression",
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0,
+      "low_quality_exact_match_rate": null,
+      "low_quality_average_character_error_rate": null,
+      "low_quality_average_word_error_rate": null,
+      "cpu_latency_observation_seconds": 29.4822,
+      "comparison_readiness": "ready",
+      "evidence_path": "evals/reports/current_tin_parser_rescue_summary.json",
+      "notes": "Current best candidate under the internal regression protocol. Low-quality subset is null here because those cases live in external holdout."
+    },
+    {
+      "system_name": "hanah_tax_ocr_current_candidate_external_holdout",
+      "system_scope": "ocr+parser+normalization+review",
+      "dataset_split": "external_holdout",
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0,
+      "document_pass_rate": 1.0,
+      "low_quality_exact_match_rate": 1.0,
+      "low_quality_average_character_error_rate": 0.0,
+      "low_quality_average_word_error_rate": 0.0,
+      "cpu_latency_observation_seconds": 29.4822,
+      "comparison_readiness": "ready",
+      "evidence_path": "evals/reports/external_holdout_tin_parser_rescue_summary.json",
+      "notes": "Current best candidate under the isolated external holdout protocol. This is the fairer accuracy row for low-quality and format-variation claims."
+    },
+    {
+      "system_name": "Google Cloud Document AI Custom Extractor",
+      "system_scope": "managed_custom_extractor_or_query_system",
+      "dataset_split": "same_protocol_only",
+      "exact_match_rate": null,
+      "average_character_error_rate": null,
+      "average_word_error_rate": null,
+      "document_pass_rate": null,
+      "low_quality_exact_match_rate": null,
+      "low_quality_average_character_error_rate": null,
+      "low_quality_average_word_error_rate": null,
+      "cpu_latency_observation_seconds": null,
+      "comparison_readiness": "planned",
+      "evidence_path": "https://docs.cloud.google.com/document-ai/docs/custom-extractor-overview",
+      "notes": "Strong baseline for structured extraction across variable layouts; compare as a managed custom extraction stack rather than raw OCR only. Normalize outputs to this repository schema before scoring."
+    },
+    {
+      "system_name": "Microsoft Azure AI Document Intelligence Custom Extraction",
+      "system_scope": "managed_custom_extractor_or_query_system",
+      "dataset_split": "same_protocol_only",
+      "exact_match_rate": null,
+      "average_character_error_rate": null,
+      "average_word_error_rate": null,
+      "document_pass_rate": null,
+      "low_quality_exact_match_rate": null,
+      "low_quality_average_character_error_rate": null,
+      "low_quality_average_word_error_rate": null,
+      "cpu_latency_observation_seconds": null,
+      "comparison_readiness": "planned",
+      "evidence_path": "https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/train/custom-model?view=doc-intel-4.0.0",
+      "notes": "Relevant managed comparator for custom extraction on fixed document families. Normalize outputs to this repository schema before scoring."
+    },
+    {
+      "system_name": "Amazon Textract AnalyzeDocument + Queries",
+      "system_scope": "managed_custom_extractor_or_query_system",
+      "dataset_split": "same_protocol_only",
+      "exact_match_rate": null,
+      "average_character_error_rate": null,
+      "average_word_error_rate": null,
+      "document_pass_rate": null,
+      "low_quality_exact_match_rate": null,
+      "low_quality_average_character_error_rate": null,
+      "low_quality_average_word_error_rate": null,
+      "cpu_latency_observation_seconds": null,
+      "comparison_readiness": "planned",
+      "evidence_path": "https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html",
+      "notes": "Useful end-to-end cloud baseline when structured queries and layout relationships matter more than a single generic OCR output. Normalize outputs to this repository schema before scoring."
+    }
+  ],
+  "current_system_assessment": {
+    "strongest_signals": [
+      "Internal regression exact/CER/WER is currently perfect.",
+      "External holdout exact/CER/WER is currently perfect.",
+      "Low-quality external holdout subset is currently perfect."
+    ],
+    "coverage_gaps": [
+      {
+        "target_id": "withholding_front_filled_nonoverlap_low_quality",
+        "priority": "highest",
+        "status": "missing_source",
+        "needed_sample_description": "내부 eval과 다른 원본의 front-side 작성 완료 withholding 샘플 1건 이상. 저해상도 또는 blur가 있고, 한글 라벨과 영문 이름/주소가 함께 보여야 한다.",
+        "blocked_by_eval_overlap_case_ids": [
+          "withholding_maria_chen_001"
+        ],
+        "blocked_by_non_extractable_cases": [
+          {
+            "case_id": "withholding_hana_payer_001",
+            "page_role": "reverse_side_instructions",
+            "exclusion_reason": "back_side_reference_page",
+            "source_path_mismatch": true,
+            "label_case_ids": [
+              "withholding_hana_payer_001"
+            ],
+            "audit_source_classification": "back_side_submission_only",
+            "audit_holdout_usable": false,
+            "audit_blocker_reason": "back_side_without_target_fields",
+            "audit_page_classifications": [
+              "back_side_payer_submission"
+            ]
+          },
+          {
+            "case_id": "withholding_pdf_001",
+            "page_role": "blank_form_template",
+            "exclusion_reason": "blank_form_without_filled_entities",
+            "source_path_mismatch": false,
+            "label_case_ids": [
+              "withholding_pdf_001"
+            ],
+            "audit_source_classification": "blank_front_plus_back_side_only",
+            "audit_holdout_usable": false,
+            "audit_blocker_reason": "blank_form_without_filled_entities",
+            "audit_page_classifications": [
+              "front_blank_template",
+              "back_side_payer_submission"
+            ]
+          }
+        ]
+      },
+      {
+        "target_id": "withholding_front_filled_nonoverlap_crop_or_skew",
+        "priority": "high",
+        "status": "missing_source",
+        "needed_sample_description": "이름/주소/서명일 중 하나가 border clipping 또는 skew 영향을 받는 작성 완료 withholding 샘플 1건 이상.",
+        "blocked_by_eval_overlap_case_ids": [
+          "withholding_maria_chen_001"
+        ],
+        "blocked_by_non_extractable_cases": [
+          {
+            "case_id": "withholding_hana_payer_001",
+            "page_role": "reverse_side_instructions",
+            "exclusion_reason": "back_side_reference_page",
+            "source_path_mismatch": true,
+            "label_case_ids": [
+              "withholding_hana_payer_001"
+            ],
+            "audit_source_classification": "back_side_submission_only",
+            "audit_holdout_usable": false,
+            "audit_blocker_reason": "back_side_without_target_fields",
+            "audit_page_classifications": [
+              "back_side_payer_submission"
+            ]
+          },
+          {
+            "case_id": "withholding_pdf_001",
+            "page_role": "blank_form_template",
+            "exclusion_reason": "blank_form_without_filled_entities",
+            "source_path_mismatch": false,
+            "label_case_ids": [
+              "withholding_pdf_001"
+            ],
+            "audit_source_classification": "blank_front_plus_back_side_only",
+            "audit_holdout_usable": false,
+            "audit_blocker_reason": "blank_form_without_filled_entities",
+            "audit_page_classifications": [
+              "front_blank_template",
+              "back_side_payer_submission"
+            ]
+          }
+        ]
+      },
+      {
+        "target_id": "apostille_blur_ready_case",
+        "priority": "medium",
+        "status": "missing_source",
+        "needed_sample_description": "서명자/발행일이 실제로 채워져 있고 blur가 있는 apostille 샘플 1건 이상.",
+        "blocked_by_eval_overlap_case_ids": [
+          "apostille_north_carolina_001",
+          "apostille_michigan_001"
+        ],
+        "blocked_by_non_extractable_cases": []
+      }
+    ],
+    "historical_risk_root_causes": [
+      {
+        "root_cause": "cross_document_name_alignment_error",
+        "count": 1,
+        "description": "Cross-document name alignment failed even when per-document OCR looked plausible.",
+        "field_groups": "english_name_org"
+      },
+      {
+        "root_cause": "date_crop_miss",
+        "count": 1,
+        "description": "Region OCR or parser missed the date crop entirely.",
+        "field_groups": "date"
+      },
+      {
+        "root_cause": "date_spacing_loss",
+        "count": 1,
+        "description": "Date text lost required whitespace or punctuation during OCR.",
+        "field_groups": "date"
+      },
+      {
+        "root_cause": "label_bleed_name_header",
+        "count": 1,
+        "description": "Name crop included nearby labels such as First/Middle/Name headers.",
+        "field_groups": "english_name_org"
+      },
+      {
+        "root_cause": "middle_name_segmentation_ambiguity",
+        "count": 1,
+        "description": "Middle-name crop absorbed adjacent first/last-name tokens.",
+        "field_groups": "english_name_org"
+      }
+    ],
+    "honest_risks": [
+      "Local CPU latency is still high enough that managed services may win on throughput.",
+      "Mixed-language external holdout coverage is still zero, so that claim is not yet benchmarked."
+    ]
+  },
+  "comparison_targets": [
+    {
+      "name": "Google Cloud Document AI Custom Extractor",
+      "status": "planned",
+      "input_format": [
+        "PDF",
+        "PNG",
+        "JPEG"
+      ],
+      "expected_output_shape": "entity/value pairs per document processor schema",
+      "official_reference": "https://docs.cloud.google.com/document-ai/docs/custom-extractor-overview",
+      "positioning_notes": "Strong baseline for structured extraction across variable layouts; compare as a managed custom extraction stack rather than raw OCR only."
+    },
+    {
+      "name": "Microsoft Azure AI Document Intelligence Custom Extraction",
+      "status": "planned",
+      "input_format": [
+        "PDF",
+        "PNG",
+        "JPEG"
+      ],
+      "expected_output_shape": "custom field schema from Document Intelligence Studio",
+      "official_reference": "https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/train/custom-model?view=doc-intel-4.0.0",
+      "positioning_notes": "Relevant managed comparator for custom extraction on fixed document families."
+    },
+    {
+      "name": "Amazon Textract AnalyzeDocument + Queries",
+      "status": "planned",
+      "input_format": [
+        "PDF",
+        "PNG",
+        "JPEG"
+      ],
+      "expected_output_shape": "OCR blocks plus query answers / structured relationships",
+      "official_reference": "https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html",
+      "positioning_notes": "Useful end-to-end cloud baseline when structured queries and layout relationships matter more than a single generic OCR output."
+    }
+  ],
+  "required_metrics": [
+    "exact_match_rate",
+    "average_character_error_rate",
+    "average_word_error_rate",
+    "field_metrics",
+    "document_pass_rate",
+    "low_quality_subset",
+    "cpu_latency_observation"
+  ]
+}
