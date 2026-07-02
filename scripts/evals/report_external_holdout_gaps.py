@@ -8,6 +8,7 @@ from typing import Any
 DEFAULT_MANIFEST_PATH = Path("evals/external_holdout/manifest.json")
 DEFAULT_OUTPUT_PATH = Path("evals/external_holdout/missing_distribution_targets.json")
 DEFAULT_AUDIT_PATH = Path("evals/external_holdout/non_extractable_source_audit.json")
+DEFAULT_SAMPLE_PAGE_AUDIT_PATH = Path("evals/external_holdout/withholding_sample_page_audit.json")
 
 TARGET_DEFINITIONS = (
     {
@@ -49,6 +50,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
     parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT_PATH)
+    parser.add_argument("--sample-page-audit", type=Path, default=DEFAULT_SAMPLE_PAGE_AUDIT_PATH)
     return parser.parse_args()
 
 
@@ -95,6 +97,7 @@ def _build_non_extractable_blocker(
 def build_external_holdout_gap_report(
     manifest_path: Path,
     audit_path: Path | None = None,
+    sample_page_audit_path: Path | None = None,
 ) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     cases = list(manifest.get("cases", []))
@@ -108,6 +111,10 @@ def build_external_holdout_gap_report(
             for case in audit_payload.get("cases", [])
             if case.get("case_id")
         }
+    sample_page_audit_cases: list[dict[str, Any]] = []
+    if sample_page_audit_path is not None and sample_page_audit_path.exists():
+        sample_page_audit_payload = json.loads(sample_page_audit_path.read_text(encoding="utf-8"))
+        sample_page_audit_cases = list(sample_page_audit_payload.get("cases", []))
 
     targets: list[dict[str, Any]] = []
     for definition in TARGET_DEFINITIONS:
@@ -164,6 +171,11 @@ def build_external_holdout_gap_report(
                     "partial_case_ids": partial_case_ids,
                     "blocked_by_eval_overlap_case_ids": overlap_case_ids,
                     "blocked_by_non_extractable_cases": blocked_non_extractable,
+                    "withholding_sample_page_inventory": (
+                        sample_page_audit_cases
+                        if definition["document_type"] == "withholding_tax_form"
+                        else []
+                    ),
                 },
                 "needed_sample_description": definition["needed_sample_description"],
             }
@@ -173,13 +185,20 @@ def build_external_holdout_gap_report(
         "version": "2026-07-02",
         "baseline_manifest": str(manifest_path),
         "audit_report_path": None if audit_path is None else str(audit_path),
+        "sample_page_audit_path": (
+            None if sample_page_audit_path is None else str(sample_page_audit_path)
+        ),
         "targets": targets,
     }
 
 
 def main() -> None:
     args = parse_args()
-    payload = build_external_holdout_gap_report(args.manifest, audit_path=args.audit)
+    payload = build_external_holdout_gap_report(
+        args.manifest,
+        audit_path=args.audit,
+        sample_page_audit_path=args.sample_page_audit,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False))

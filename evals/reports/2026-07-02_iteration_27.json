@@ -1,0 +1,161 @@
+{
+  "iteration_id": "2026-07-02_iteration_27",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "mixed-language withholding external holdout 공백은 이미지 OCR을 다시 돌리지 않아도 sample_dataset page-role 메타데이터와 PDF 텍스트 audit만으로 overlap/non-extractable blocker를 재현 가능하게 증명할 수 있다.",
+    "홀드아웃 blocker 증거 경로와 로컬 raw payload 제외 규칙을 README/.gitignore에 고정하면 이후 same-protocol 비교를 반복할 때 eval 오염과 산출물 혼선을 줄일 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "withholding_sample_page_audit",
+      "status": "kept",
+      "files": [
+        "scripts/evals/audit_withholding_sample_pages.py",
+        "tests/test_withholding_sample_page_audit.py",
+        "evals/external_holdout/withholding_sample_page_audit.json"
+      ],
+      "summary": "원천징수 sample inventory audit를 이미지 OCR 기본 경로에서 sample_dataset 메타데이터 우선 경로로 전환하고, PDF만 text extraction으로 보강해 front overlap / reverse-side / blank template blocker를 빠르게 재현 가능하게 남겼다."
+    },
+    {
+      "type": "external_holdout_gap_evidence_refresh",
+      "status": "kept",
+      "files": [
+        "scripts/evals/report_external_holdout_gaps.py",
+        "tests/test_external_holdout_audit.py",
+        "evals/external_holdout/missing_distribution_targets.json"
+      ],
+      "summary": "missing distribution target report가 withholding sample page inventory를 직접 포함하도록 유지하고, gap report를 재생성해 non-overlap mixed-language withholding 공백이 eval overlap 1건과 non-extractable 2건 때문에 막혀 있음을 파일 단위로 기록했다."
+    },
+    {
+      "type": "protocol_docs_and_ignore",
+      "status": "kept",
+      "files": [
+        "README.md",
+        ".gitignore"
+      ],
+      "summary": "holdout refresh 명령에 sample page audit 경로를 추가하고, 외부 comparator raw payload를 `evals/sota_positioning/raw_inputs/` 아래에 둘 때 커밋하지 않도록 ignore 규칙을 명시했다."
+    }
+  ],
+  "external_holdout_blocker_state": {
+    "audit_path": "evals/external_holdout/withholding_sample_page_audit.json",
+    "gap_report_path": "evals/external_holdout/missing_distribution_targets.json",
+    "withholding_cases": [
+      {
+        "case_id": "withholding_maria_chen_001",
+        "holdout_status": "eval_overlap",
+        "source_classification": "contains_target_page",
+        "evidence_strategy": "sample_dataset_metadata"
+      },
+      {
+        "case_id": "withholding_hana_payer_001",
+        "holdout_status": "non_extractable",
+        "source_classification": "back_side_submission_only",
+        "evidence_strategy": "sample_dataset_metadata"
+      },
+      {
+        "case_id": "withholding_pdf_001",
+        "holdout_status": "non_extractable",
+        "source_classification": "blank_front_plus_back_side_only",
+        "evidence_strategy": "pdf_text"
+      }
+    ],
+    "missing_targets": [
+      {
+        "target_id": "withholding_front_filled_nonoverlap_low_quality",
+        "status": "missing_source",
+        "blocked_by_eval_overlap_case_ids": [
+          "withholding_maria_chen_001"
+        ],
+        "blocked_by_non_extractable_cases": [
+          {
+            "case_id": "withholding_hana_payer_001",
+            "audit_source_classification": "back_side_submission_only",
+            "audit_blocker_reason": "back_side_without_target_fields"
+          },
+          {
+            "case_id": "withholding_pdf_001",
+            "audit_source_classification": "blank_front_plus_back_side_only",
+            "audit_blocker_reason": "blank_form_without_filled_entities"
+          }
+        ]
+      },
+      {
+        "target_id": "withholding_front_filled_nonoverlap_crop_or_skew",
+        "status": "missing_source",
+        "blocked_by_eval_overlap_case_ids": [
+          "withholding_maria_chen_001"
+        ],
+        "blocked_by_non_extractable_cases": [
+          {
+            "case_id": "withholding_hana_payer_001",
+            "audit_source_classification": "back_side_submission_only",
+            "audit_blocker_reason": "back_side_without_target_fields"
+          },
+          {
+            "case_id": "withholding_pdf_001",
+            "audit_source_classification": "blank_front_plus_back_side_only",
+            "audit_blocker_reason": "blank_form_without_filled_entities"
+          }
+        ]
+      }
+    ]
+  },
+  "baseline_comparison": {
+    "baseline_summary_path": "evals/reports/current_official_v17_summary.json",
+    "candidate_summary_path": "evals/reports/current_mixed_language_gap_fix_summary.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "overall_status": "unchanged",
+    "note": "이번 반복은 OCR/parser 로직 변경이 아니라 holdout blocker 증거와 비교 프로토콜 운영 경로 고정 작업이므로 공식 baseline 대비 수치는 그대로 유지됐다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_summary.json",
+      "evals/reports/current_mixed_language_gap_fix_summary.json"
+    ],
+    "note": "date 계열을 변경하지 않았고, baseline과 current candidate 요약에서 exact/CER/WER 모두 동일하다."
+  },
+  "validation": {
+    "tests": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/pytest tests/test_external_holdout.py tests/test_external_holdout_audit.py tests/test_withholding_sample_page_audit.py -q",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/ruff check scripts/evals/audit_withholding_sample_pages.py scripts/evals/report_external_holdout_gaps.py tests/test_external_holdout_audit.py tests/test_withholding_sample_page_audit.py",
+        "status": "passed"
+      }
+    ],
+    "artifacts": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.audit_withholding_sample_pages --output evals/external_holdout/withholding_sample_page_audit.json",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.report_external_holdout_gaps --manifest evals/external_holdout/manifest.json --audit evals/external_holdout/non_extractable_source_audit.json --sample-page-audit evals/external_holdout/withholding_sample_page_audit.json --output evals/external_holdout/missing_distribution_targets.json",
+        "status": "passed"
+      }
+    ]
+  },
+  "kept_candidates": [
+    "sample_dataset 메타데이터 우선 withholding page audit",
+    "PDF text extraction 기반 blank-form / back-side 분리 evidence",
+    "README/.gitignore에 고정한 same-protocol comparator 운영 경로"
+  ],
+  "discarded_candidates": [
+    "withholding sample inventory 전체를 이미지 OCR로 다시 분류하는 느린 audit 기본 정책"
+  ],
+  "next_priorities": [
+    "external holdout에 넣을 수 있는 실제 non-overlap mixed-language withholding front-side 원본 1건 이상을 추가 확보하거나 pending_review 신규 수집 경로를 만들기",
+    "Google Document AI 또는 동급 comparator의 실제 raw payload 1세트를 same-protocol row로 연결해 `evals/sota_positioning/current_comparison_snapshot.json`의 외부 비교 행을 채우기"
+  ]
+}

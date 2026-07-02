@@ -97,6 +97,7 @@ def test_build_external_holdout_gap_report_includes_audit_evidence(
 ) -> None:
     manifest_path = tmp_path / "manifest.json"
     audit_path = tmp_path / "audit.json"
+    sample_page_audit_path = tmp_path / "sample_page_audit.json"
     manifest_path.write_text(
         json.dumps(
             {
@@ -104,12 +105,14 @@ def test_build_external_holdout_gap_report_includes_audit_evidence(
                     {
                         "case_id": "withholding_maria_chen_001",
                         "document_type": "withholding_tax_form",
+                        "sample_path": "sample_data/withholding-1.png",
                     }
                 ],
                 "excluded_non_extractable_cases": [
                     {
                         "case_id": "withholding_hana_payer_001",
                         "document_type": "withholding_tax_form",
+                        "sample_path": "sample_data/withholding-2.png",
                         "page_role": "reverse_side_instructions",
                         "exclusion_reason": "back_side_reference_page",
                         "source_path_mismatch": True,
@@ -141,10 +144,45 @@ def test_build_external_holdout_gap_report_includes_audit_evidence(
         ),
         encoding="utf-8",
     )
+    sample_page_audit_path.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "source_path": "sample_data/withholding-1.png",
+                        "holdout_status": "eval_overlap",
+                        "source_classification": "contains_target_page",
+                        "holdout_usable": True,
+                        "blocker_reason": None,
+                        "page_audits": [
+                            {"page_number": 1, "classification": "front_filled_target_page"},
+                        ],
+                    },
+                    {
+                        "source_path": "sample_data/withholding-2.png",
+                        "holdout_status": "non_extractable",
+                        "source_classification": "back_side_submission_only",
+                        "holdout_usable": False,
+                        "blocker_reason": "back_side_without_target_fields",
+                        "page_audits": [
+                            {"page_number": 1, "classification": "back_side_payer_submission"},
+                        ],
+                    },
+                ]
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
 
-    report = build_external_holdout_gap_report(manifest_path, audit_path=audit_path)
+    report = build_external_holdout_gap_report(
+        manifest_path,
+        audit_path=audit_path,
+        sample_page_audit_path=sample_page_audit_path,
+    )
 
     assert report["audit_report_path"] == str(audit_path)
+    assert report["sample_page_audit_path"] == str(sample_page_audit_path)
     target = next(
         entry
         for entry in report["targets"]
@@ -162,4 +200,26 @@ def test_build_external_holdout_gap_report_includes_audit_evidence(
             "audit_blocker_reason": "back_side_without_target_fields",
             "audit_page_classifications": ["back_side_payer_submission"],
         }
+    ]
+    assert target["evidence"]["withholding_sample_page_inventory"] == [
+        {
+            "source_path": "sample_data/withholding-1.png",
+            "holdout_status": "eval_overlap",
+            "source_classification": "contains_target_page",
+            "holdout_usable": True,
+            "blocker_reason": None,
+            "page_audits": [
+                {"page_number": 1, "classification": "front_filled_target_page"},
+            ],
+        },
+        {
+            "source_path": "sample_data/withholding-2.png",
+            "holdout_status": "non_extractable",
+            "source_classification": "back_side_submission_only",
+            "holdout_usable": False,
+            "blocker_reason": "back_side_without_target_fields",
+            "page_audits": [
+                {"page_number": 1, "classification": "back_side_payer_submission"},
+            ],
+        },
     ]

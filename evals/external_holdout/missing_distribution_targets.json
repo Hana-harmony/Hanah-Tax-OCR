@@ -2,6 +2,7 @@
   "version": "2026-07-02",
   "baseline_manifest": "evals/external_holdout/manifest.json",
   "audit_report_path": "evals/external_holdout/non_extractable_source_audit.json",
+  "sample_page_audit_path": "evals/external_holdout/withholding_sample_page_audit.json",
   "targets": [
     {
       "target_id": "withholding_front_filled_nonoverlap_low_quality",
@@ -49,6 +50,149 @@
             "audit_page_classifications": [
               "front_blank_template",
               "back_side_payer_submission"
+            ]
+          }
+        ],
+        "withholding_sample_page_inventory": [
+          {
+            "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+            "document_type": "withholding_tax_form",
+            "sample_split": "test",
+            "case_id": "withholding_maria_chen_001",
+            "holdout_status": "eval_overlap",
+            "manifest_case_id": "withholding_maria_chen_001",
+            "manifest_subset_tags": [
+              "mixed_language"
+            ],
+            "manifest_page_role": null,
+            "manifest_exclusion_reason": null,
+            "source_classification": "contains_target_page",
+            "holdout_usable": true,
+            "blocker_reason": null,
+            "usable_page_numbers": [
+              1
+            ],
+            "evidence_strategy": "sample_dataset_metadata",
+            "page_audits": [
+              {
+                "page_number": 1,
+                "classification": "front_filled_target_page",
+                "holdout_usable": true,
+                "blocker_reason": null,
+                "confidence": "declared",
+                "reasons": [
+                  "sample_dataset_extractable_front_page"
+                ],
+                "markers": {
+                  "page_role": "front",
+                  "extractable": true
+                },
+                "text_excerpt": null,
+                "evidence_strategy": "sample_dataset_metadata"
+              }
+            ]
+          },
+          {
+            "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
+            "document_type": "withholding_tax_form",
+            "sample_split": "train",
+            "case_id": "withholding_hana_payer_001",
+            "holdout_status": "non_extractable",
+            "manifest_case_id": "withholding_hana_payer_001",
+            "manifest_subset_tags": [
+              "format_variation",
+              "mixed_language"
+            ],
+            "manifest_page_role": "reverse_side_instructions",
+            "manifest_exclusion_reason": "back_side_reference_page",
+            "source_classification": "back_side_submission_only",
+            "holdout_usable": false,
+            "blocker_reason": "back_side_without_target_fields",
+            "usable_page_numbers": [],
+            "evidence_strategy": "sample_dataset_metadata",
+            "page_audits": [
+              {
+                "page_number": 1,
+                "classification": "back_side_payer_submission",
+                "holdout_usable": false,
+                "blocker_reason": "back_side_without_target_fields",
+                "confidence": "declared",
+                "reasons": [
+                  "sample_dataset_reverse_side_reference_page"
+                ],
+                "markers": {
+                  "page_role": "reverse_side_instructions",
+                  "extractable": false
+                },
+                "text_excerpt": null,
+                "evidence_strategy": "sample_dataset_metadata"
+              }
+            ]
+          },
+          {
+            "source_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
+            "document_type": "withholding_tax_form",
+            "sample_split": "test",
+            "case_id": "withholding_pdf_001",
+            "holdout_status": "non_extractable",
+            "manifest_case_id": "withholding_pdf_001",
+            "manifest_subset_tags": [
+              "format_variation",
+              "mixed_language",
+              "pdf_render"
+            ],
+            "manifest_page_role": "blank_form_template",
+            "manifest_exclusion_reason": "blank_form_without_filled_entities",
+            "source_classification": "blank_front_plus_back_side_only",
+            "holdout_usable": false,
+            "blocker_reason": "blank_form_without_filled_entities",
+            "usable_page_numbers": [],
+            "evidence_strategy": "pdf_text",
+            "page_audits": [
+              {
+                "page_number": 1,
+                "classification": "front_blank_template",
+                "holdout_usable": false,
+                "blocker_reason": "blank_form_without_filled_entities",
+                "confidence": "high",
+                "reasons": [
+                  "contains_front_form_title",
+                  "missing_filled_target_signals"
+                ],
+                "markers": {
+                  "has_title": true,
+                  "has_name_labels": true,
+                  "has_instruction_header": false,
+                  "has_payer_header": false,
+                  "has_us_address": false,
+                  "has_tin": false,
+                  "has_applicant_signature": true
+                },
+                "text_excerpt": "■ 소득세법 시행규칙 [별지 제29호의12서식] <개정 2018. 3. 21.>     ※ 해당되는 [ ]에 √표를 합니다.                                                                             (앞 쪽) 접수번호                                                       접수일자   1. 신청인의 인적사항 ① 성명 (Las",
+                "evidence_strategy": "pdf_text"
+              },
+              {
+                "page_number": 2,
+                "classification": "back_side_payer_submission",
+                "holdout_usable": false,
+                "blocker_reason": "back_side_without_target_fields",
+                "confidence": "high",
+                "reasons": [
+                  "contains_payer_header",
+                  "contains_instruction_header"
+                ],
+                "markers": {
+                  "has_title": false,
+                  "has_name_labels": false,
+                  "has_instruction_header": true,
+                  "has_payer_header": true,
+                  "has_us_address": false,
+                  "has_tin": false,
+                  "has_applicant_signature": false
+                },
+                "text_excerpt": "(뒤쪽)                                              작성방법  ※ 접수번호 및 접수일자는 원천징수의무자가 실질귀속자로부터 이 신청서를 제출받아 접수한 일자 및 일련번호를 적습니다.  1. 이 신청서는 비거주자가 지급받는 국내원천소득에 대하여 조세조약에 따른 제한세율을 적용받으려는 경우에 제출하며, 조세    조약에 따라 국내에서 원천징수가 면제되는 경우에는 이를 제출하지 않습니다.    이",
+                "evidence_strategy": "pdf_text"
+              }
             ]
           }
         ]
@@ -102,6 +246,149 @@
               "back_side_payer_submission"
             ]
           }
+        ],
+        "withholding_sample_page_inventory": [
+          {
+            "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+            "document_type": "withholding_tax_form",
+            "sample_split": "test",
+            "case_id": "withholding_maria_chen_001",
+            "holdout_status": "eval_overlap",
+            "manifest_case_id": "withholding_maria_chen_001",
+            "manifest_subset_tags": [
+              "mixed_language"
+            ],
+            "manifest_page_role": null,
+            "manifest_exclusion_reason": null,
+            "source_classification": "contains_target_page",
+            "holdout_usable": true,
+            "blocker_reason": null,
+            "usable_page_numbers": [
+              1
+            ],
+            "evidence_strategy": "sample_dataset_metadata",
+            "page_audits": [
+              {
+                "page_number": 1,
+                "classification": "front_filled_target_page",
+                "holdout_usable": true,
+                "blocker_reason": null,
+                "confidence": "declared",
+                "reasons": [
+                  "sample_dataset_extractable_front_page"
+                ],
+                "markers": {
+                  "page_role": "front",
+                  "extractable": true
+                },
+                "text_excerpt": null,
+                "evidence_strategy": "sample_dataset_metadata"
+              }
+            ]
+          },
+          {
+            "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-2.png",
+            "document_type": "withholding_tax_form",
+            "sample_split": "train",
+            "case_id": "withholding_hana_payer_001",
+            "holdout_status": "non_extractable",
+            "manifest_case_id": "withholding_hana_payer_001",
+            "manifest_subset_tags": [
+              "format_variation",
+              "mixed_language"
+            ],
+            "manifest_page_role": "reverse_side_instructions",
+            "manifest_exclusion_reason": "back_side_reference_page",
+            "source_classification": "back_side_submission_only",
+            "holdout_usable": false,
+            "blocker_reason": "back_side_without_target_fields",
+            "usable_page_numbers": [],
+            "evidence_strategy": "sample_dataset_metadata",
+            "page_audits": [
+              {
+                "page_number": 1,
+                "classification": "back_side_payer_submission",
+                "holdout_usable": false,
+                "blocker_reason": "back_side_without_target_fields",
+                "confidence": "declared",
+                "reasons": [
+                  "sample_dataset_reverse_side_reference_page"
+                ],
+                "markers": {
+                  "page_role": "reverse_side_instructions",
+                  "extractable": false
+                },
+                "text_excerpt": null,
+                "evidence_strategy": "sample_dataset_metadata"
+              }
+            ]
+          },
+          {
+            "source_path": "sample_data/국내원천소득 제한세율/원본 샘플.pdf",
+            "document_type": "withholding_tax_form",
+            "sample_split": "test",
+            "case_id": "withholding_pdf_001",
+            "holdout_status": "non_extractable",
+            "manifest_case_id": "withholding_pdf_001",
+            "manifest_subset_tags": [
+              "format_variation",
+              "mixed_language",
+              "pdf_render"
+            ],
+            "manifest_page_role": "blank_form_template",
+            "manifest_exclusion_reason": "blank_form_without_filled_entities",
+            "source_classification": "blank_front_plus_back_side_only",
+            "holdout_usable": false,
+            "blocker_reason": "blank_form_without_filled_entities",
+            "usable_page_numbers": [],
+            "evidence_strategy": "pdf_text",
+            "page_audits": [
+              {
+                "page_number": 1,
+                "classification": "front_blank_template",
+                "holdout_usable": false,
+                "blocker_reason": "blank_form_without_filled_entities",
+                "confidence": "high",
+                "reasons": [
+                  "contains_front_form_title",
+                  "missing_filled_target_signals"
+                ],
+                "markers": {
+                  "has_title": true,
+                  "has_name_labels": true,
+                  "has_instruction_header": false,
+                  "has_payer_header": false,
+                  "has_us_address": false,
+                  "has_tin": false,
+                  "has_applicant_signature": true
+                },
+                "text_excerpt": "■ 소득세법 시행규칙 [별지 제29호의12서식] <개정 2018. 3. 21.>     ※ 해당되는 [ ]에 √표를 합니다.                                                                             (앞 쪽) 접수번호                                                       접수일자   1. 신청인의 인적사항 ① 성명 (Las",
+                "evidence_strategy": "pdf_text"
+              },
+              {
+                "page_number": 2,
+                "classification": "back_side_payer_submission",
+                "holdout_usable": false,
+                "blocker_reason": "back_side_without_target_fields",
+                "confidence": "high",
+                "reasons": [
+                  "contains_payer_header",
+                  "contains_instruction_header"
+                ],
+                "markers": {
+                  "has_title": false,
+                  "has_name_labels": false,
+                  "has_instruction_header": true,
+                  "has_payer_header": true,
+                  "has_us_address": false,
+                  "has_tin": false,
+                  "has_applicant_signature": false
+                },
+                "text_excerpt": "(뒤쪽)                                              작성방법  ※ 접수번호 및 접수일자는 원천징수의무자가 실질귀속자로부터 이 신청서를 제출받아 접수한 일자 및 일련번호를 적습니다.  1. 이 신청서는 비거주자가 지급받는 국내원천소득에 대하여 조세조약에 따른 제한세율을 적용받으려는 경우에 제출하며, 조세    조약에 따라 국내에서 원천징수가 면제되는 경우에는 이를 제출하지 않습니다.    이",
+                "evidence_strategy": "pdf_text"
+              }
+            ]
+          }
         ]
       },
       "needed_sample_description": "이름/주소/서명일 중 하나가 border clipping 또는 skew 영향을 받는 작성 완료 withholding 샘플 1건 이상."
@@ -122,7 +409,8 @@
           "apostille_north_carolina_001",
           "apostille_michigan_001"
         ],
-        "blocked_by_non_extractable_cases": []
+        "blocked_by_non_extractable_cases": [],
+        "withholding_sample_page_inventory": []
       },
       "needed_sample_description": "서명자/발행일이 실제로 채워져 있고 blur가 있는 apostille 샘플 1건 이상."
     }

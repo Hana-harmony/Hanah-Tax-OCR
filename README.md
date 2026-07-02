@@ -221,13 +221,18 @@ PYTHONPATH=src .venv/bin/python -m scripts.evals.summarize_eval_report \
 PYTHONPATH=src .venv/bin/python -m scripts.evals.build_external_holdout
 PYTHONPATH=src .venv/bin/python -m scripts.evals.audit_non_extractable_holdout_sources \
   --output evals/external_holdout/non_extractable_source_audit.json
+PYTHONPATH=src .venv/bin/python -m scripts.evals.audit_withholding_sample_pages \
+  --manifest evals/external_holdout/manifest.json \
+  --output evals/external_holdout/withholding_sample_page_audit.json
 PYTHONPATH=src .venv/bin/python -m scripts.evals.report_external_holdout_gaps \
   --manifest evals/external_holdout/manifest.json \
   --audit evals/external_holdout/non_extractable_source_audit.json \
+  --sample-page-audit evals/external_holdout/withholding_sample_page_audit.json \
   --output evals/external_holdout/missing_distribution_targets.json
 ```
 
 `missing_distribution_targets.json`은 overlap 여부뿐 아니라 `non_extractable_source_audit.json`을 참조해 reverse-side, blank template 같은 blocker 근거를 machine-readable 형태로 남깁니다.
+`withholding_sample_page_audit.json`은 원천징수 샘플에 대해 이미지 OCR을 다시 돌리지 않고 `sample_dataset`의 page-role 메타데이터와 PDF 텍스트를 우선 사용해 front-side overlap, reverse-side, blank template 여부를 재현 가능하게 기록합니다.
 
 Google Document AI Custom Extractor raw JSON을 같은 프로토콜 report/summary/comparison 형식으로 정규화:
 
@@ -264,3 +269,4 @@ PYTHONPATH=src .venv/bin/python -m scripts.evals.run_google_document_ai_protocol
 - `data/` 아래 generated manifest JSONL은 로컬 산출물로 보고 커밋하지 않습니다.
 - `data/training/reports/*.json` 같은 로컬 분석 보고서는 재생성 가능한 산출물로 보고 커밋하지 않습니다.
 - 로컬 실험 산출물인 `PaddleOCR/`, `output/`, `tmp/`는 커밋하지 않습니다.
+- 외부 비교 raw payload를 `evals/sota_positioning/raw_inputs/` 아래에 임시 저장하는 경우에도 로컬 산출물로 보고 커밋하지 않습니다.
