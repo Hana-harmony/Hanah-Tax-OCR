@@ -3,9 +3,10 @@
   "protocol_reference": "evals/benchmark_protocol.json",
   "table_template_reference": "evals/sota_positioning/comparison_table_template.json",
   "comparison_scope": "Document-type-specific OCR + parser + normalization + review-aware end-to-end extraction system",
+  "current_candidate_refs_path": "evals/sota_positioning/current_candidate_refs.json",
   "current_candidate_references": {
-    "internal_summary": "evals/reports/current_tin_parser_rescue_summary.json",
-    "external_summary": "evals/reports/external_holdout_tin_parser_rescue_summary.json",
+    "internal_summary": "evals/reports/current_mixed_language_gap_fix_summary.json",
+    "external_summary": "evals/reports/external_holdout_current_candidate_summary.json",
     "latency_observations": "evals/benchmark_latency_observations.json",
     "holdout_gap_report": "evals/external_holdout/missing_distribution_targets.json",
     "error_taxonomy": "evals/error_taxonomy/hard_case_manifest.json"
@@ -22,9 +23,9 @@
       "low_quality_exact_match_rate": null,
       "low_quality_average_character_error_rate": null,
       "low_quality_average_word_error_rate": null,
-      "cpu_latency_observation_seconds": 29.4822,
+      "cpu_latency_observation_seconds": 7.4588,
       "comparison_readiness": "ready",
-      "evidence_path": "evals/reports/current_tin_parser_rescue_summary.json",
+      "evidence_path": "evals/reports/current_mixed_language_gap_fix_summary.json",
       "notes": "Current best candidate under the internal regression protocol. Low-quality subset is null here because those cases live in external holdout."
     },
     {
@@ -38,9 +39,9 @@
       "low_quality_exact_match_rate": 1.0,
       "low_quality_average_character_error_rate": 0.0,
       "low_quality_average_word_error_rate": 0.0,
-      "cpu_latency_observation_seconds": 29.4822,
+      "cpu_latency_observation_seconds": 7.4588,
       "comparison_readiness": "ready",
-      "evidence_path": "evals/reports/external_holdout_tin_parser_rescue_summary.json",
+      "evidence_path": "evals/reports/external_holdout_current_candidate_summary.json",
       "notes": "Current best candidate under the isolated external holdout protocol. This is the fairer accuracy row for low-quality and format-variation claims."
     },
     {
@@ -228,7 +229,6 @@
       }
     ],
     "honest_risks": [
-      "Local CPU latency is still high enough that managed services may win on throughput.",
       "Mixed-language external holdout coverage is still zero, so that claim is not yet benchmarked."
     ]
   },

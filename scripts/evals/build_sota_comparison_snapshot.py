@@ -8,6 +8,7 @@ from typing import Any
 DEFAULT_PROTOCOL_PATH = Path("evals/benchmark_protocol.json")
 DEFAULT_TABLE_TEMPLATE_PATH = Path("evals/sota_positioning/comparison_table_template.json")
 DEFAULT_TARGETS_PATH = Path("evals/sota_positioning/comparison_targets.json")
+DEFAULT_CURRENT_CANDIDATE_REFS_PATH = Path("evals/sota_positioning/current_candidate_refs.json")
 DEFAULT_INTERNAL_SUMMARY_PATH = Path("evals/reports/current_tin_parser_rescue_summary.json")
 DEFAULT_EXTERNAL_SUMMARY_PATH = Path(
     "evals/reports/external_holdout_tin_parser_rescue_summary.json"
@@ -29,6 +30,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--protocol", type=Path, default=DEFAULT_PROTOCOL_PATH)
     parser.add_argument("--table-template", type=Path, default=DEFAULT_TABLE_TEMPLATE_PATH)
     parser.add_argument("--targets", type=Path, default=DEFAULT_TARGETS_PATH)
+    parser.add_argument(
+        "--current-candidate-refs",
+        type=Path,
+        default=DEFAULT_CURRENT_CANDIDATE_REFS_PATH,
+    )
     parser.add_argument("--internal-summary", type=Path, default=DEFAULT_INTERNAL_SUMMARY_PATH)
     parser.add_argument("--external-summary", type=Path, default=DEFAULT_EXTERNAL_SUMMARY_PATH)
     parser.add_argument("--latency", type=Path, default=DEFAULT_LATENCY_PATH)
@@ -40,6 +46,39 @@ def parse_args() -> argparse.Namespace:
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _resolve_snapshot_inputs(
+    *,
+    current_candidate_refs_path: Path | None,
+    internal_summary_path: Path,
+    external_summary_path: Path,
+    latency_path: Path,
+    gap_report_path: Path,
+    taxonomy_path: Path,
+) -> dict[str, Path]:
+    resolved = {
+        "internal_summary_path": internal_summary_path,
+        "external_summary_path": external_summary_path,
+        "latency_path": latency_path,
+        "gap_report_path": gap_report_path,
+        "taxonomy_path": taxonomy_path,
+    }
+    if current_candidate_refs_path is None or not current_candidate_refs_path.exists():
+        return resolved
+
+    refs_payload = load_json(current_candidate_refs_path)
+    overrides = {
+        "internal_summary_path": refs_payload.get("internal_summary_path"),
+        "external_summary_path": refs_payload.get("external_summary_path"),
+        "latency_path": refs_payload.get("latency_observations_path"),
+        "gap_report_path": refs_payload.get("holdout_gap_report_path"),
+        "taxonomy_path": refs_payload.get("error_taxonomy_path"),
+    }
+    for key, value in overrides.items():
+        if isinstance(value, str) and value.strip():
+            resolved[key] = Path(value)
+    return resolved
 
 
 def _subset_metric(summary: dict[str, Any], subset_key: str, metric_key: str) -> float | None:
@@ -172,12 +211,27 @@ def build_sota_comparison_snapshot(
     protocol_path: Path,
     table_template_path: Path,
     targets_path: Path,
+    current_candidate_refs_path: Path | None = None,
     internal_summary_path: Path,
     external_summary_path: Path,
     latency_path: Path,
     gap_report_path: Path,
     taxonomy_path: Path,
 ) -> dict[str, Any]:
+    resolved_inputs = _resolve_snapshot_inputs(
+        current_candidate_refs_path=current_candidate_refs_path,
+        internal_summary_path=internal_summary_path,
+        external_summary_path=external_summary_path,
+        latency_path=latency_path,
+        gap_report_path=gap_report_path,
+        taxonomy_path=taxonomy_path,
+    )
+    internal_summary_path = resolved_inputs["internal_summary_path"]
+    external_summary_path = resolved_inputs["external_summary_path"]
+    latency_path = resolved_inputs["latency_path"]
+    gap_report_path = resolved_inputs["gap_report_path"]
+    taxonomy_path = resolved_inputs["taxonomy_path"]
+
     protocol = load_json(protocol_path)
     table_template = load_json(table_template_path)
     targets_payload = load_json(targets_path)
@@ -252,6 +306,11 @@ def build_sota_comparison_snapshot(
         "protocol_reference": str(protocol_path),
         "table_template_reference": str(table_template_path),
         "comparison_scope": targets_payload.get("comparison_scope"),
+        "current_candidate_refs_path": (
+            None
+            if current_candidate_refs_path is None or not current_candidate_refs_path.exists()
+            else str(current_candidate_refs_path)
+        ),
         "current_candidate_references": {
             "internal_summary": str(internal_summary_path),
             "external_summary": str(external_summary_path),
@@ -277,6 +336,7 @@ def main() -> None:
         protocol_path=args.protocol,
         table_template_path=args.table_template,
         targets_path=args.targets,
+        current_candidate_refs_path=args.current_candidate_refs,
         internal_summary_path=args.internal_summary,
         external_summary_path=args.external_summary,
         latency_path=args.latency,

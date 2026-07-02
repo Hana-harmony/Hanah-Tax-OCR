@@ -1,0 +1,141 @@
+{
+  "iteration_id": "2026-07-02_iteration_28",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "SOTA positioning snapshot이 과거 candidate summary를 계속 참조하면 현재 시스템의 실제 비교 위치가 왜곡되므로, 최신 internal/external/latency artifact를 한 파일로 고정하는 current-candidate ref layer가 ROI가 높다.",
+    "현재 parser 후보를 바꾸지 않았더라도 external holdout summary와 latency를 새 코드 기준으로 재생성해 두면, 이후 comparator row를 채울 때 stale evidence 없이 same-protocol 비교를 이어갈 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "current_candidate_refs_for_snapshot",
+      "status": "kept",
+      "files": [
+        "scripts/evals/build_sota_comparison_snapshot.py",
+        "tests/test_sota_positioning_snapshot.py",
+        "evals/sota_positioning/current_candidate_refs.json"
+      ],
+      "summary": "snapshot builder가 하드코딩된 과거 summary 대신 `current_candidate_refs.json`을 우선 읽도록 바꾸고, 최신 internal/external/latency artifact 참조를 파일로 고정했다."
+    },
+    {
+      "type": "external_holdout_current_candidate_refresh",
+      "status": "kept",
+      "files": [
+        "evals/reports/external_holdout_current_candidate_report.json",
+        "evals/reports/external_holdout_current_candidate_summary.json",
+        "evals/reports/external_holdout_current_candidate_metadata.json",
+        "evals/reports/external_holdout_tin_parser_rescue_vs_current_candidate.json"
+      ],
+      "summary": "현재 코드 기준 external holdout 5건을 재실행해 same-protocol summary를 새 파일로 남기고, 기존 external holdout candidate 대비 exact/CER/WER unchanged 비교 artifact를 추가했다."
+    },
+    {
+      "type": "latency_and_snapshot_refresh",
+      "status": "kept",
+      "files": [
+        "evals/benchmark_latency_observations.json",
+        "evals/sota_positioning/current_comparison_snapshot.json"
+      ],
+      "summary": "external holdout 5건 기준 CPU latency를 다시 측정해 평균 7.4588초로 갱신했고, current comparison snapshot이 최신 candidate summary와 refreshed latency를 사용하도록 재생성했다."
+    }
+  ],
+  "baseline_comparison": {
+    "baseline_summary_path": "evals/reports/current_official_v17_summary.json",
+    "candidate_summary_path": "evals/reports/current_mixed_language_gap_fix_summary.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "overall_status": "unchanged",
+    "note": "이번 반복은 parser/recognizer를 수정하지 않았고, current candidate internal summary가 baseline과 동일한 1.0 / 0.0 / 0.0을 유지했다."
+  },
+  "external_holdout_refresh": {
+    "summary_path": "evals/reports/external_holdout_current_candidate_summary.json",
+    "comparison_path": "evals/reports/external_holdout_tin_parser_rescue_vs_current_candidate.json",
+    "exact_match_rate": 1.0,
+    "average_character_error_rate": 0.0,
+    "average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "low_quality_exact_match_rate": 1.0,
+    "low_quality_average_character_error_rate": 0.0,
+    "low_quality_average_word_error_rate": 0.0,
+    "comparison_status": "unchanged",
+    "comparison_exact_delta": 0.0,
+    "comparison_cer_delta": 0.0,
+    "comparison_wer_delta": 0.0,
+    "regressed_fields": []
+  },
+  "latency_refresh": {
+    "path": "evals/benchmark_latency_observations.json",
+    "case_ids": [
+      "residency_john_doe_001",
+      "residency_legacy_001",
+      "residency_university_hawaii_001",
+      "residency_pdf_001",
+      "apostille_california_001"
+    ],
+    "average_case_seconds": 7.4588,
+    "average_document_seconds": 7.4588,
+    "note": "기존 3건 mixed-type observation 29.4822초 대신, external holdout current candidate 기준 5건 CPU latency observation을 snapshot에 사용한다."
+  },
+  "snapshot_refresh": {
+    "refs_path": "evals/sota_positioning/current_candidate_refs.json",
+    "snapshot_path": "evals/sota_positioning/current_comparison_snapshot.json",
+    "internal_summary_reference": "evals/reports/current_mixed_language_gap_fix_summary.json",
+    "external_summary_reference": "evals/reports/external_holdout_current_candidate_summary.json",
+    "honest_risks": [
+      "Mixed-language external holdout coverage is still zero, so that claim is not yet benchmarked."
+    ]
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_summary.json",
+      "evals/reports/current_mixed_language_gap_fix_summary.json",
+      "evals/reports/external_holdout_current_candidate_summary.json"
+    ],
+    "note": "date 관련 parser/recognizer를 변경하지 않았고 internal/external current candidate summary 모두 exact/CER/WER가 그대로 유지됐다."
+  },
+  "validation": {
+    "tests": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/pytest tests/test_sota_positioning_snapshot.py tests/test_run_external_holdout_eval.py -q",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/ruff check scripts/evals/build_sota_comparison_snapshot.py tests/test_sota_positioning_snapshot.py",
+        "status": "passed"
+      }
+    ],
+    "artifacts": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_external_holdout_eval --expected-root evals/external_holdout/cases --external-manifest evals/external_holdout/manifest.json --output-dir tmp/external_holdout_current_candidate_actual --report-output evals/reports/external_holdout_current_candidate_report.json --summary-output evals/reports/external_holdout_current_candidate_summary.json --metadata-output evals/reports/external_holdout_current_candidate_metadata.json --lang en",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.measure_latency --case-id residency_john_doe_001 --case-id residency_legacy_001 --case-id residency_university_hawaii_001 --case-id residency_pdf_001 --case-id apostille_california_001 --output evals/benchmark_latency_observations.json",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.build_sota_comparison_snapshot --output evals/sota_positioning/current_comparison_snapshot.json",
+        "status": "passed"
+      }
+    ]
+  },
+  "kept_candidates": [
+    "current_candidate_refs.json 기반 snapshot input override",
+    "external holdout current candidate summary refresh",
+    "external holdout 5건 기준 refreshed CPU latency observation"
+  ],
+  "discarded_candidates": [
+    "snapshot builder 내부에 특정 candidate report 이름을 하드코딩하는 운영 방식"
+  ],
+  "next_priorities": [
+    "Google Document AI comparator에 실제 raw payload 1세트를 연결해 snapshot의 managed-service row를 첫 실제 same-protocol metric row로 채우기",
+    "mixed-language external holdout coverage zero를 깨기 위해 실제 non-overlap withholding front-side 원본을 추가 확보하거나 pending_review 수집 경로를 강화하기"
+  ]
+}
