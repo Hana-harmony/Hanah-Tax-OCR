@@ -135,7 +135,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
                 dividend_rate_source,
             )
         )
-        region_signature_date = self._normalize_iso_date(
+        region_signature_date = self._normalize_signature_date_region(
             self._region_value(ocr_result, "signature_date")
         )
         fallback_signature_date = self._extract_signature_date_fallback(single_line)
@@ -351,9 +351,9 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         region_signature_date: str | None,
         fallback_signature_date: str | None,
     ) -> str | None:
-        if not self._is_valid_iso_date(region_signature_date):
+        if not self._is_plausible_signature_date(region_signature_date):
             return fallback_signature_date
-        if not self._is_valid_iso_date(fallback_signature_date):
+        if not self._is_plausible_signature_date(fallback_signature_date):
             return region_signature_date
 
         region_year = int(str(region_signature_date)[:4])
@@ -474,7 +474,14 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         tokens = [token.strip(".") for token in applicant_name.split()]
         if len(tokens) < 3:
             return normalized_middle_name
-        if tokens[0].lower() == first_name.lower() and tokens[-1].lower() == last_name.lower():
+        if (
+            tokens[-1].lower() == last_name.lower()
+            and (
+                tokens[0].lower() == first_name.lower()
+                or not normalized_middle_name
+                or len(normalized_middle_name) != 1
+            )
+        ):
             return self._normalize_middle_initial(tokens[1][:1].upper())
         return normalized_middle_name
 
@@ -515,6 +522,11 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if not last_name or derived_last_name != last_name:
             return normalized_first_name
         if middle_name and derived_middle_name and middle_name != derived_middle_name:
+            if self._looks_like_truncated_name_token(
+                normalized_first_name,
+                normalized_derived_first_name,
+            ):
+                return normalized_derived_first_name
             return normalized_first_name
         if canonicalize_name(normalized_derived_first_name) == canonicalize_name(
             normalized_first_name
@@ -522,6 +534,11 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             return normalized_first_name
         if not re.search(r"[A-Za-z]", normalized_derived_first_name or ""):
             return normalized_first_name
+        if self._looks_like_truncated_name_token(
+            normalized_first_name,
+            normalized_derived_first_name,
+        ):
+            return normalized_derived_first_name
         if self._digit_count(normalized_derived_first_name) > self._digit_count(
             normalized_first_name
         ):
@@ -581,6 +598,59 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         if self._digit_count(normalized) <= self._digit_count(token):
             return value
         return normalized
+
+    def _looks_like_truncated_name_token(
+        self,
+        candidate: str | None,
+        reference: str | None,
+    ) -> bool:
+        if not candidate or not reference:
+            return False
+        normalized_candidate = canonicalize_name(candidate)
+        normalized_reference = canonicalize_name(reference)
+        if not normalized_candidate or not normalized_reference:
+            return False
+        return (
+            len(normalized_reference) > len(normalized_candidate)
+            and normalized_reference.endswith(normalized_candidate)
+        )
+
+    def _normalize_signature_date_region(self, value: str | None) -> str | None:
+        normalized = self._normalize_iso_date(value)
+        if self._is_plausible_signature_date(normalized):
+            return normalized
+        if not value:
+            return normalized
+        numeric_tokens = re.findall(r"\d{1,4}", value)
+        if len(numeric_tokens) < 3:
+            return normalized
+        for index in range(len(numeric_tokens) - 2):
+            day, month, year = numeric_tokens[index : index + 3]
+            if len(year) != 4:
+                continue
+            try:
+                day_int = int(day)
+                month_int = int(month)
+                year_int = int(year)
+            except ValueError:
+                continue
+            if not (1 <= day_int <= 31 and 1 <= month_int <= 12 and 1900 <= year_int <= 2100):
+                continue
+            candidate = f"{year_int:04d}-{month_int:02d}-{day_int:02d}"
+            if self._is_plausible_signature_date(candidate):
+                return candidate
+        return normalized
+
+    def _is_plausible_signature_date(self, value: str | None) -> bool:
+        if not self._is_valid_iso_date(value):
+            return False
+        if not value:
+            return False
+        try:
+            year, month, day = (int(part) for part in value.split("-"))
+        except ValueError:
+            return False
+        return 1900 <= year <= 2100 and 1 <= month <= 12 and 1 <= day <= 31
 
     def _digit_count(self, value: str | None) -> int:
         if not value:

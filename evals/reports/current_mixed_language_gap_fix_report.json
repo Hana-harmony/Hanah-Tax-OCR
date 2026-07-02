@@ -1,0 +1,5246 @@
+{
+  "compared_cases": 64,
+  "missing_cases": [],
+  "comparisons": [
+    {
+      "case_id": "apostille_michigan_001",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_michigan_001",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "Michigan Notary Public",
+      "actual": "Michigan Notary Public",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_michigan_001",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Lansing, Michigan",
+      "actual": "Lansing, Michigan",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_michigan_001",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State, State of Michigan",
+      "actual": "Secretary of State, State of Michigan",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "CHONG U CHOI",
+      "actual": "CHONG U CHOI",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC COMMISSION EXPIRES 10/17/2016",
+      "actual": "NOTARY PUBLIC COMMISSION EXPIRES 10/17/2016",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF MECKLENBURG,NORTH CAROLINA",
+      "actual": "COUNTY OF MECKLENBURG,NORTH CAROLINA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Raleigh, North Carolina",
+      "actual": "Raleigh, North Carolina",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "10TH DAY OF APRIL, 2014",
+      "actual": "10TH DAY OF APRIL, 2014",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State or Deputy Secretary of State State of North Carolina",
+      "actual": "Secretary of State or Deputy Secretary of State State of North Carolina",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5",
+      "actual": "5",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_001",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_001",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 1",
+      "actual": "NOTARY SAMPLE 1",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_001",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_001",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_001",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 1",
+      "actual": "Capital City, Sample State 1",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_001",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "2TH DAY OF APRIL, 2021",
+      "actual": "2TH DAY OF APRIL, 2021",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_001",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_001",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5001",
+      "actual": "5001",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_002",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_002",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 2",
+      "actual": "NOTARY SAMPLE 2",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_002",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_002",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_002",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 2",
+      "actual": "Capital City, Sample State 2",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_002",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "3TH DAY OF APRIL, 2022",
+      "actual": "3TH DAY OF APRIL, 2022",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_002",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_002",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5002",
+      "actual": "5002",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_003",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_003",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 3",
+      "actual": "NOTARY SAMPLE 3",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_003",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_003",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_003",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 3",
+      "actual": "Capital City, Sample State 3",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_003",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "4TH DAY OF APRIL, 2023",
+      "actual": "4TH DAY OF APRIL, 2023",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_003",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_003",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5003",
+      "actual": "5003",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_004",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_004",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 4",
+      "actual": "NOTARY SAMPLE 4",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_004",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_004",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_004",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 4",
+      "actual": "Capital City, Sample State 4",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_004",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "5TH DAY OF APRIL, 2024",
+      "actual": "5TH DAY OF APRIL, 2024",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_004",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_004",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5004",
+      "actual": "5004",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_005",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_005",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 5",
+      "actual": "NOTARY SAMPLE 5",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_005",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_005",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_005",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 5",
+      "actual": "Capital City, Sample State 5",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_005",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "6TH DAY OF APRIL, 2025",
+      "actual": "6TH DAY OF APRIL, 2025",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_005",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_005",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5005",
+      "actual": "5005",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_006",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_006",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 6",
+      "actual": "NOTARY SAMPLE 6",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_006",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_006",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_006",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 6",
+      "actual": "Capital City, Sample State 6",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_006",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "7TH DAY OF APRIL, 2026",
+      "actual": "7TH DAY OF APRIL, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_006",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_006",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5006",
+      "actual": "5006",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_007",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_007",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 7",
+      "actual": "NOTARY SAMPLE 7",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_007",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_007",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_007",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 7",
+      "actual": "Capital City, Sample State 7",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_007",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "8TH DAY OF APRIL, 2027",
+      "actual": "8TH DAY OF APRIL, 2027",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_007",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_007",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5007",
+      "actual": "5007",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_008",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_008",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 8",
+      "actual": "NOTARY SAMPLE 8",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_008",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_008",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_008",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 8",
+      "actual": "Capital City, Sample State 8",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_008",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "9TH DAY OF APRIL, 2028",
+      "actual": "9TH DAY OF APRIL, 2028",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_008",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_008",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5008",
+      "actual": "5008",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_009",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_009",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 9",
+      "actual": "NOTARY SAMPLE 9",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_009",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_009",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_009",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 9",
+      "actual": "Capital City, Sample State 9",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_009",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "10TH DAY OF APRIL, 2029",
+      "actual": "10TH DAY OF APRIL, 2029",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_009",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_009",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5009",
+      "actual": "5009",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_010",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_010",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 10",
+      "actual": "NOTARY SAMPLE 10",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_010",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_010",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_010",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 10",
+      "actual": "Capital City, Sample State 10",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_010",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "11TH DAY OF APRIL, 2020",
+      "actual": "11TH DAY OF APRIL, 2020",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_010",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_010",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5010",
+      "actual": "5010",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_011",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_011",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 11",
+      "actual": "NOTARY SAMPLE 11",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_011",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_011",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_011",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 11",
+      "actual": "Capital City, Sample State 11",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_011",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "12TH DAY OF APRIL, 2021",
+      "actual": "12TH DAY OF APRIL, 2021",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_011",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_011",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5011",
+      "actual": "5011",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_012",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_012",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 12",
+      "actual": "NOTARY SAMPLE 12",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_012",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_012",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_012",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 12",
+      "actual": "Capital City, Sample State 12",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_012",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "13TH DAY OF APRIL, 2022",
+      "actual": "13TH DAY OF APRIL, 2022",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_012",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_012",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5012",
+      "actual": "5012",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_013",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_013",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 13",
+      "actual": "NOTARY SAMPLE 13",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_013",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_013",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_013",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 13",
+      "actual": "Capital City, Sample State 13",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_013",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "14TH DAY OF APRIL, 2023",
+      "actual": "14TH DAY OF APRIL, 2023",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_013",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_013",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5013",
+      "actual": "5013",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_014",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_014",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 14",
+      "actual": "NOTARY SAMPLE 14",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_014",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_014",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_014",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 14",
+      "actual": "Capital City, Sample State 14",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_014",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "15TH DAY OF APRIL, 2024",
+      "actual": "15TH DAY OF APRIL, 2024",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_014",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_014",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5014",
+      "actual": "5014",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_015",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_015",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 15",
+      "actual": "NOTARY SAMPLE 15",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_015",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_015",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_015",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 15",
+      "actual": "Capital City, Sample State 15",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_015",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "16TH DAY OF APRIL, 2025",
+      "actual": "16TH DAY OF APRIL, 2025",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_015",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_015",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5015",
+      "actual": "5015",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_016",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_016",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 16",
+      "actual": "NOTARY SAMPLE 16",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_016",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_016",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_016",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 16",
+      "actual": "Capital City, Sample State 16",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_016",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "17TH DAY OF APRIL, 2026",
+      "actual": "17TH DAY OF APRIL, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_016",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_016",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5016",
+      "actual": "5016",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_017",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_017",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 17",
+      "actual": "NOTARY SAMPLE 17",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_017",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_017",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_017",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 17",
+      "actual": "Capital City, Sample State 17",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_017",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "18TH DAY OF APRIL, 2027",
+      "actual": "18TH DAY OF APRIL, 2027",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_017",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_017",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5017",
+      "actual": "5017",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_018",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_018",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 18",
+      "actual": "NOTARY SAMPLE 18",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_018",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_018",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_018",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 18",
+      "actual": "Capital City, Sample State 18",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_018",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "19TH DAY OF APRIL, 2028",
+      "actual": "19TH DAY OF APRIL, 2028",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_018",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_018",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5018",
+      "actual": "5018",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_019",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_019",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 19",
+      "actual": "NOTARY SAMPLE 19",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_019",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_019",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_019",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 19",
+      "actual": "Capital City, Sample State 19",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_019",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "20TH DAY OF APRIL, 2029",
+      "actual": "20TH DAY OF APRIL, 2029",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_019",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_019",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5019",
+      "actual": "5019",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_020",
+      "document_type": "apostille",
+      "field_name": "issuing_country",
+      "expected": "UNITED STATES OF AMERICA",
+      "actual": "UNITED STATES OF AMERICA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_020",
+      "document_type": "apostille",
+      "field_name": "signed_by",
+      "expected": "NOTARY SAMPLE 20",
+      "actual": "NOTARY SAMPLE 20",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_020",
+      "document_type": "apostille",
+      "field_name": "signer_capacity",
+      "expected": "NOTARY PUBLIC",
+      "actual": "NOTARY PUBLIC",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_020",
+      "document_type": "apostille",
+      "field_name": "seal_owner",
+      "expected": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "actual": "COUNTY OF SAMPLE, STATE OF SAMPLE",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_020",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Capital City, Sample State 20",
+      "actual": "Capital City, Sample State 20",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_020",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "21TH DAY OF APRIL, 2020",
+      "actual": "21TH DAY OF APRIL, 2020",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_020",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State State of Sample",
+      "actual": "Secretary of State State of Sample",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "apostille_regression_020",
+      "document_type": "apostille",
+      "field_name": "certificate_number",
+      "expected": "5020",
+      "actual": "5020",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_maria_chen_001",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "MARIA L. CHEN",
+      "actual": "MARIA L. CHEN",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_maria_chen_001",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "987-65-4321",
+      "actual": "987-65-4321",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_maria_chen_001",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2026",
+      "actual": "2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_maria_chen_001",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 12, 2026",
+      "actual": "January 12, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_maria_chen_001",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_maria_chen_001",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_001",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 1 User",
+      "actual": "Sample 1 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_001",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "101-11-1001",
+      "actual": "101-11-1001",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_001",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2011",
+      "actual": "2011",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_001",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 2, 2026",
+      "actual": "January 2, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_001",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_001",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_002",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 2 User",
+      "actual": "Sample 2 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_002",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "102-12-1002",
+      "actual": "102-12-1002",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_002",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2012",
+      "actual": "2012",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_002",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 3, 2026",
+      "actual": "January 3, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_002",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_002",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_003",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 3 User",
+      "actual": "Sample 3 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_003",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "103-13-1003",
+      "actual": "103-13-1003",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_003",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2013",
+      "actual": "2013",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_003",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 4, 2026",
+      "actual": "January 4, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_003",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_003",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_004",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 4 User",
+      "actual": "Sample 4 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_004",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "104-14-1004",
+      "actual": "104-14-1004",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_004",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2014",
+      "actual": "2014",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_004",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 5, 2026",
+      "actual": "January 5, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_004",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_004",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_005",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 5 User",
+      "actual": "Sample 5 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_005",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "105-15-1005",
+      "actual": "105-15-1005",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_005",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2015",
+      "actual": "2015",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_005",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 6, 2026",
+      "actual": "January 6, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_005",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_005",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_006",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 6 User",
+      "actual": "Sample 6 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_006",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "106-16-1006",
+      "actual": "106-16-1006",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_006",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2016",
+      "actual": "2016",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_006",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 7, 2026",
+      "actual": "January 7, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_006",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_006",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_007",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 7 User",
+      "actual": "Sample 7 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_007",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "107-17-1007",
+      "actual": "107-17-1007",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_007",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2017",
+      "actual": "2017",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_007",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 8, 2026",
+      "actual": "January 8, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_007",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_007",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_008",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 8 User",
+      "actual": "Sample 8 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_008",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "108-18-1008",
+      "actual": "108-18-1008",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_008",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2018",
+      "actual": "2018",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_008",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 9, 2026",
+      "actual": "January 9, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_008",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_008",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_009",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 9 User",
+      "actual": "Sample 9 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_009",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "109-19-1009",
+      "actual": "109-19-1009",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_009",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2019",
+      "actual": "2019",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_009",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 10, 2026",
+      "actual": "January 10, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_009",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_009",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_010",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 10 User",
+      "actual": "Sample 10 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_010",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "110-20-1010",
+      "actual": "110-20-1010",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_010",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2010",
+      "actual": "2010",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_010",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 11, 2026",
+      "actual": "January 11, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_010",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_010",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_011",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 11 User",
+      "actual": "Sample 11 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_011",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "111-21-1011",
+      "actual": "111-21-1011",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_011",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2011",
+      "actual": "2011",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_011",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 12, 2026",
+      "actual": "January 12, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_011",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_011",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_012",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 12 User",
+      "actual": "Sample 12 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_012",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "112-22-1012",
+      "actual": "112-22-1012",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_012",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2012",
+      "actual": "2012",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_012",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 13, 2026",
+      "actual": "January 13, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_012",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_012",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_013",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 13 User",
+      "actual": "Sample 13 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_013",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "113-23-1013",
+      "actual": "113-23-1013",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_013",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2013",
+      "actual": "2013",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_013",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 14, 2026",
+      "actual": "January 14, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_013",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_013",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_014",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 14 User",
+      "actual": "Sample 14 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_014",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "114-24-1014",
+      "actual": "114-24-1014",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_014",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2014",
+      "actual": "2014",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_014",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 15, 2026",
+      "actual": "January 15, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_014",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_014",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_015",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 15 User",
+      "actual": "Sample 15 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_015",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "115-25-1015",
+      "actual": "115-25-1015",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_015",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2015",
+      "actual": "2015",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_015",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 16, 2026",
+      "actual": "January 16, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_015",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_015",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_016",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 16 User",
+      "actual": "Sample 16 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_016",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "116-26-1016",
+      "actual": "116-26-1016",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_016",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2016",
+      "actual": "2016",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_016",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 17, 2026",
+      "actual": "January 17, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_016",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_016",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_017",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 17 User",
+      "actual": "Sample 17 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_017",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "117-27-1017",
+      "actual": "117-27-1017",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_017",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2017",
+      "actual": "2017",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_017",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 18, 2026",
+      "actual": "January 18, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_017",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_017",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_018",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 18 User",
+      "actual": "Sample 18 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_018",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "118-28-1018",
+      "actual": "118-28-1018",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_018",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2018",
+      "actual": "2018",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_018",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 19, 2026",
+      "actual": "January 19, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_018",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_018",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_019",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 19 User",
+      "actual": "Sample 19 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_019",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "119-29-1019",
+      "actual": "119-29-1019",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_019",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2019",
+      "actual": "2019",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_019",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 20, 2026",
+      "actual": "January 20, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_019",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_019",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_020",
+      "document_type": "residency_certificate",
+      "field_name": "taxpayer_name",
+      "expected": "Sample 20 User",
+      "actual": "Sample 20 User",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_020",
+      "document_type": "residency_certificate",
+      "field_name": "tin",
+      "expected": "120-30-1020",
+      "actual": "120-30-1020",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_020",
+      "document_type": "residency_certificate",
+      "field_name": "tax_year",
+      "expected": "2010",
+      "actual": "2010",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_020",
+      "document_type": "residency_certificate",
+      "field_name": "issue_date",
+      "expected": "January 21, 2026",
+      "actual": "January 21, 2026",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_020",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "residency_regression_020",
+      "document_type": "residency_certificate",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "MARIA",
+      "actual": "MARIA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "CHEN",
+      "actual": "CHEN",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "L",
+      "actual": "L",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "987-65-4321",
+      "actual": "987-65-4321",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+      "actual": "1234 Sunset Blvd Apt 5B Los Angeles CA 90026 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-12",
+      "actual": "2026-01-12",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE1",
+      "actual": "SAMPLE1",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "A",
+      "actual": "A",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "201-21-2001",
+      "actual": "201-21-2001",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "1 Main Street Suite 1 New York NY 10001 United States of America",
+      "actual": "1 Main Street Suite 1 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-02",
+      "actual": "2026-01-02",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_001",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE1 A USER",
+      "actual": "SAMPLE1 A USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE2",
+      "actual": "SAMPLE2",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "B",
+      "actual": "B",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "202-22-2002",
+      "actual": "202-22-2002",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "2 Main Street Suite 2 New York NY 10001 United States of America",
+      "actual": "2 Main Street Suite 2 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-03",
+      "actual": "2026-01-03",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_002",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE2 B USER",
+      "actual": "SAMPLE2 B USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE3",
+      "actual": "SAMPLE3",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "C",
+      "actual": "C",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "203-23-2003",
+      "actual": "203-23-2003",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "3 Main Street Suite 3 New York NY 10001 United States of America",
+      "actual": "3 Main Street Suite 3 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-04",
+      "actual": "2026-01-04",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_003",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE3 C USER",
+      "actual": "SAMPLE3 C USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE4",
+      "actual": "SAMPLE4",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "D",
+      "actual": "D",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "204-24-2004",
+      "actual": "204-24-2004",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "4 Main Street Suite 4 New York NY 10001 United States of America",
+      "actual": "4 Main Street Suite 4 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-05",
+      "actual": "2026-01-05",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_004",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE4 D USER",
+      "actual": "SAMPLE4 D USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE5",
+      "actual": "SAMPLE5",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "E",
+      "actual": "E",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "205-25-2005",
+      "actual": "205-25-2005",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "5 Main Street Suite 5 New York NY 10001 United States of America",
+      "actual": "5 Main Street Suite 5 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-06",
+      "actual": "2026-01-06",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_005",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE5 E USER",
+      "actual": "SAMPLE5 E USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE6",
+      "actual": "SAMPLE6",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "F",
+      "actual": "F",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "206-26-2006",
+      "actual": "206-26-2006",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "6 Main Street Suite 6 New York NY 10001 United States of America",
+      "actual": "6 Main Street Suite 6 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-07",
+      "actual": "2026-01-07",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_006",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE6 F USER",
+      "actual": "SAMPLE6 F USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE7",
+      "actual": "SAMPLE7",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "G",
+      "actual": "G",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "207-27-2007",
+      "actual": "207-27-2007",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "7 Main Street Suite 7 New York NY 10001 United States of America",
+      "actual": "7 Main Street Suite 7 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-08",
+      "actual": "2026-01-08",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_007",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE7 G USER",
+      "actual": "SAMPLE7 G USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE8",
+      "actual": "SAMPLE8",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "H",
+      "actual": "H",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "208-28-2008",
+      "actual": "208-28-2008",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "8 Main Street Suite 8 New York NY 10001 United States of America",
+      "actual": "8 Main Street Suite 8 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-09",
+      "actual": "2026-01-09",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_008",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE8 H USER",
+      "actual": "SAMPLE8 H USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE9",
+      "actual": "SAMPLE9",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "I",
+      "actual": "I",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "209-29-2009",
+      "actual": "209-29-2009",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "9 Main Street Suite 9 New York NY 10001 United States of America",
+      "actual": "9 Main Street Suite 9 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-10",
+      "actual": "2026-01-10",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_009",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE9 I USER",
+      "actual": "SAMPLE9 I USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE10",
+      "actual": "SAMPLE10",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "J",
+      "actual": "J",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "210-30-2010",
+      "actual": "210-30-2010",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "10 Main Street Suite 10 New York NY 10001 United States of America",
+      "actual": "10 Main Street Suite 10 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-11",
+      "actual": "2026-01-11",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_010",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE10 J USER",
+      "actual": "SAMPLE10 J USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE11",
+      "actual": "SAMPLE11",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "K",
+      "actual": "K",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "211-31-2011",
+      "actual": "211-31-2011",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "11 Main Street Suite 11 New York NY 10001 United States of America",
+      "actual": "11 Main Street Suite 11 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-12",
+      "actual": "2026-01-12",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_011",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE11 K USER",
+      "actual": "SAMPLE11 K USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE12",
+      "actual": "SAMPLE12",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "L",
+      "actual": "L",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "212-32-2012",
+      "actual": "212-32-2012",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "12 Main Street Suite 12 New York NY 10001 United States of America",
+      "actual": "12 Main Street Suite 12 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-13",
+      "actual": "2026-01-13",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_012",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE12 L USER",
+      "actual": "SAMPLE12 L USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE13",
+      "actual": "SAMPLE13",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "M",
+      "actual": "M",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "213-33-2013",
+      "actual": "213-33-2013",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "13 Main Street Suite 13 New York NY 10001 United States of America",
+      "actual": "13 Main Street Suite 13 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-14",
+      "actual": "2026-01-14",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_013",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE13 M USER",
+      "actual": "SAMPLE13 M USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE14",
+      "actual": "SAMPLE14",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "N",
+      "actual": "N",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "214-34-2014",
+      "actual": "214-34-2014",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "14 Main Street Suite 14 New York NY 10001 United States of America",
+      "actual": "14 Main Street Suite 14 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-15",
+      "actual": "2026-01-15",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_014",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE14 N USER",
+      "actual": "SAMPLE14 N USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE15",
+      "actual": "SAMPLE15",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "O",
+      "actual": "O",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "215-35-2015",
+      "actual": "215-35-2015",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "15 Main Street Suite 15 New York NY 10001 United States of America",
+      "actual": "15 Main Street Suite 15 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-16",
+      "actual": "2026-01-16",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_015",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE15 O USER",
+      "actual": "SAMPLE15 O USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE16",
+      "actual": "SAMPLE16",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "P",
+      "actual": "P",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "216-36-2016",
+      "actual": "216-36-2016",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "16 Main Street Suite 16 New York NY 10001 United States of America",
+      "actual": "16 Main Street Suite 16 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-17",
+      "actual": "2026-01-17",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_016",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE16 P USER",
+      "actual": "SAMPLE16 P USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE17",
+      "actual": "SAMPLE17",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "Q",
+      "actual": "Q",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "217-37-2017",
+      "actual": "217-37-2017",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "17 Main Street Suite 17 New York NY 10001 United States of America",
+      "actual": "17 Main Street Suite 17 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-18",
+      "actual": "2026-01-18",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_017",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE17 Q USER",
+      "actual": "SAMPLE17 Q USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE18",
+      "actual": "SAMPLE18",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "R",
+      "actual": "R",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "218-38-2018",
+      "actual": "218-38-2018",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "18 Main Street Suite 18 New York NY 10001 United States of America",
+      "actual": "18 Main Street Suite 18 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-19",
+      "actual": "2026-01-19",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_018",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE18 R USER",
+      "actual": "SAMPLE18 R USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE19",
+      "actual": "SAMPLE19",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "S",
+      "actual": "S",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "219-39-2019",
+      "actual": "219-39-2019",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "19 Main Street Suite 19 New York NY 10001 United States of America",
+      "actual": "19 Main Street Suite 19 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-20",
+      "actual": "2026-01-20",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_019",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE19 S USER",
+      "actual": "SAMPLE19 S USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "SAMPLE20",
+      "actual": "SAMPLE20",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "USER",
+      "actual": "USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "T",
+      "actual": "T",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "tin",
+      "expected": "220-40-2020",
+      "actual": "220-40-2020",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "address",
+      "expected": "20 Main Street Suite 20 New York NY 10001 United States of America",
+      "actual": "20 Main Street Suite 20 New York NY 10001 United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country",
+      "expected": "United States of America",
+      "actual": "United States of America",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "residency_country_code",
+      "expected": "US",
+      "actual": "US",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "dividend_tax_rate",
+      "expected": "15%",
+      "actual": "15%",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "signature_date",
+      "expected": "2026-01-21",
+      "actual": "2026-01-21",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_regression_020",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "SAMPLE20 T USER",
+      "actual": "SAMPLE20 T USER",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    }
+  ],
+  "field_metrics": {
+    "apostille.certificate_number": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "apostille.issued_at": {
+      "comparisons": 22,
+      "exact_matches": 22,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "apostille.issued_on": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "apostille.issuing_authority": {
+      "comparisons": 22,
+      "exact_matches": 22,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "apostille.issuing_country": {
+      "comparisons": 22,
+      "exact_matches": 22,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "apostille.seal_owner": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "apostille.signed_by": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "apostille.signer_capacity": {
+      "comparisons": 22,
+      "exact_matches": 22,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "residency_certificate.issue_date": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "residency_certificate.residency_country": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "residency_certificate.residency_country_code": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "residency_certificate.tax_year": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "residency_certificate.taxpayer_name": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "residency_certificate.tin": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.address": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.applicant_name": {
+      "comparisons": 20,
+      "exact_matches": 20,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.dividend_tax_rate": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.first_name": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.last_name": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.middle_name": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.residency_country": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.residency_country_code": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.signature_date": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.tin": {
+      "comparisons": 21,
+      "exact_matches": 21,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    }
+  }
+}

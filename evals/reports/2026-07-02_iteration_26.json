@@ -1,0 +1,144 @@
+{
+  "iteration_id": "2026-07-02_iteration_26",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "실제 external holdout에 mixed-language withholding front-side 원본이 없더라도, low_quality와 skew를 separately 때리는 semi-real proxy를 만들면 새로운 분포 취약 필드를 더 직접 발견할 수 있다.",
+    "skew 상황에서 applicant_name region이 맞더라도 top-row first/middle name cell과 reversed date region을 parser가 잘못 우선하면 exact/CER/WER가 급격히 깨지므로, trusted applicant_name/date-region rescue가 recognizer 재학습보다 ROI가 높다."
+  ],
+  "changes": [
+    {
+      "type": "mixed_language_gap_probes",
+      "status": "kept",
+      "files": [
+        "evals/semi_real_probes/manifest.json",
+        "evals/external_holdout/proxy_probe_coverage.json"
+      ],
+      "summary": "external holdout의 `withholding_front_filled_nonoverlap_low_quality`와 `withholding_front_filled_nonoverlap_crop_or_skew` 공백을 대체 측정하기 위해 blur proxy와 rotate proxy 2건을 추가하고, gap별 proxy coverage를 machine-readable로 연결했다."
+    },
+    {
+      "type": "trusted_applicant_and_reversed_signature_date_rescue",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/parsers/withholding_tax_form.py",
+        "tests/test_parsers.py"
+      ],
+      "summary": "trusted applicant_name이 존재할 때 truncated/polluted top-row name cell보다 applicant-derived first/middle name을 우선하고, reversed numeric signature-date region을 DD/MM/YYYY->YYYY-MM-DD로 복구하는 rescue를 추가했다."
+    },
+    {
+      "type": "mixed_language_proxy_measurement",
+      "status": "kept",
+      "files": [
+        "evals/reports/withholding_mixed_language_gap_baseline_report.json",
+        "evals/reports/withholding_mixed_language_gap_baseline_summary.json",
+        "evals/reports/withholding_mixed_language_gap_baseline_metadata.json",
+        "evals/reports/withholding_country_row_rotate_probe_fix_v2_report.json",
+        "evals/reports/withholding_country_row_rotate_probe_fix_v2_summary.json",
+        "evals/reports/withholding_country_row_rotate_probe_fix_v2_metadata.json",
+        "evals/reports/withholding_mixed_language_gap_fix_report.json",
+        "evals/reports/withholding_mixed_language_gap_fix_summary.json",
+        "evals/reports/withholding_mixed_language_gap_fix_metadata.json",
+        "evals/reports/withholding_mixed_language_gap_baseline_vs_fix.json",
+        "evals/reports/current_mixed_language_gap_fix_report.json",
+        "evals/reports/current_mixed_language_gap_fix_summary.json",
+        "evals/reports/current_mixed_language_gap_fix_metadata.json",
+        "evals/reports/current_official_v17_vs_mixed_language_gap_fix.json",
+        "evals/augmentation_effects/ledger.json"
+      ],
+      "summary": "새 2-probe gap suite를 baseline/fix로 비교해 first_name, middle_name, applicant_name, signature_date 4필드 개선을 측정했고, official replay unchanged를 함께 기록했다."
+    }
+  ],
+  "probe_results": {
+    "withholding_mixed_language_gap_suite": {
+      "baseline_report_path": "evals/reports/withholding_mixed_language_gap_baseline_report.json",
+      "baseline_summary_path": "evals/reports/withholding_mixed_language_gap_baseline_summary.json",
+      "candidate_report_path": "evals/reports/withholding_mixed_language_gap_fix_report.json",
+      "candidate_summary_path": "evals/reports/withholding_mixed_language_gap_fix_summary.json",
+      "comparison_path": "evals/reports/withholding_mixed_language_gap_baseline_vs_fix.json",
+      "baseline_exact_match_rate": 0.8,
+      "candidate_exact_match_rate": 1.0,
+      "baseline_average_character_error_rate": 0.409615,
+      "candidate_average_character_error_rate": 0.0,
+      "baseline_average_word_error_rate": 0.183333,
+      "candidate_average_word_error_rate": 0.0,
+      "baseline_document_pass_rate": 0.5,
+      "candidate_document_pass_rate": 1.0,
+      "improved_fields": [
+        "withholding_tax_form.applicant_name",
+        "withholding_tax_form.first_name",
+        "withholding_tax_form.middle_name",
+        "withholding_tax_form.signature_date"
+      ],
+      "regressed_fields": []
+    },
+    "withholding_country_row_rotate_probe": {
+      "baseline_failed_fields": [
+        "first_name",
+        "middle_name",
+        "signature_date",
+        "applicant_name"
+      ],
+      "fixed_summary_path": "evals/reports/withholding_country_row_rotate_probe_fix_v2_summary.json",
+      "fixed_exact_match_rate": 1.0,
+      "fixed_document_pass_rate": 1.0
+    }
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_mixed_language_gap_fix_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_mixed_language_gap_fix.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "overall_status": "unchanged",
+    "note": "withholding 21건 rerun official replay에서 regressed field가 없었다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_vs_mixed_language_gap_fix.json",
+      "evals/reports/withholding_mixed_language_gap_baseline_vs_fix.json"
+    ],
+    "note": "official replay date field는 unchanged였고, new mixed-language gap proxy의 signature_date exact는 0.5에서 1.0으로 개선됐다."
+  },
+  "validation": {
+    "tests": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/pytest tests/test_parsers.py -q",
+        "status": "passed"
+      }
+    ],
+    "evals": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_semi_real_probe_eval --manifest evals/semi_real_probes/manifest.json --suite-output-root tmp/semi_real_mixed_language_gap_suite --actual-output-dir tmp/semi_real_mixed_language_gap_actual --report-output evals/reports/withholding_mixed_language_gap_baseline_report.json --summary-output evals/reports/withholding_mixed_language_gap_baseline_summary.json --metadata-output evals/reports/withholding_mixed_language_gap_baseline_metadata.json --case-id withholding_country_row_blur_probe --case-id withholding_country_row_rotate_probe",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_semi_real_probe_eval --manifest evals/semi_real_probes/manifest.json --suite-output-root tmp/semi_real_mixed_language_gap_fix_suite --actual-output-dir tmp/semi_real_mixed_language_gap_fix_actual --report-output evals/reports/withholding_mixed_language_gap_fix_report.json --summary-output evals/reports/withholding_mixed_language_gap_fix_summary.json --metadata-output evals/reports/withholding_mixed_language_gap_fix_metadata.json --case-id withholding_country_row_blur_probe --case-id withholding_country_row_rotate_probe",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.replay_hybrid_eval --baseline-actual-dir tmp/evals/current_official_v17_parser --expected-root evals/cases --output-dir tmp/current_mixed_language_gap_fix_replay --report-output evals/reports/current_mixed_language_gap_fix_report.json --summary-output evals/reports/current_mixed_language_gap_fix_summary.json --baseline-report tmp/evals/current_official_v17_parser_report.json --comparison-output evals/reports/current_official_v17_vs_mixed_language_gap_fix.json --metadata-output evals/reports/current_mixed_language_gap_fix_metadata.json --rerun-prefix withholding_",
+        "status": "passed"
+      }
+    ]
+  },
+  "kept_candidates": [
+    "trusted applicant_name 우선 이름 rescue",
+    "reversed numeric signature_date region rescue",
+    "mixed-language withholding gap semi-real proxy 2건"
+  ],
+  "discarded_candidates": [
+    "오염된 top-row name cell이 applicant_name region을 덮어쓰는 정책",
+    "형식만 ISO인 pseudo-date를 valid region date로 취급하는 정책"
+  ],
+  "next_priorities": [
+    "semi-real proxy가 아닌 실제 mixed-language withholding front-side 원본 1건 이상을 external holdout ready case로 승격할 수 있는지 sample_data/labeled를 다시 스캔한다.",
+    "Google comparator에 실제 raw output fixture 1세트를 연결해 same-protocol score row를 채운다."
+  ]
+}

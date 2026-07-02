@@ -1073,6 +1073,35 @@ def test_withholding_parser_prefers_region_signature_date_over_unrelated_birthda
     assert parsed.fields["signature_date"] == "2026-01-12"
 
 
+def test_withholding_parser_recovers_signature_date_from_reversed_region_tokens() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "1985-06-15",
+                            "2026-01-12",
+                            "신청인 MARIA L. CHEN",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "signature_date": OCRPage(
+                    page_number=1,
+                    raw_text="$4|e}.\n12\n01\n2026\n?stt",
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["signature_date"] == "2026-01-12"
+
+
 def test_withholding_parser_falls_back_when_region_signature_date_is_invalid() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(
@@ -1099,6 +1128,39 @@ def test_withholding_parser_falls_back_when_region_signature_date_is_invalid() -
     )
 
     assert parsed.fields["signature_date"] == "2026-01-12"
+
+
+def test_withholding_parser_prefers_trusted_applicant_name_over_truncated_name_cells() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "2026-01-12",
+                            "1985-06-15",
+                            "987-65-4321",
+                            "United States of America",
+                            "MARIA L. CHEN",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "last_name": OCRPage(page_number=1, raw_text="ast Name)\nCHEN"),
+                "first_name": OCRPage(page_number=1, raw_text="Name)\nRIA"),
+                "middle_name": OCRPage(page_number=1, raw_text="(Middle\nAmerica"),
+                "applicant_name": OCRPage(page_number=1, raw_text="MARIA L. CHEN"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["first_name"] == "MARIA"
+    assert parsed.fields["middle_name"] == "L"
+    assert parsed.fields["applicant_name"] == "MARIA L. CHEN"
 
 
 def test_withholding_parser_prefers_last_full_text_signature_date_over_birthdate() -> None:

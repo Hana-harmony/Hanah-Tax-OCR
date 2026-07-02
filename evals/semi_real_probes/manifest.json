@@ -350,6 +350,99 @@
         "Refined semi-real probe that keeps the perturbation tighter around the mixed-language country row while avoiding a full-document JPEG collapse.",
         "Used to separate country-row parser/context failures from broad full-page recognizer breakdown."
       ]
+    },
+    {
+      "case_id": "withholding_country_row_blur_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_pipeline": [
+        {
+          "augmentation_type": "low_res"
+        },
+        {
+          "augmentation_type": "gaussian_blur"
+        },
+        {
+          "augmentation_type": "overlay_patch",
+          "augmentation_options": {
+            "width_ratio": 0.3,
+            "height_ratio": 0.1,
+            "x_ratio": 0.56,
+            "y_ratio": 0.245
+          }
+        },
+        {
+          "augmentation_type": "border_clip",
+          "augmentation_options": {
+            "anchor": "right",
+            "clip_width_ratio": 0.04
+          }
+        }
+      ],
+      "focus_fields": [
+        "tin",
+        "address",
+        "residency_country",
+        "residency_country_code",
+        "signature_date"
+      ],
+      "failure_modes": [
+        "low_dpi",
+        "blur",
+        "label_bleed",
+        "mixed_korean_english_interference",
+        "border_clipping"
+      ],
+      "notes": [
+        "Composite semi-real probe that lowers resolution, adds blur, and overlays the mixed-language country row before clipping the right edge.",
+        "Used to approximate the missing external holdout bucket where Korean labels and English address/country text coexist under low-quality front-side withholding scans."
+      ]
+    },
+    {
+      "case_id": "withholding_country_row_rotate_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_pipeline": [
+        {
+          "augmentation_type": "rotate"
+        },
+        {
+          "augmentation_type": "overlay_patch",
+          "augmentation_options": {
+            "width_ratio": 0.3,
+            "height_ratio": 0.1,
+            "x_ratio": 0.56,
+            "y_ratio": 0.245
+          }
+        },
+        {
+          "augmentation_type": "border_clip",
+          "augmentation_options": {
+            "anchor": "right",
+            "clip_width_ratio": 0.04
+          }
+        }
+      ],
+      "focus_fields": [
+        "tin",
+        "address",
+        "residency_country",
+        "residency_country_code",
+        "signature_date"
+      ],
+      "failure_modes": [
+        "skew",
+        "label_bleed",
+        "mixed_korean_english_interference",
+        "border_clipping",
+        "crop_miss"
+      ],
+      "notes": [
+        "Composite semi-real probe that rotates the whole form before adding mixed-language country-row interference and clipping the right edge.",
+        "Used to approximate the missing crop-or-skew external holdout bucket on front-side withholding forms without polluting the official eval set."
+      ]
     }
   ]
 }

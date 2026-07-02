@@ -1,0 +1,60 @@
+{
+  "version": "2026-07-02",
+  "baseline_gap_report": "evals/external_holdout/missing_distribution_targets.json",
+  "note": "이 파일은 missing_source external holdout target을 대체하지 않는다. 실원본 확보 전까지 semi-real proxy probe로 어떤 분포를 검증했는지 추적한다.",
+  "targets": [
+    {
+      "target_id": "withholding_front_filled_nonoverlap_low_quality",
+      "coverage_status": "proxy_measured",
+      "proxy_type": "semi_real",
+      "probe_case_ids": [
+        "withholding_country_row_blur_probe"
+      ],
+      "report_path": "evals/reports/withholding_mixed_language_gap_fix_report.json",
+      "summary_path": "evals/reports/withholding_mixed_language_gap_fix_summary.json",
+      "comparison_path": "evals/reports/withholding_mixed_language_gap_baseline_vs_fix.json",
+      "covered_failure_modes": [
+        "low_dpi",
+        "blur",
+        "label_bleed",
+        "mixed_korean_english_interference",
+        "border_clipping"
+      ],
+      "limitations": [
+        "실제 non-overlap 원본은 아직 없다.",
+        "semi-real proxy이므로 true external holdout score로 해석하면 안 된다."
+      ]
+    },
+    {
+      "target_id": "withholding_front_filled_nonoverlap_crop_or_skew",
+      "coverage_status": "proxy_measured",
+      "proxy_type": "semi_real",
+      "probe_case_ids": [
+        "withholding_country_row_rotate_probe"
+      ],
+      "report_path": "evals/reports/withholding_mixed_language_gap_fix_report.json",
+      "summary_path": "evals/reports/withholding_mixed_language_gap_fix_summary.json",
+      "comparison_path": "evals/reports/withholding_mixed_language_gap_baseline_vs_fix.json",
+      "covered_failure_modes": [
+        "skew",
+        "label_bleed",
+        "mixed_korean_english_interference",
+        "border_clipping",
+        "crop_miss"
+      ],
+      "limitations": [
+        "실제 non-overlap 원본은 아직 없다.",
+        "semi-real proxy이므로 true external holdout score로 해석하면 안 된다."
+      ]
+    },
+    {
+      "target_id": "apostille_blur_ready_case",
+      "coverage_status": "uncovered",
+      "proxy_type": null,
+      "probe_case_ids": [],
+      "limitations": [
+        "실샘플과 semi-real proxy 모두 아직 없다."
+      ]
+    }
+  ]
+}
