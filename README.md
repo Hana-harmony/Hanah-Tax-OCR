@@ -31,6 +31,7 @@
 - `evals/error_taxonomy/`: 실패 원인 기준 hard-case taxonomy manifest
 - `evals/augmentation_effects/`: semi-real hard case 증강 효과 기록
 - `evals/benchmark_protocol.json`: 공식 비교 프로토콜과 승격 규칙
+- `evals/sota_positioning/`: same-protocol comparator target, adapter contract, current comparison snapshot
 - `scripts/`: 적재, 증강, 합성, 비식별화, 큐 관리 도구
 - `src/hanah_tax_ocr/`: OCR, 파싱, 검수, 평가 코드
 
@@ -227,6 +228,22 @@ PYTHONPATH=src .venv/bin/python -m scripts.evals.report_external_holdout_gaps \
 ```
 
 `missing_distribution_targets.json`은 overlap 여부뿐 아니라 `non_extractable_source_audit.json`을 참조해 reverse-side, blank template 같은 blocker 근거를 machine-readable 형태로 남깁니다.
+
+Google Document AI Custom Extractor raw JSON을 같은 프로토콜 report/summary/comparison 형식으로 정규화:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m scripts.evals.run_google_document_ai_protocol_eval \
+  --raw-dir tmp/google_document_ai_raw \
+  --expected-root evals/cases \
+  --output-dir tmp/google_document_ai_actual \
+  --report-output evals/reports/google_document_ai_report.json \
+  --summary-output evals/reports/google_document_ai_summary.json \
+  --metadata-output evals/reports/google_document_ai_metadata.json \
+  --baseline-report tmp/evals/current_official_v17_parser_report.json \
+  --comparison-output evals/reports/current_official_v17_vs_google_document_ai.json
+```
+
+이 adapter는 `evals/sota_positioning/google_document_ai_custom_extractor_contract.json`의 field alias와 normalization 규칙을 사용해 raw entity/value 결과를 이 저장소의 harness schema로 변환한 뒤, `evals/benchmark_protocol.json`과 동일한 exact match, CER, WER, low-quality subset 규칙으로 점수화합니다.
 
 후보 승격 판단은 반드시 `evals/benchmark_protocol.json`의 exact match, CER, WER, field-level metrics, document pass rate, low-quality subset, CPU latency 관찰 규칙을 따릅니다.
 평가 harness는 mixed Korean-English 비중이 높은 `withholding_tax_form`에 대해 기본 OCR lang을 `en`으로 사용합니다.

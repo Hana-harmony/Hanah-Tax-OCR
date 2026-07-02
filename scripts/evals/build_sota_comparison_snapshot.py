@@ -103,11 +103,18 @@ def _build_target_rows(
         row = dict(placeholder)
         row["system_name"] = str(target.get("name") or "planned_target")
         row["comparison_readiness"] = str(target.get("status") or "planned")
-        row["evidence_path"] = target.get("official_reference")
+        row["evidence_path"] = target.get("adapter_contract_path") or target.get(
+            "official_reference"
+        )
         row["notes"] = " ".join(
             part
             for part in [
                 str(target.get("positioning_notes") or "").strip(),
+                (
+                    f"Official reference: {target.get('official_reference')}"
+                    if target.get("official_reference")
+                    else ""
+                ),
                 "Normalize outputs to this repository schema before scoring.",
             ]
             if part

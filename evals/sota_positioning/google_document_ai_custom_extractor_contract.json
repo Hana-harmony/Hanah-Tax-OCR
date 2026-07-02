@@ -1,0 +1,126 @@
+{
+  "version": "2026-07-02",
+  "system_name": "Google Cloud Document AI Custom Extractor",
+  "system_id": "google_document_ai_custom_extractor",
+  "protocol_scope": "same_protocol_only",
+  "raw_payload_expectations": {
+    "one_file_per_case": true,
+    "file_name_pattern": "<case_id>.json",
+    "supported_entity_fields": [
+      "type",
+      "mentionText",
+      "normalizedValue.text",
+      "normalizedValue.dateValue"
+    ],
+    "expected_top_level_keys": [
+      "entities"
+    ]
+  },
+  "document_type_aliases": {
+    "residency_certificate": {
+      "taxpayer_name": [
+        "taxpayer_name",
+        "taxpayerName",
+        "taxpayer-name"
+      ],
+      "tin": [
+        "tin",
+        "ssn",
+        "taxpayer_identification_number"
+      ],
+      "tax_year": [
+        "tax_year",
+        "taxYear"
+      ],
+      "issue_date": [
+        "issue_date",
+        "issueDate"
+      ],
+      "residency_country": [
+        "residency_country",
+        "residencyCountry"
+      ],
+      "residency_country_code": [
+        "residency_country_code",
+        "residencyCountryCode"
+      ]
+    },
+    "withholding_tax_form": {
+      "first_name": [
+        "first_name",
+        "firstName"
+      ],
+      "last_name": [
+        "last_name",
+        "lastName"
+      ],
+      "middle_name": [
+        "middle_name",
+        "middleName"
+      ],
+      "tin": [
+        "tin",
+        "taxpayer_identification_number"
+      ],
+      "address": [
+        "address",
+        "residence_address"
+      ],
+      "residency_country": [
+        "residency_country",
+        "residencyCountry"
+      ],
+      "residency_country_code": [
+        "residency_country_code",
+        "residencyCountryCode"
+      ],
+      "dividend_tax_rate": [
+        "dividend_tax_rate",
+        "dividendTaxRate"
+      ],
+      "signature_date": [
+        "signature_date",
+        "signatureDate"
+      ],
+      "applicant_name": [
+        "applicant_name",
+        "applicantName"
+      ]
+    },
+    "apostille": {
+      "issuing_country": [
+        "issuing_country",
+        "issuingCountry"
+      ],
+      "signed_by": [
+        "signed_by",
+        "signedBy"
+      ],
+      "signer_capacity": [
+        "signer_capacity",
+        "signerCapacity"
+      ],
+      "seal_owner": [
+        "seal_owner",
+        "sealOwner"
+      ],
+      "issued_at": [
+        "issued_at",
+        "issuedAt"
+      ],
+      "issued_on": [
+        "issued_on",
+        "issuedOn"
+      ],
+      "issuing_authority": [
+        "issuing_authority",
+        "issuingAuthority"
+      ],
+      "certificate_number": [
+        "certificate_number",
+        "certificateNumber"
+      ]
+    }
+  },
+  "protocol_eval_command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_google_document_ai_protocol_eval --raw-dir <raw_json_dir> --expected-root <expected_root> --output-dir <actual_dir> --report-output <report.json> --summary-output <summary.json> --metadata-output <metadata.json> --baseline-report <baseline_report.json> --comparison-output <comparison.json>"
+}

@@ -67,3 +67,8 @@ data/**/manifests/**/*.jsonl
 PaddleOCR/
 output/
 tmp/
+
+# Local external comparator artifacts
+evals/sota_positioning/raw_outputs/
+evals/sota_positioning/normalized_actuals/
+evals/sota_positioning/local_runs/

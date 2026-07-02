@@ -1,0 +1,88 @@
+{
+  "iteration_id": "2026-07-02_iteration_24",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "SOTA comparator는 벤더별 raw output을 그대로 비교하면 불공정하므로, 먼저 같은 normalized harness schema와 같은 benchmark protocol로 강제하는 adapter가 있어야 한다.",
+    "Google Document AI를 첫 comparator로 연결하면 managed custom extraction stack과 현재 candidate를 exact/CER/WER/low-quality subset 기준으로 직접 비교할 준비도가 가장 빨리 올라간다."
+  ],
+  "changes": [
+    {
+      "type": "google_document_ai_protocol_adapter",
+      "status": "kept",
+      "files": [
+        "scripts/evals/run_google_document_ai_protocol_eval.py",
+        "tests/test_google_document_ai_protocol_eval.py",
+        "evals/sota_positioning/google_document_ai_custom_extractor_contract.json"
+      ],
+      "summary": "Google Document AI Custom Extractor raw JSON을 문서 타입별 field alias와 normalization rule로 harness result schema에 맞춘 뒤, 동일 benchmark protocol report/summary/comparison으로 점수화하는 adapter를 추가했다."
+    },
+    {
+      "type": "sota_snapshot_readiness_upgrade",
+      "status": "kept",
+      "files": [
+        "evals/sota_positioning/comparison_targets.json",
+        "scripts/evals/build_sota_comparison_snapshot.py",
+        "evals/sota_positioning/current_comparison_snapshot.json"
+      ],
+      "summary": "Google comparator를 `planned`에서 `adapter_ready`로 승격하고, current comparison snapshot이 official reference보다 adapter contract를 우선 evidence로 보여주도록 갱신했다."
+    },
+    {
+      "type": "operator_docs_and_ignore_update",
+      "status": "kept",
+      "files": [
+        "README.md",
+        ".gitignore"
+      ],
+      "summary": "README에 same-protocol Google comparator 실행 예시를 추가하고, `evals/sota_positioning/` 아래 로컬 raw/normalized comparator 산출물 경로를 gitignore에 명시했다."
+    }
+  ],
+  "validation": {
+    "tests": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/pytest tests/test_google_document_ai_protocol_eval.py tests/test_sota_positioning_snapshot.py -q",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/ruff check scripts/evals/run_google_document_ai_protocol_eval.py scripts/evals/build_sota_comparison_snapshot.py tests/test_google_document_ai_protocol_eval.py tests/test_sota_positioning_snapshot.py",
+        "status": "passed"
+      }
+    ],
+    "snapshot_build": {
+      "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.build_sota_comparison_snapshot --output evals/sota_positioning/current_comparison_snapshot.json",
+      "status": "passed"
+    }
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_tin_parser_rescue_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_tin_parser_rescue.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "note": "이번 반복은 비교 adapter와 운영 artifact만 추가했기 때문에 current candidate의 official baseline replay 수치는 unchanged로 유지했다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_vs_tin_parser_rescue.json"
+    ],
+    "note": "date field OCR/parser 로직 수정이 없어서 baseline 대비 회귀가 없다."
+  },
+  "kept_candidates": [
+    "Google Document AI Custom Extractor same-protocol normalization + scoring adapter",
+    "adapter contract를 evidence로 드러내는 SOTA comparison snapshot readiness upgrade"
+  ],
+  "discarded_candidates": [
+    "벤더별 raw output 형식을 그대로 비교 표에 붙여 exact/CER/WER 해석을 섞는 방식"
+  ],
+  "next_priorities": [
+    "Google raw output fixture 또는 실제 벤더 출력 샘플 1세트를 넣어 same-protocol scored comparison report를 한 번 생성한다.",
+    "mixed-language withholding 외부 홀드아웃 원본을 확보하거나 semi-real probe를 늘려 current snapshot의 coverage gap을 줄인다."
+  ]
+}
