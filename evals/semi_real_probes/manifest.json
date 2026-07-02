@@ -2,6 +2,43 @@
   "version": "2026-07-01",
   "probes": [
     {
+      "case_id": "apostille_issued_on_spacing_probe",
+      "base_case_id": "apostille_north_carolina_001",
+      "document_type": "apostille",
+      "source_path": "sample_data/아포스티유 샘플/미국 california 주2.jpg",
+      "augmentation_pipeline": [
+        {
+          "augmentation_type": "low_res"
+        },
+        {
+          "augmentation_type": "jpeg_blocking"
+        },
+        {
+          "augmentation_type": "gaussian_blur"
+        }
+      ],
+      "focus_fields": [
+        "issued_on",
+        "issued_at",
+        "issuing_authority"
+      ],
+      "expected_fields": {
+        "issued_on": "10TH DAY OF APRIL, 2014",
+        "issued_at": "Raleigh, North Carolina",
+        "issuing_authority": "Secretary of State or Deputy Secretary of State State of North Carolina"
+      },
+      "failure_modes": [
+        "low_dpi",
+        "compression",
+        "blur",
+        "date_spacing_loss"
+      ],
+      "notes": [
+        "Apostille semi-real probe that compounds low-resolution, JPEG blocking, and blur around the historical issued_on spacing-loss case.",
+        "Used to verify that apostille date normalization still restores `issued_on` when OCR collapses punctuation or whitespace."
+      ]
+    },
+    {
       "case_id": "withholding_left_clip_probe",
       "base_case_id": "withholding_maria_chen_001",
       "document_type": "withholding_tax_form",
@@ -135,6 +172,53 @@
       "notes": [
         "Document-level edge-overlap probe forced to the right anchor via a probe-specific seed.",
         "Used to directly stress the top-right name band around the middle-name cell instead of only the bottom applicant signature block."
+      ]
+    },
+    {
+      "case_id": "withholding_top_left_name_header_bleed_probe",
+      "base_case_id": "withholding_maria_chen_001",
+      "document_type": "withholding_tax_form",
+      "source_path": "sample_data/국내원천소득 제한세율/국내원천소득 제한세율 적용신청서-1.png",
+      "augmentation_pipeline": [
+        {
+          "augmentation_type": "border_clip",
+          "augmentation_options": {
+            "anchor": "top",
+            "clip_height_ratio": 0.1
+          }
+        },
+        {
+          "augmentation_type": "overlay_patch",
+          "augmentation_options": {
+            "anchor": "top_left",
+            "width_ratio": 0.18,
+            "height_ratio": 0.08,
+            "x_ratio": 0.12,
+            "y_ratio": 0.095
+          }
+        }
+      ],
+      "focus_fields": [
+        "first_name",
+        "last_name",
+        "middle_name",
+        "applicant_name"
+      ],
+      "expected_fields": {
+        "first_name": "MARIA",
+        "last_name": "CHEN",
+        "middle_name": "L",
+        "applicant_name": "MARIA L. CHEN"
+      },
+      "failure_modes": [
+        "label_bleed",
+        "border_clipping",
+        "crop_miss",
+        "label_bleed_name_header"
+      ],
+      "notes": [
+        "Withholding semi-real probe that clips the top band and overlays the left side of the name header area rather than the middle-name cell.",
+        "Used to verify that applicant-name priors can still recover the upper first/last/middle cells when header fragments bleed into the top-left name row."
       ]
     },
     {

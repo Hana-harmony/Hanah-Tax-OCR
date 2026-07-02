@@ -1,0 +1,133 @@
+{
+  "iteration_id": "2026-07-02_iteration_30",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "상단 name header bleed로 `last_name`이 라벨 조각으로 오염될 때, 신뢰 가능한 `applicant_name` 구조 prior를 사용하면 withholding 이름군 exact/CER/WER를 회복할 가능성이 가장 높다.",
+    "Apostille `issued_on` spacing-loss는 parser normalization보다 region OCR box/전처리 fallback이 필요할 수 있으므로, probe에서 박스 확장과 저화질 전처리 후보를 먼저 계량 검증한다."
+  ],
+  "changes": [
+    {
+      "type": "withholding_name_header_label_bleed_rescue",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/parsers/withholding_tax_form.py",
+        "tests/test_parsers.py",
+        "evals/semi_real_probes/manifest.json",
+        "evals/reports/taxonomy_gap_probe_fix_report.json",
+        "evals/reports/current_top_left_header_bleed_fix_summary.json"
+      ],
+      "summary": "상단 좌측 name row에서 `last_name` crop이 `tast Name\\nCHEN`처럼 라벨 조각에 오염될 때, clean `applicant_name`에서 유도한 last-name을 우선하는 rescue를 추가했고 semi-real probe에서 applicant_name/last_name을 복구했다."
+    },
+    {
+      "type": "apostille_region_ocr_probe_diagnostic",
+      "status": "discarded",
+      "files": [
+        "evals/reports/apostille_spacing_probe_region_ocr_experiments.json",
+        "evals/external_holdout/proxy_probe_coverage.json",
+        "evals/augmentation_effects/ledger.json"
+      ],
+      "summary": "North Carolina apostille 하단 3개 row에 대해 box expansion과 autocontrast/binarize/sharpen 후보를 probe에 재적용했지만, semi-real 저화질 probe에서는 `s`, `ME`, `Reng.Sere Ce` 수준의 OCR 붕괴만 확인돼 lightweight region-OCR fallback은 유지 후보에서 제외했다."
+    },
+    {
+      "type": "current_candidate_reference_refresh",
+      "status": "kept",
+      "files": [
+        "evals/sota_positioning/current_candidate_refs.json",
+        "evals/sota_positioning/current_comparison_snapshot.json"
+      ],
+      "summary": "새 parser candidate를 `current_top_left_header_bleed_fix`로 승격하고 snapshot이 최신 internal summary와 baseline comparison artifact를 가리키도록 갱신했다."
+    }
+  ],
+  "baseline_comparison": {
+    "baseline_summary_path": "evals/reports/current_official_v17_summary.json",
+    "candidate_summary_path": "evals/reports/current_top_left_header_bleed_fix_summary.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "overall_status": "unchanged",
+    "note": "Official replay는 baseline과 동일한 1.0 / 0.0 / 0.0을 유지했고 regressed field가 없다."
+  },
+  "targeted_probe_comparison": {
+    "baseline_summary_path": "evals/reports/taxonomy_gap_probe_current_summary.json",
+    "candidate_summary_path": "evals/reports/taxonomy_gap_probe_fix_summary.json",
+    "baseline_exact_match_rate": 0.285714,
+    "baseline_average_character_error_rate": 0.615385,
+    "baseline_average_word_error_rate": 0.619048,
+    "candidate_exact_match_rate": 0.571429,
+    "candidate_average_character_error_rate": 0.428571,
+    "candidate_average_word_error_rate": 0.428571,
+    "baseline_document_pass_rate": 0.0,
+    "candidate_document_pass_rate": 0.5,
+    "delta_exact_match_rate": 0.28571499999999994,
+    "delta_average_character_error_rate": -0.18681399999999998,
+    "delta_average_word_error_rate": -0.19047700000000006,
+    "overall_status": "improved",
+    "improved_fields": [
+      "withholding_tax_form.applicant_name",
+      "withholding_tax_form.last_name"
+    ],
+    "regressed_fields": [],
+    "remaining_failed_case_ids": [
+      "apostille_issued_on_spacing_probe"
+    ]
+  },
+  "apostille_region_ocr_diagnostic": {
+    "report_path": "evals/reports/apostille_spacing_probe_region_ocr_experiments.json",
+    "decision_status": "discarded",
+    "probe_issued_on_best_text": "s",
+    "probe_issued_at_best_text": "e.Sore-Ceise",
+    "probe_issuing_authority_best_text": "ME",
+    "probe_best_preprocessing_variant": "sharp_4x",
+    "probe_best_preprocessing_text": "Reng.Sere Ce",
+    "note": "Wide region expansion recovers partial context on the clean base sample but the semi-real low-resolution probe still produces only gibberish (`s`, `ME`, `Reng.Sere Ce`) across region and preprocessing candidates, so lightweight region-OCR fallback is not a maintainable keep candidate."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_summary.json",
+      "evals/reports/current_top_left_header_bleed_fix_summary.json",
+      "evals/reports/current_official_v17_vs_top_left_header_bleed_fix.json"
+    ],
+    "note": "Official replay comparison에서 regressed_fields가 비어 있고 date 계열 exact/CER/WER 변화가 없다."
+  },
+  "validation": {
+    "tests": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/pytest tests/test_parsers.py tests/test_semi_real_probe_suite.py tests/test_run_semi_real_probe_eval.py tests/test_sota_positioning_snapshot.py -q",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/ruff check src/hanah_tax_ocr/parsers/withholding_tax_form.py tests/test_parsers.py scripts/evals/build_sota_comparison_snapshot.py",
+        "status": "passed"
+      }
+    ],
+    "artifacts": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_semi_real_probe_eval --manifest evals/semi_real_probes/manifest.json --suite-output-root tmp/taxonomy_gap_probe_fix_suite --actual-output-dir tmp/taxonomy_gap_probe_fix_actual --report-output evals/reports/taxonomy_gap_probe_fix_report.json --summary-output evals/reports/taxonomy_gap_probe_fix_summary.json --metadata-output evals/reports/taxonomy_gap_probe_fix_metadata.json --case-id apostille_issued_on_spacing_probe --case-id withholding_top_left_name_header_bleed_probe",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.build_sota_comparison_snapshot --output evals/sota_positioning/current_comparison_snapshot.json",
+        "status": "passed"
+      }
+    ]
+  },
+  "kept_candidates": [
+    "applicant_name 기반 last_name rescue for label_bleed_name_header",
+    "withholding_top_left_name_header_bleed_probe와 official replay를 반영한 current_top_left_header_bleed_fix snapshot ref"
+  ],
+  "discarded_candidates": [
+    "Apostille issued_on/issued_at/issuing_authority에 대한 lightweight box-expansion + contrast/binarize region OCR fallback"
+  ],
+  "next_priorities": [
+    "Apostille blur/spacing-loss는 parser-only가 아니라 recognizer 또는 더 강한 region OCR 체인이 필요한지 별도 field-crop 기반 실험으로 분리하기",
+    "외부 holdout의 mixed-language withholding front-side 실제 원본 부족을 계속 해소해 semi-real probe 의존도를 낮추기"
+  ]
+}

@@ -49,11 +49,24 @@
     },
     {
       "target_id": "apostille_blur_ready_case",
-      "coverage_status": "uncovered",
-      "proxy_type": null,
-      "probe_case_ids": [],
+      "coverage_status": "proxy_measured",
+      "proxy_type": "semi_real",
+      "probe_case_ids": [
+        "apostille_issued_on_spacing_probe"
+      ],
+      "report_path": "evals/reports/taxonomy_gap_probe_fix_report.json",
+      "summary_path": "evals/reports/taxonomy_gap_probe_fix_summary.json",
+      "comparison_path": "evals/reports/taxonomy_gap_probe_current_vs_fix.json",
+      "covered_failure_modes": [
+        "low_dpi",
+        "compression",
+        "blur",
+        "date_spacing_loss"
+      ],
       "limitations": [
-        "실샘플과 semi-real proxy 모두 아직 없다."
+        "실제 blur apostille 원본은 아직 없다.",
+        "semi-real proxy이므로 true external holdout score로 해석하면 안 된다.",
+        "current candidate는 apostille `issued_on/issued_at/issuing_authority`를 아직 복구하지 못했다."
       ]
     }
   ]

@@ -1,14 +1,14 @@
 {
   "version": "2026-07-02",
-  "candidate_id": "current_mixed_language_gap_fix",
-  "internal_summary_path": "evals/reports/current_mixed_language_gap_fix_summary.json",
+  "candidate_id": "current_top_left_header_bleed_fix",
+  "internal_summary_path": "evals/reports/current_top_left_header_bleed_fix_summary.json",
   "external_summary_path": "evals/reports/external_holdout_current_candidate_summary.json",
   "latency_observations_path": "evals/benchmark_latency_observations.json",
   "holdout_gap_report_path": "evals/external_holdout/missing_distribution_targets.json",
   "error_taxonomy_path": "evals/error_taxonomy/hard_case_manifest.json",
   "supporting_evidence": {
-    "internal_baseline_comparison_path": "evals/reports/current_official_v17_vs_mixed_language_gap_fix.json",
+    "internal_baseline_comparison_path": "evals/reports/current_official_v17_vs_top_left_header_bleed_fix.json",
     "external_holdout_regression_comparison_path": "evals/reports/external_holdout_tin_parser_rescue_vs_current_candidate.json"
   },
-  "selection_note": "Latest parser candidate with unchanged official replay and refreshed external-holdout summary/latency snapshot."
+  "selection_note": "Latest parser candidate with top-left name-header bleed rescue kept, unchanged official replay, and refreshed external-holdout/latency evidence."
 }

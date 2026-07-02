@@ -1,0 +1,127 @@
+{
+  "compared_cases": 2,
+  "missing_cases": [],
+  "comparisons": [
+    {
+      "case_id": "apostille_issued_on_spacing_probe",
+      "document_type": "apostille",
+      "field_name": "issued_on",
+      "expected": "10TH DAY OF APRIL, 2014",
+      "actual": null,
+      "exact_match": false,
+      "character_error_rate": 1.0,
+      "word_error_rate": 1.0
+    },
+    {
+      "case_id": "apostille_issued_on_spacing_probe",
+      "document_type": "apostille",
+      "field_name": "issued_at",
+      "expected": "Raleigh, North Carolina",
+      "actual": null,
+      "exact_match": false,
+      "character_error_rate": 1.0,
+      "word_error_rate": 1.0
+    },
+    {
+      "case_id": "apostille_issued_on_spacing_probe",
+      "document_type": "apostille",
+      "field_name": "issuing_authority",
+      "expected": "Secretary of State or Deputy Secretary of State State of North Carolina",
+      "actual": null,
+      "exact_match": false,
+      "character_error_rate": 1.0,
+      "word_error_rate": 1.0
+    },
+    {
+      "case_id": "withholding_top_left_name_header_bleed_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "first_name",
+      "expected": "MARIA",
+      "actual": "MARIA",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_top_left_name_header_bleed_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "last_name",
+      "expected": "CHEN",
+      "actual": "CHEN",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_top_left_name_header_bleed_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "middle_name",
+      "expected": "L",
+      "actual": "L",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    },
+    {
+      "case_id": "withholding_top_left_name_header_bleed_probe",
+      "document_type": "withholding_tax_form",
+      "field_name": "applicant_name",
+      "expected": "MARIA L. CHEN",
+      "actual": "MARIA L. CHEN",
+      "exact_match": true,
+      "character_error_rate": 0.0,
+      "word_error_rate": 0.0
+    }
+  ],
+  "field_metrics": {
+    "apostille.issued_at": {
+      "comparisons": 1,
+      "exact_matches": 0,
+      "exact_match_rate": 0.0,
+      "average_character_error_rate": 1.0,
+      "average_word_error_rate": 1.0
+    },
+    "apostille.issued_on": {
+      "comparisons": 1,
+      "exact_matches": 0,
+      "exact_match_rate": 0.0,
+      "average_character_error_rate": 1.0,
+      "average_word_error_rate": 1.0
+    },
+    "apostille.issuing_authority": {
+      "comparisons": 1,
+      "exact_matches": 0,
+      "exact_match_rate": 0.0,
+      "average_character_error_rate": 1.0,
+      "average_word_error_rate": 1.0
+    },
+    "withholding_tax_form.applicant_name": {
+      "comparisons": 1,
+      "exact_matches": 1,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.first_name": {
+      "comparisons": 1,
+      "exact_matches": 1,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.last_name": {
+      "comparisons": 1,
+      "exact_matches": 1,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    },
+    "withholding_tax_form.middle_name": {
+      "comparisons": 1,
+      "exact_matches": 1,
+      "exact_match_rate": 1.0,
+      "average_character_error_rate": 0.0,
+      "average_word_error_rate": 0.0
+    }
+  }
+}

@@ -87,6 +87,10 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             or derived_middle_name
             or self._find_first(r"Middle Name\)?\s*([A-Z])\b", single_line)
         )
+        last_name = self._prefer_applicant_last_name(
+            last_name,
+            applicant_name=applicant_name,
+        )
         tin = self._extract_best_tin(
             single_line,
             region_tin=region_tin,
@@ -544,6 +548,38 @@ class WithholdingTaxFormParser(BaseDocumentParser):
         ):
             return normalized_derived_first_name
         return normalized_first_name
+
+    def _prefer_applicant_last_name(
+        self,
+        last_name: str | None,
+        *,
+        applicant_name: str | None,
+    ) -> str | None:
+        _, _, derived_last_name = self._derive_name_parts(applicant_name)
+        normalized_last_name = self._normalize_name(last_name)
+        if not derived_last_name:
+            return normalized_last_name
+        if not normalized_last_name:
+            return derived_last_name
+        if canonicalize_name(normalized_last_name) == canonicalize_name(derived_last_name):
+            return normalized_last_name
+        if self._looks_like_label_bleed_last_name(normalized_last_name):
+            return derived_last_name
+        return normalized_last_name
+
+    def _looks_like_label_bleed_last_name(self, value: str | None) -> bool:
+        if not value:
+            return False
+        normalized = canonicalize_name(value)
+        if not normalized:
+            return False
+        if normalized in {canonicalize_name(fragment) for fragment in self._LABEL_FRAGMENTS}:
+            return True
+        suspicious_suffixes = ("ast", "irst", "iddle", "name")
+        return any(
+            normalized.endswith(fragment) and len(normalized) <= len(fragment) + 1
+            for fragment in suspicious_suffixes
+        )
 
     def _format_applicant_name(
         self,

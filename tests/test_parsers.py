@@ -1163,6 +1163,37 @@ def test_withholding_parser_prefers_trusted_applicant_name_over_truncated_name_c
     assert parsed.fields["applicant_name"] == "MARIA L. CHEN"
 
 
+def test_withholding_parser_prefers_trusted_applicant_name_over_label_bleed_last_name() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "2026-01-12",
+                            "987-65-4321",
+                            "United States of America",
+                            "MARIA L. CHEN",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "last_name": OCRPage(page_number=1, raw_text="tast Name\nCHEN"),
+                "first_name": OCRPage(page_number=1, raw_text="irst Name)\nMARIA"),
+                "middle_name": OCRPage(page_number=1, raw_text="L"),
+                "applicant_name": OCRPage(page_number=1, raw_text="MARIA L. CHEN"),
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["last_name"] == "CHEN"
+    assert parsed.fields["applicant_name"] == "MARIA L. CHEN"
+
+
 def test_withholding_parser_prefers_last_full_text_signature_date_over_birthdate() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

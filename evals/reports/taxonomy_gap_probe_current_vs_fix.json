@@ -1,0 +1,331 @@
+{
+  "baseline_compared_cases": 2,
+  "candidate_compared_cases": 2,
+  "baseline_missing_cases": [],
+  "candidate_missing_cases": [],
+  "resolved_missing_cases": [],
+  "new_missing_cases": [],
+  "improved_fields": [
+    "withholding_tax_form.applicant_name",
+    "withholding_tax_form.last_name"
+  ],
+  "regressed_fields": [],
+  "mixed_fields": [],
+  "unchanged_fields": [
+    "apostille.issued_at",
+    "apostille.issued_on",
+    "apostille.issuing_authority",
+    "withholding_tax_form.first_name",
+    "withholding_tax_form.middle_name"
+  ],
+  "added_fields": [],
+  "removed_fields": [],
+  "field_deltas": {
+    "apostille.issued_at": {
+      "field_key": "apostille.issued_at",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "apostille.issued_on": {
+      "field_key": "apostille.issued_on",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "apostille.issuing_authority": {
+      "field_key": "apostille.issuing_authority",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "withholding_tax_form.applicant_name": {
+      "field_key": "withholding_tax_form.applicant_name",
+      "status": "improved",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 0.3076923076923077,
+        "average_word_error_rate": 0.3333333333333333
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 1.0,
+      "average_character_error_rate_delta": -0.3076923076923077,
+      "average_word_error_rate_delta": -0.3333333333333333
+    },
+    "withholding_tax_form.first_name": {
+      "field_key": "withholding_tax_form.first_name",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "withholding_tax_form.last_name": {
+      "field_key": "withholding_tax_form.last_name",
+      "status": "improved",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 1.0,
+      "average_character_error_rate_delta": -1.0,
+      "average_word_error_rate_delta": -1.0
+    },
+    "withholding_tax_form.middle_name": {
+      "field_key": "withholding_tax_form.middle_name",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 1,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    }
+  },
+  "improved_documents": [
+    "withholding_tax_form"
+  ],
+  "regressed_documents": [],
+  "mixed_documents": [],
+  "unchanged_documents": [
+    "apostille"
+  ],
+  "added_documents": [],
+  "removed_documents": [],
+  "document_deltas": {
+    "apostille": {
+      "field_key": "apostille",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 3,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "candidate": {
+        "comparisons": 3,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "withholding_tax_form": {
+      "field_key": "withholding_tax_form",
+      "status": "improved",
+      "baseline": {
+        "comparisons": 4,
+        "exact_matches": 2,
+        "exact_match_rate": 0.5,
+        "average_character_error_rate": 0.3269230769230769,
+        "average_word_error_rate": 0.3333333333333333
+      },
+      "candidate": {
+        "comparisons": 4,
+        "exact_matches": 4,
+        "exact_match_rate": 1.0,
+        "average_character_error_rate": 0.0,
+        "average_word_error_rate": 0.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.5,
+      "average_character_error_rate_delta": -0.3269230769230769,
+      "average_word_error_rate_delta": -0.3333333333333333
+    }
+  },
+  "improved_field_groups": [
+    "english_name_org"
+  ],
+  "regressed_field_groups": [],
+  "mixed_field_groups": [],
+  "unchanged_field_groups": [
+    "date"
+  ],
+  "added_field_groups": [],
+  "removed_field_groups": [],
+  "field_group_deltas": {
+    "date": {
+      "field_key": "date",
+      "status": "unchanged",
+      "baseline": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "candidate": {
+        "comparisons": 1,
+        "exact_matches": 0,
+        "exact_match_rate": 0.0,
+        "average_character_error_rate": 1.0,
+        "average_word_error_rate": 1.0
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.0,
+      "average_character_error_rate_delta": 0.0,
+      "average_word_error_rate_delta": 0.0
+    },
+    "english_name_org": {
+      "field_key": "english_name_org",
+      "status": "improved",
+      "baseline": {
+        "comparisons": 6,
+        "exact_matches": 2,
+        "exact_match_rate": 0.3333333333333333,
+        "average_character_error_rate": 0.5512820512820512,
+        "average_word_error_rate": 0.5555555555555556
+      },
+      "candidate": {
+        "comparisons": 6,
+        "exact_matches": 4,
+        "exact_match_rate": 0.6666666666666666,
+        "average_character_error_rate": 0.3333333333333333,
+        "average_word_error_rate": 0.3333333333333333
+      },
+      "comparison_delta": 0,
+      "exact_match_rate_delta": 0.3333333333333333,
+      "average_character_error_rate_delta": -0.2179487179487179,
+      "average_word_error_rate_delta": -0.22222222222222227
+    }
+  },
+  "improved_training_field_groups": [],
+  "regressed_training_field_groups": [],
+  "mixed_training_field_groups": [],
+  "unchanged_training_field_groups": [],
+  "added_training_field_groups": [],
+  "removed_training_field_groups": [],
+  "training_profile_deltas": {},
+  "overall_delta": {
+    "field_key": "overall",
+    "status": "improved",
+    "baseline": {
+      "comparisons": 7,
+      "exact_matches": 2,
+      "exact_match_rate": 0.2857142857142857,
+      "average_character_error_rate": 0.6153846153846153,
+      "average_word_error_rate": 0.6190476190476192
+    },
+    "candidate": {
+      "comparisons": 7,
+      "exact_matches": 4,
+      "exact_match_rate": 0.5714285714285714,
+      "average_character_error_rate": 0.42857142857142855,
+      "average_word_error_rate": 0.42857142857142855
+    },
+    "comparison_delta": 0,
+    "exact_match_rate_delta": 0.2857142857142857,
+    "average_character_error_rate_delta": -0.18681318681318676,
+    "average_word_error_rate_delta": -0.19047619047619063
+  },
+  "promotion_assessment": {
+    "status": "promote",
+    "blocking_reasons": [],
+    "warning_reasons": [],
+    "severe_regressed_fields": [],
+    "coverage_regressed_fields": [],
+    "notable_improved_fields": [
+      "withholding_tax_form.applicant_name",
+      "withholding_tax_form.last_name"
+    ]
+  }
+}

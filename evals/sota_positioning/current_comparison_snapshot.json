@@ -5,7 +5,7 @@
   "comparison_scope": "Document-type-specific OCR + parser + normalization + review-aware end-to-end extraction system",
   "current_candidate_refs_path": "evals/sota_positioning/current_candidate_refs.json",
   "current_candidate_references": {
-    "internal_summary": "evals/reports/current_mixed_language_gap_fix_summary.json",
+    "internal_summary": "evals/reports/current_top_left_header_bleed_fix_summary.json",
     "external_summary": "evals/reports/external_holdout_current_candidate_summary.json",
     "latency_observations": "evals/benchmark_latency_observations.json",
     "holdout_gap_report": "evals/external_holdout/missing_distribution_targets.json",
@@ -25,7 +25,7 @@
       "low_quality_average_word_error_rate": null,
       "cpu_latency_observation_seconds": 7.4588,
       "comparison_readiness": "ready",
-      "evidence_path": "evals/reports/current_mixed_language_gap_fix_summary.json",
+      "evidence_path": "evals/reports/current_top_left_header_bleed_fix_summary.json",
       "notes": "Current best candidate under the internal regression protocol. Low-quality subset is null here because those cases live in external holdout."
     },
     {

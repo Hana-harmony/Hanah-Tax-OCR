@@ -659,6 +659,61 @@
         }
       ],
       "notes": "mixed-language withholding external holdout 공백을 대신하는 blur/rotate semi-real proxy 2건에서 applicant_name-first/middle name rescue와 reversed signature-date region rescue를 추가해 overall exact를 0.8에서 1.0으로 복구했고, official replay 회귀는 없었다."
+    },
+    {
+      "experiment_id": "taxonomy_gap_top_left_name_header_rescue_2026_07_02",
+      "baseline_report": "evals/reports/taxonomy_gap_probe_current_report.json",
+      "candidate_report": "evals/reports/taxonomy_gap_probe_fix_report.json",
+      "variants": [
+        "border_clip",
+        "overlay_patch",
+        "low_res",
+        "jpeg_blocking",
+        "gaussian_blur"
+      ],
+      "probe_case_ids": [
+        "apostille_issued_on_spacing_probe",
+        "withholding_top_left_name_header_bleed_probe"
+      ],
+      "field_group_deltas": [
+        {
+          "field_group": "date",
+          "baseline": {
+            "comparisons": 3.0,
+            "exact_match_rate": 0.0,
+            "average_character_error_rate": 1.0,
+            "average_word_error_rate": 1.0
+          },
+          "candidate": {
+            "comparisons": 3.0,
+            "exact_match_rate": 0.0,
+            "average_character_error_rate": 1.0,
+            "average_word_error_rate": 1.0
+          },
+          "exact_match_rate_delta": 0.0,
+          "average_character_error_rate_delta": 0.0,
+          "average_word_error_rate_delta": 0.0
+        },
+        {
+          "field_group": "english_name_org",
+          "baseline": {
+            "comparisons": 4.0,
+            "exact_match_rate": 0.5,
+            "average_character_error_rate": 0.326923,
+            "average_word_error_rate": 0.333333
+          },
+          "candidate": {
+            "comparisons": 4.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.5,
+          "average_character_error_rate_delta": -0.326923,
+          "average_word_error_rate_delta": -0.333333
+        }
+      ],
+      "notes": "taxonomy 기반 신규 probe 2건 중 top-left name-header bleed는 trusted applicant_name 기반 last_name rescue로 exact를 0.5에서 1.0으로 복구했고, apostille low-res/blur/compression spacing-loss probe는 여전히 unrecovered로 남아 OCR 신호 한계가 드러났다."
     }
   ]
 }
