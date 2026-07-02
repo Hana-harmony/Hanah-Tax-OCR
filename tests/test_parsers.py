@@ -1043,6 +1043,36 @@ def test_withholding_parser_prefers_region_signature_date_over_header_date() -> 
     assert parsed.fields["signature_date"] == "2026-01-12"
 
 
+def test_withholding_parser_prefers_region_signature_date_over_unrelated_birthdate() -> None:
+    parser = WithholdingTaxFormParser()
+    parsed = parser.parse(
+        OCRResult(
+            pages=[
+                OCRPage(
+                    page_number=1,
+                    raw_text="\n".join(
+                        [
+                            "[2026.3.20.]",
+                            "2026-01-12",
+                            "1985-06-15",
+                            "신청인 MARIA L. CHEN",
+                        ]
+                    ),
+                )
+            ],
+            regions={
+                "signature_date": OCRPage(
+                    page_number=1,
+                    raw_text="l.\n2026\n01\n12\nec L\not",
+                )
+            },
+        ),
+        "withholding.png",
+    )
+
+    assert parsed.fields["signature_date"] == "2026-01-12"
+
+
 def test_withholding_parser_falls_back_when_region_signature_date_is_invalid() -> None:
     parser = WithholdingTaxFormParser()
     parsed = parser.parse(

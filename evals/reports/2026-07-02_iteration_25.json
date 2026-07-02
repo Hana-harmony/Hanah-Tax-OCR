@@ -1,0 +1,123 @@
+{
+  "iteration_id": "2026-07-02_iteration_25",
+  "baseline_report": "tmp/evals/current_official_v17_parser_report.json",
+  "focus_hypotheses": [
+    "현재 candidate의 내부/외부 공식 eval이 perfect여도 semi-real edge-overlap 분포에서 date fallback이 unrelated birthdate를 선택하면 새로운 분포 강건성이 약해질 수 있다.",
+    "signature_date는 valid region OCR이 있을 때 full-text fallback보다 우선하도록 selection policy를 보수화하면, official replay를 깨지 않고 semi-real date robustness를 회복할 수 있다."
+  ],
+  "changes": [
+    {
+      "type": "signature_date_selection_policy",
+      "status": "kept",
+      "files": [
+        "src/hanah_tax_ocr/parsers/withholding_tax_form.py",
+        "tests/test_parsers.py"
+      ],
+      "summary": "withholding parser가 valid한 region signature_date를 unrelated full-text birthdate보다 우선하도록 selection policy를 단순화했고, 실제 semi-real failure 패턴을 재현하는 회귀 테스트를 추가했다."
+    },
+    {
+      "type": "semi_real_measurement_refresh",
+      "status": "kept",
+      "files": [
+        "evals/reports/withholding_edge_overlap_right_name_probe_signature_date_fix_report.json",
+        "evals/reports/withholding_edge_overlap_right_name_probe_signature_date_fix_summary.json",
+        "evals/reports/withholding_edge_overlap_right_name_probe_signature_date_fix_metadata.json",
+        "evals/reports/semi_real_signature_date_selection_report.json",
+        "evals/reports/semi_real_signature_date_selection_summary.json",
+        "evals/reports/semi_real_signature_date_selection_metadata.json",
+        "evals/reports/semi_real_current_vs_signature_date_selection.json",
+        "evals/augmentation_effects/ledger.json"
+      ],
+      "summary": "right-edge name overlap probe 1건과 전체 semi-real 11건을 재실행해 signature_date 1필드 개선만 발생했고, overall exact/CER/WER와 document pass rate가 모두 회복됐음을 기록했다."
+    }
+  ],
+  "probe_results": {
+    "withholding_edge_overlap_right_name_probe": {
+      "baseline_report_path": "evals/reports/semi_real_current_candidate_report.json",
+      "candidate_report_path": "evals/reports/withholding_edge_overlap_right_name_probe_signature_date_fix_report.json",
+      "candidate_summary_path": "evals/reports/withholding_edge_overlap_right_name_probe_signature_date_fix_summary.json",
+      "baseline_failed_field": "withholding_tax_form.signature_date",
+      "baseline_actual": "1985-06-15",
+      "candidate_actual": "2026-01-12",
+      "candidate_exact_match_rate": 1.0,
+      "candidate_average_character_error_rate": 0.0,
+      "candidate_average_word_error_rate": 0.0,
+      "candidate_document_pass_rate": 1.0
+    },
+    "semi_real_full_manifest": {
+      "baseline_report_path": "evals/reports/semi_real_current_candidate_report.json",
+      "candidate_report_path": "evals/reports/semi_real_signature_date_selection_report.json",
+      "candidate_summary_path": "evals/reports/semi_real_signature_date_selection_summary.json",
+      "comparison_path": "evals/reports/semi_real_current_vs_signature_date_selection.json",
+      "baseline_exact_match_rate": 0.990385,
+      "candidate_exact_match_rate": 1.0,
+      "baseline_average_character_error_rate": 0.005769,
+      "candidate_average_character_error_rate": 0.0,
+      "baseline_average_word_error_rate": 0.009615,
+      "candidate_average_word_error_rate": 0.0,
+      "baseline_document_pass_rate": 0.909091,
+      "candidate_document_pass_rate": 1.0,
+      "improved_fields": [
+        "withholding_tax_form.signature_date"
+      ],
+      "regressed_fields": []
+    }
+  },
+  "baseline_comparison": {
+    "summary_path": "evals/reports/current_signature_date_selection_summary.json",
+    "comparison_path": "evals/reports/current_official_v17_vs_signature_date_selection.json",
+    "baseline_exact_match_rate": 1.0,
+    "baseline_average_character_error_rate": 0.0,
+    "baseline_average_word_error_rate": 0.0,
+    "candidate_exact_match_rate": 1.0,
+    "candidate_average_character_error_rate": 0.0,
+    "candidate_average_word_error_rate": 0.0,
+    "document_pass_rate": 1.0,
+    "delta_exact_match_rate": 0.0,
+    "delta_average_character_error_rate": 0.0,
+    "delta_average_word_error_rate": 0.0,
+    "overall_status": "unchanged",
+    "note": "official replay는 withholding 21건 rerun 기준 regressed field 없이 unchanged였다."
+  },
+  "date_regression": {
+    "status": "none",
+    "evidence": [
+      "evals/reports/current_official_v17_vs_signature_date_selection.json",
+      "evals/reports/semi_real_current_vs_signature_date_selection.json"
+    ],
+    "note": "official replay date field는 unchanged였고, semi-real date field group exact는 0.9에서 1.0으로 개선됐다."
+  },
+  "validation": {
+    "tests": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/pytest tests/test_parsers.py -q",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/ruff check src/hanah_tax_ocr/parsers/withholding_tax_form.py tests/test_parsers.py",
+        "status": "passed"
+      }
+    ],
+    "evals": [
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.run_semi_real_probe_eval --manifest evals/semi_real_probes/manifest.json --suite-output-root tmp/semi_real_signature_date_full_suite --actual-output-dir tmp/semi_real_signature_date_full_actual --report-output evals/reports/semi_real_signature_date_selection_report.json --summary-output evals/reports/semi_real_signature_date_selection_summary.json --metadata-output evals/reports/semi_real_signature_date_selection_metadata.json",
+        "status": "passed"
+      },
+      {
+        "command": "PYTHONPATH=src .venv/bin/python -m scripts.evals.replay_hybrid_eval --baseline-actual-dir tmp/evals/current_official_v17_parser --expected-root evals/cases --output-dir tmp/current_signature_date_selection_replay --report-output evals/reports/current_signature_date_selection_report.json --summary-output evals/reports/current_signature_date_selection_summary.json --baseline-report tmp/evals/current_official_v17_parser_report.json --comparison-output evals/reports/current_official_v17_vs_signature_date_selection.json --metadata-output evals/reports/current_signature_date_selection_metadata.json --rerun-prefix withholding_",
+        "status": "passed"
+      }
+    ]
+  },
+  "kept_candidates": [
+    "valid region signature_date 우선 selection policy",
+    "right-edge overlap 분포에서 birthdate noise를 무시하는 parser-only rescue"
+  ],
+  "discarded_candidates": [
+    "region과 full-text 연도가 다르면 fallback을 우선하는 signature_date selection policy"
+  ],
+  "next_priorities": [
+    "mixed-language withholding external holdout missing_source를 semi-real 또는 실샘플로 메워 현재 perfect candidate가 새로운 분포에서도 유지되는지 더 직접 검증한다.",
+    "Google comparator에 실제 raw output fixture 1세트를 연결해 same-protocol score row를 한 번 채운다."
+  ]
+}

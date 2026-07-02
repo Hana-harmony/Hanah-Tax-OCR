@@ -1,0 +1,293 @@
+{
+  "materialization": {
+    "version": "2026-07-01",
+    "manifest_path": "evals/semi_real_probes/manifest.json",
+    "output_root": "tmp/semi_real_signature_date_full_suite",
+    "probe_count": 11,
+    "materialized": [
+      {
+        "case_id": "withholding_left_clip_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_left_clip_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_left_clip_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_left_clip_probe/expected.json",
+        "augmentation_type": "left_clip",
+        "seed": null,
+        "augmentation_options": {},
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "left_clip",
+            "augmentation_options": {}
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_jpeg_blocking_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_jpeg_blocking_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_jpeg_blocking_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_jpeg_blocking_probe/expected.json",
+        "augmentation_type": "jpeg_blocking",
+        "seed": null,
+        "augmentation_options": {},
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "jpeg_blocking",
+            "augmentation_options": {}
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_overlay_patch_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_overlay_patch_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_overlay_patch_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_overlay_patch_probe/expected.json",
+        "augmentation_type": "overlay_patch",
+        "seed": null,
+        "augmentation_options": {},
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "overlay_patch",
+            "augmentation_options": {}
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_edge_overlap_bottom_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_edge_overlap_bottom_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_edge_overlap_bottom_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_edge_overlap_bottom_probe/expected.json",
+        "augmentation_type": "edge_overlap",
+        "seed": 5,
+        "augmentation_options": {},
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "edge_overlap",
+            "augmentation_options": {}
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_border_clip_top_name_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_border_clip_top_name_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_border_clip_top_name_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_border_clip_top_name_probe/expected.json",
+        "augmentation_type": "border_clip",
+        "seed": 5,
+        "augmentation_options": {
+          "anchor": "top",
+          "clip_height_ratio": 0.18
+        },
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "border_clip",
+            "augmentation_options": {
+              "anchor": "top",
+              "clip_height_ratio": 0.18
+            }
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_edge_overlap_right_name_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_edge_overlap_right_name_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_edge_overlap_right_name_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_edge_overlap_right_name_probe/expected.json",
+        "augmentation_type": "edge_overlap",
+        "seed": 4,
+        "augmentation_options": {
+          "anchor": "right"
+        },
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "edge_overlap",
+            "augmentation_options": {
+              "anchor": "right"
+            }
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_overlay_patch_top_right_middle_name_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_overlay_patch_top_right_middle_name_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_overlay_patch_top_right_middle_name_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_overlay_patch_top_right_middle_name_probe/expected.json",
+        "augmentation_type": "overlay_patch",
+        "seed": 11,
+        "augmentation_options": {
+          "anchor": "top_right",
+          "width_ratio": 0.13,
+          "height_ratio": 0.085,
+          "x_ratio": 0.655,
+          "y_ratio": 0.105
+        },
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "overlay_patch",
+            "augmentation_options": {
+              "anchor": "top_right",
+              "width_ratio": 0.13,
+              "height_ratio": 0.085,
+              "x_ratio": 0.655,
+              "y_ratio": 0.105
+            }
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_dual_name_signature_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_dual_name_signature_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_dual_name_signature_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_dual_name_signature_probe/expected.json",
+        "augmentation_type": "pipeline",
+        "seed": null,
+        "augmentation_options": {},
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "border_clip",
+            "augmentation_options": {
+              "anchor": "top",
+              "clip_height_ratio": 0.18
+            }
+          },
+          {
+            "augmentation_type": "edge_overlap",
+            "augmentation_options": {
+              "anchor": "bottom"
+            }
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_top_right_dual_confusion_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_top_right_dual_confusion_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_top_right_dual_confusion_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_top_right_dual_confusion_probe/expected.json",
+        "augmentation_type": "pipeline",
+        "seed": null,
+        "augmentation_options": {},
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "border_clip",
+            "augmentation_options": {
+              "anchor": "top",
+              "clip_height_ratio": 0.18
+            }
+          },
+          {
+            "augmentation_type": "overlay_patch",
+            "augmentation_options": {
+              "anchor": "top_right",
+              "width_ratio": 0.13,
+              "height_ratio": 0.085,
+              "x_ratio": 0.655,
+              "y_ratio": 0.105
+            }
+          },
+          {
+            "augmentation_type": "edge_overlap",
+            "augmentation_options": {
+              "anchor": "bottom"
+            }
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_country_row_confusion_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_country_row_confusion_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_country_row_confusion_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_country_row_confusion_probe/expected.json",
+        "augmentation_type": "pipeline",
+        "seed": null,
+        "augmentation_options": {},
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "jpeg_blocking",
+            "augmentation_options": {}
+          },
+          {
+            "augmentation_type": "overlay_patch",
+            "augmentation_options": {
+              "width_ratio": 0.34,
+              "height_ratio": 0.1,
+              "x_ratio": 0.52,
+              "y_ratio": 0.245
+            }
+          },
+          {
+            "augmentation_type": "border_clip",
+            "augmentation_options": {
+              "anchor": "right",
+              "clip_width_ratio": 0.05
+            }
+          }
+        ]
+      },
+      {
+        "case_id": "withholding_country_row_context_probe",
+        "document_type": "withholding_tax_form",
+        "asset_path": "tmp/semi_real_signature_date_full_suite/assets/withholding_country_row_context_probe.png",
+        "label_path": "tmp/semi_real_signature_date_full_suite/labeled/withholding_tax_form/withholding_country_row_context_probe/label.json",
+        "expected_path": "tmp/semi_real_signature_date_full_suite/cases/withholding_country_row_context_probe/expected.json",
+        "augmentation_type": "pipeline",
+        "seed": null,
+        "augmentation_options": {},
+        "augmentation_pipeline": [
+          {
+            "augmentation_type": "low_res",
+            "augmentation_options": {}
+          },
+          {
+            "augmentation_type": "overlay_patch",
+            "augmentation_options": {
+              "width_ratio": 0.26,
+              "height_ratio": 0.08,
+              "x_ratio": 0.6,
+              "y_ratio": 0.245
+            }
+          },
+          {
+            "augmentation_type": "border_clip",
+            "augmentation_options": {
+              "anchor": "right",
+              "clip_width_ratio": 0.03
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "eval_metadata": {
+    "expected_root": "tmp/semi_real_signature_date_full_suite/cases",
+    "labeled_root": "tmp/semi_real_signature_date_full_suite/labeled",
+    "output_dir": "tmp/semi_real_signature_date_full_actual",
+    "recognizer_root": null,
+    "inference_subdir": "inference",
+    "written_case_ids": [
+      "withholding_border_clip_top_name_probe",
+      "withholding_country_row_confusion_probe",
+      "withholding_country_row_context_probe",
+      "withholding_dual_name_signature_probe",
+      "withholding_edge_overlap_bottom_probe",
+      "withholding_edge_overlap_right_name_probe",
+      "withholding_jpeg_blocking_probe",
+      "withholding_left_clip_probe",
+      "withholding_overlay_patch_probe",
+      "withholding_overlay_patch_top_right_middle_name_probe",
+      "withholding_top_right_dual_confusion_probe"
+    ],
+    "missing_case_ids": [],
+    "region_override_count": 0
+  },
+  "report_output": "evals/reports/semi_real_signature_date_selection_report.json",
+  "summary_output": "evals/reports/semi_real_signature_date_selection_summary.json",
+  "selected_case_ids": []
+}

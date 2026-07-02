@@ -518,6 +518,74 @@
         }
       ],
       "notes": "jpeg_blocking + overlay_patch semi-real probe에서 parser-only rescue로 phone-like TIN confusion과 country-tail noise를 제거해 numeric_tin_code와 english_name_org(address)를 동시에 1.0 exact로 복구했다."
+    },
+    {
+      "experiment_id": "withholding_edge_overlap_right_signature_date_selection_2026_07_02",
+      "baseline_report": "evals/reports/semi_real_current_candidate_report.json",
+      "candidate_report": "evals/reports/semi_real_signature_date_selection_report.json",
+      "variants": [
+        "edge_overlap"
+      ],
+      "probe_case_ids": [
+        "withholding_edge_overlap_right_name_probe"
+      ],
+      "field_group_deltas": [
+        {
+          "field_group": "date",
+          "baseline": {
+            "comparisons": 10.0,
+            "exact_match_rate": 0.9,
+            "average_character_error_rate": 0.06,
+            "average_word_error_rate": 0.1
+          },
+          "candidate": {
+            "comparisons": 10.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.1,
+          "average_character_error_rate_delta": -0.06,
+          "average_word_error_rate_delta": -0.1
+        },
+        {
+          "field_group": "english_name_org",
+          "baseline": {
+            "comparisons": 60.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "candidate": {
+            "comparisons": 60.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.0,
+          "average_character_error_rate_delta": 0.0,
+          "average_word_error_rate_delta": 0.0
+        },
+        {
+          "field_group": "numeric_tin_code",
+          "baseline": {
+            "comparisons": 34.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "candidate": {
+            "comparisons": 34.0,
+            "exact_match_rate": 1.0,
+            "average_character_error_rate": 0.0,
+            "average_word_error_rate": 0.0
+          },
+          "exact_match_rate_delta": 0.0,
+          "average_character_error_rate_delta": 0.0,
+          "average_word_error_rate_delta": 0.0
+        }
+      ],
+      "notes": "right-edge overlap가 top-right name band에 걸려도 region signature_date가 valid하면 full-text birthdate noise보다 우선하도록 parser selection policy를 보수화해, semi-real 전체 date field group exact를 0.9에서 1.0으로 복구했다."
     }
   ]
 }

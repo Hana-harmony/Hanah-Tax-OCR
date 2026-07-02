@@ -357,10 +357,7 @@ class WithholdingTaxFormParser(BaseDocumentParser):
             return region_signature_date
 
         region_year = int(str(region_signature_date)[:4])
-        fallback_year = int(str(fallback_signature_date)[:4])
         if region_year < 1900 or region_year > 2100:
-            return fallback_signature_date
-        if region_year != fallback_year:
             return fallback_signature_date
         return region_signature_date
 
